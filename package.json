@@ -1,0 +1,16 @@
+{
+  "name": "sera-quem-faz",
+  "private": true,
+  "description": "Frontend da plataforma SERÁ QUEM FAZ?",
+  "scripts": {
+    "test": "node --test tests/*.test.cjs",
+    "cities:update": "node scripts/atualizar-municipios.mjs",
+    "check": "node --check assets/account.js && node --check assets/auth.js && node --check assets/categories.js && node --check assets/cities.js && node --check assets/category-summary.js && node --check assets/category-detail.js && node --check assets/provider.js && node --check assets/profile-ui.js && node --check assets/site.js && node --check assets/account-compat.js && node --check assets/account-fallback-ui.js && node --check assets/auth-navigation.js && node --check assets/supabase-config.js && node --check assets/utils.js && node --check assets/admin.js && node --check assets/portrait.js && node --check assets/client-dashboard.js && node --check assets/professional-details.js && node --check assets/pricing.js && node --check assets/billing-config.js && node --check assets/billing.js && node --check assets/request-media.js && node --check assets/request-profile.js && node --check assets/request-portal.js && node --check assets/admin-finance.js && node --check supabase/functions/_shared/billing-core.mjs && node --check assets/catalog-preview.js && node --check assets/auth-feedback.js && node --check assets/auth-redirect.js",
+    "verify": "npm run check && npm test",
+    "build:dist": "bash scripts/build-distribution.sh"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "version": "3.9.10"
+}

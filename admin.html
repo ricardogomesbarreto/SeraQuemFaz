@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<meta name="robots" content="noindex,nofollow,noarchive"/>
+<meta name="description" content="Painel privado de análise de cadastros e moderação do SERÁ QUEM FAZ?"/>
+<meta name="theme-color" content="#103957"/>
+<title>Administração de segurança | SERÁ QUEM FAZ?</title>
+<link href="assets/brand/favicon.ico" rel="icon" sizes="any"/>
+<link href="assets/site.css" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&amp;family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<script defer src="assets/site.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script defer src="assets/supabase-config.js"></script><script defer src="assets/account-compat.js"></script><script defer src="assets/auth-navigation.js"></script>
+<script defer src="assets/admin.js"></script>
+<script defer src="assets/admin-finance.js"></script>
+</head>
+<body class="legal-page sqf-admin-page">
+<a class="skip-link" href="#conteudo">Pular para o conteúdo</a>
+<header class="site-header"><div class="container header-inner">
+<a aria-label="SERÁ QUEM FAZ? — início" class="brand" href="index.html"><img class="brand-logo" src="assets/brand/logo-horizontal.png" alt="SERÁ QUEM FAZ?" width="240" height="80"/></a>
+<button aria-controls="site-menu" aria-expanded="false" aria-label="Abrir menu" class="menu-toggle" type="button"><span></span><span></span><span></span></button>
+<nav aria-label="Menu principal" class="site-nav" id="site-menu"><a href="index.html">Início</a><a href="categorias.html">Catálogo e pesquisa</a><a href="painel.html">Minha conta</a><div class="nav-actions" data-auth-loading="true"><button type="button" id="staffLogout" class="button button-outline">Sair</button></div></nav>
+</div></header>
+<main class="container admin-main" id="conteudo">
+<div class="admin-hero"><span class="section-kicker">ÁREA RESTRITA</span><h1>Segurança e moderação</h1><p>Administração de prestadores, avaliações, denúncias e solicitações LGPD. Todas as ações exigem autorização no servidor e são registradas na auditoria.</p></div>
+<p id="adminStatus" class="subtle-status" role="status" aria-live="polite">Verificando sua sessão e as permissões...</p>
+<section id="mfaSection" class="admin-panel" hidden aria-labelledby="mfaHeading">
+  <h2 id="mfaHeading">Verificação de dois fatores obrigatória</h2>
+  <p>Para abrir o painel, confirme um código do aplicativo autenticador. A proteção é verificada no banco antes de cada consulta ou decisão.</p>
+  <div id="mfaEnrollment" hidden>
+    <p>Adicione a conta ao seu aplicativo autenticador (TOTP) usando esta chave exibida somente durante o cadastro do fator:</p>
+    <code id="mfaSecret" class="mfa-secret"></code>
+  </div>
+  <div class="admin-actions"><button type="button" id="mfaEnroll" class="button button-outline">Configurar autenticador</button></div>
+  <form id="mfaForm" class="admin-mfa-form"><label for="mfaCode">Código de 6 dígitos</label><input id="mfaCode" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" maxlength="6" required placeholder="000000"/><button class="button button-primary" type="submit">Verificar e entrar</button></form>
+  <p id="mfaStatus" role="status" aria-live="polite"></p>
+</section>
+<div id="adminContent" hidden>
+<div class="admin-panel"><div class="admin-heading-row"><div><span class="section-kicker">VISÃO GERAL</span><h2>Filas de trabalho</h2><p>Os indicadores apresentam registros pendentes, não resultados de investigação.</p></div><div class="admin-actions"><span id="adminRole" class="admin-role"></span><button id="refreshAdmin" class="button button-outline button-small" type="button">Atualizar</button></div></div><div id="adminStats" class="admin-stats" aria-label="Indicadores administrativos"></div></div>
+<section class="admin-panel" id="sqfAdminBilling" hidden aria-labelledby="sqfAdminBillingTitle"><span class="section-kicker">OPERAÇÃO FINANCEIRA</span><h2 id="sqfAdminBillingTitle">Monitoramento das assinaturas</h2>
+<p class="muted">Somente administradores com MFA podem consultar estes dados agregados. Alertas não equivalem a confirmação de fraude.</p>
+<button type="button" class="button button-outline button-small" id="sqfBillingAdminRefresh">Atualizar indicadores financeiros</button>
+<div id="sqfBillingAdminStats" class="admin-stats" aria-live="polite"></div><p id="sqfBillingAdminStatus" role="status" class="form-feedback"></p></section>
+<section class="admin-panel" aria-labelledby="queueHeading"><div class="admin-heading-row"><div><span class="section-kicker">ANÁLISE DE SEGURANÇA</span><h2 id="queueHeading">Solicitações</h2></div><div class="admin-toolbar"><label for="adminQueue">Fila</label><select id="adminQueue"><option value="reviews">Avaliações</option><option value="disputes">Contestações</option><option value="responses">Respostas dos prestadores</option><option value="reports">Denúncias</option><option value="providers">Prestadores</option><option value="privacy">Solicitações LGPD</option><option value="audit">Histórico de decisões</option></select></div></div><p class="muted">Leia as informações antes de decidir. Não aprove cadastros por aparência, gênero, origem ou outros critérios discriminatórios. Faça análise baseada em dados e evidências verificáveis.</p><div class="admin-queue-controls"><label for="adminSearch">Buscar nos resultados desta fila</label><input id="adminSearch" type="search" maxlength="100" placeholder="Pesquisar título ou descrição" autocomplete="off"/><label for="adminStateFilter">Situação</label><select id="adminStateFilter"><option value="">Todas</option><option value="pending">Pendentes</option><option value="reviewing">Em análise</option><option value="approved">Aprovados</option><option value="published">Publicados</option><option value="suspended">Suspensos</option><option value="resolved">Resolvidos</option></select></div><p id="adminFilteredCount" role="status" aria-live="polite" class="muted"></p><div id="queueResults" class="admin-queue" aria-live="polite"></div></section>
+<p class="admin-notice"><strong>Limites do sistema:</strong> aprovação de cadastro não certifica idoneidade; atendimento confirmado por duas contas não comprova pagamento ou realização independente; dados de identidade exigem serviço especializado e base legal própria. Não solicite documentos por estes formulários.</p>
+</div>
+</main>
+<footer class="site-footer"><div class="container footer-grid"><div><a class="footer-brand" href="index.html" aria-label="SERÁ QUEM FAZ? — início"><img src="assets/brand/logo-horizontal-footer.png" alt="SERÁ QUEM FAZ?" width="240" height="80"/></a><p>Uma plataforma para aproximar pessoas, profissões e oportunidades.</p><span class="footer-local">Administração com acesso restrito</span></div><div><strong>Navegação</strong><a href="index.html">Início</a><a href="painel.html">Minha conta</a><a href="privacidade.html">Privacidade</a></div></div><div class="container footer-bottom"><span>© <span data-year>2026</span> SERÁ QUEM FAZ?.</span><span>Segurança, transparência e responsabilidade.</span></div></footer>
+</body></html>

@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<meta content="#113a59" name="theme-color"/>
+<meta content="SERÁ QUEM FAZ?: escolha sua cidade no Brasil, explore serviços e conheça perfis e avaliações de profissionais publicados." name="description"/>
+<title>SERÁ QUEM FAZ? | Conectando pessoas a serviços</title>
+<link href="assets/brand/favicon.ico" rel="icon" sizes="any"/><link href="assets/brand/icone-192.png" rel="icon" type="image/png" sizes="192x192"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&amp;family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="assets/site.css" rel="stylesheet"/>
+<script defer src="assets/cities.js"></script><script defer src="assets/pricing.js"></script><script defer="" src="assets/site.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script defer src="assets/supabase-config.js"></script><script defer src="assets/account-compat.js"></script><script defer src="assets/auth-navigation.js"></script></head>
+<body>
+<a class="skip-link" href="#conteudo">Pular para o conteúdo</a><header class="site-header">
+<div class="container header-inner">
+<a aria-label="SERÁ QUEM FAZ? — página inicial" class="brand" href="index.html"><img class="brand-logo" src="assets/brand/logo-horizontal.png" alt="SERÁ QUEM FAZ?" width="240" height="80"/></a>
+<button aria-controls="site-menu" aria-expanded="false" aria-label="Abrir menu" class="menu-toggle" type="button"><span></span><span></span><span></span></button>
+<nav aria-label="Menu principal" class="site-nav" id="site-menu">
+<a aria-current="page" class="current" data-nav="home" href="index.html">Início</a>
+<a data-nav="catalog" href="categorias.html">Catálogo e pesquisa</a>
+<a href="index.html#como-funciona">Como funciona</a>
+<a href="index.html#profissionais">Para profissionais</a>
+<a href="index.html#planos">Planos</a>
+<div class="nav-actions" data-auth-loading="true"><a class="button button-ghost" data-nav="login" href="entrar.html">Entrar</a><a class="button button-primary" data-nav="signup" href="cadastro.html">Criar conta <span aria-hidden="true">↗</span></a></div>
+</nav>
+</div>
+</header>
+<main id="conteudo">
+<section aria-labelledby="hero-title" class="hero">
+<div class="container hero-grid">
+<div class="hero-copy">
+<div class="eyebrow">✦ SERVIÇOS E OPORTUNIDADES EM UM SÓ LUGAR</div>
+<h1 id="hero-title">O que você precisa? <em>SERÁ QUEM FAZ?</em></h1>
+<p class="hero-lead">Daquela manutenção que não pode esperar a novos projetos: explore as categorias, conheça perfis públicos de prestadores, veja portfólios e avaliações moderadas quando estiverem disponíveis.</p>
+<form action="categorias.html" class="search-panel city-first-form" method="get" role="search" id="homeCitySearch">
+<span class="search-step-label">01 — ENCONTRE SUA CIDADE</span>
+<div class="city-picker" data-city-picker><label class="city-picker-label" for="homeCity">Em qual cidade você procura um profissional?</label><div class="city-picker-control"><span class="city-pin" aria-hidden="true">⌖</span><input data-city-input id="homeCity" list="homeCitySuggestions" type="search" placeholder="Digite a cidade e a UF..." autocomplete="off" required maxlength="120"/><datalist id="homeCitySuggestions"></datalist></div><input data-city-id id="homeCityId" type="hidden" name="cidade"/><small class="city-picker-status" data-city-status aria-live="polite">Carregando cidades do IBGE...</small></div><button class="button button-primary search-submit" type="submit">Encontrar serviços nesta cidade <span aria-hidden="true">→</span></button>
+</form>
+<div class="location-note"><span aria-hidden="true">⌖</span><span>Selecione sua cidade para visualizar os serviços disponíveis na região</span></div><div aria-label="Diferenciais do projeto" class="hero-trust"><span><b aria-hidden="true">✓</b> Catálogo de serviços</span><span><b aria-hidden="true">✓</b> Perfis e portfólios</span><span><b aria-hidden="true">✓</b> Iniciativa regional</span></div>
+
+</div>
+<div class="hero-visual"><img alt="Dois profissionais de áreas diferentes, um técnico de manutenção e uma profissional da construção, representando os prestadores de serviços" fetchpriority="high" height="941" src="assets/images/profissionais-landing.webp" width="1672"/></div>
+</div>
+</section><section aria-label="O que você encontra na plataforma" class="value-strip"><div class="container value-strip-inner"><div><span aria-hidden="true" class="value-icon">⌕</span><span><strong>Descubra serviços</strong><small>Catálogo de categorias em um só lugar</small></span></div><div><span aria-hidden="true" class="value-icon">◎</span><span><strong>Experiência sem complicações</strong><small>Pesquisa simples e acessível</small></span></div><div><span aria-hidden="true" class="value-icon">↗</span><span><strong>Uma comunidade em construção</strong><small>Preparada para novas oportunidades</small></span></div></div></section>
+<section aria-labelledby="services-title" class="section services">
+<div class="container">
+<div class="section-head"><div><span class="section-kicker">Explore as possibilidades</span><h2 id="services-title">Para cada necessidade, uma área de serviço.</h2></div><a class="text-link" href="categorias.html">Ver todas as categorias <span aria-hidden="true">↗</span></a></div>
+<div aria-label="Exemplos de áreas de serviço" class="service-grid">
+<a class="service-tile" href="categorias.html?q=reparos"><span aria-hidden="true" class="service-icon">⌂</span><strong>Reparos e manutenção</strong><span>Cuide do que importa na sua casa.</span><span aria-hidden="true" class="tile-arrow">↗</span></a>
+<a class="service-tile" href="categorias.html?q=automotivo"><span aria-hidden="true" class="service-icon">⚙</span><strong>Serviços automotivos</strong><span>Encontre áreas para seu veículo.</span><span aria-hidden="true" class="tile-arrow">↗</span></a>
+<a class="service-tile" href="categorias.html?q=construção"><span aria-hidden="true" class="service-icon">▤</span><strong>Obras e construção</strong><span>Do planejamento à reforma.</span><span aria-hidden="true" class="tile-arrow">↗</span></a>
+<a class="service-tile" href="categorias.html?q=tecnologia"><span aria-hidden="true" class="service-icon">⌘</span><strong>Tecnologia e suporte</strong><span>Ajuda com dispositivos e sistemas.</span><span aria-hidden="true" class="tile-arrow">↗</span></a>
+</div>
+<p class="section-footnote">Os exemplos acima são sugestões de pesquisa. A disponibilidade real depende das categorias cadastradas na plataforma.</p>
+</div>
+</section>
+<section aria-labelledby="steps-title" class="section steps-section" id="como-funciona">
+<div class="container"><div class="section-head centered"><span class="section-kicker">Sem complicações</span><h2 id="steps-title">Uma conexão de cada vez.</h2><p>Conheça a plataforma e encontre as categorias de serviços cadastradas para sua região.</p></div>
+<div class="steps-grid"><article class="step"><span class="step-number">01</span><div aria-hidden="true" class="step-symbol">⌕</div><h3>Escolha sua cidade</h3><p>Selecione primeiro sua cidade; em seguida, escolha a categoria do serviço.</p></article><article class="step"><span class="step-number">02</span><div aria-hidden="true" class="step-symbol">◫</div><h3>Conheça as opções</h3><p>Entre em uma categoria, conheça os profissionais publicados e confira fotos de trabalhos e avaliações.</p></article><article class="step"><span class="step-number">03</span><div aria-hidden="true" class="step-symbol">↗</div><h3>Faça parte</h3><p>Crie sua conta para publicar serviços ou avaliar um profissional quando o banco estiver configurado.</p></article></div>
+</div>
+</section>
+<section class="section professional-section" id="profissionais"><div class="container professional-panel"><div><span class="section-kicker light">Quem sabe fazer, merece ser encontrado</span><h2>Seu trabalho tem valor. <em>Mostre que você faz.</em></h2><p>Cadastre seus serviços, apresente fotos de trabalhos e publique seu perfil para ser encontrado. A visualização pública depende da ativação do banco; agendamento e pagamento não fazem parte desta versão.</p><a class="button button-white" href="cadastro.html?tipo=prestador">Criar conta de prestador <span aria-hidden="true">↗</span></a></div><div aria-hidden="true" class="professional-art"><img class="professional-logo" src="assets/brand/simbolo-dark.png" alt=""/></div></div></section>
+<section aria-labelledby="audience-title" class="section audience-section"><div class="container"><div class="section-head centered"><span class="section-kicker">PARA QUEM PRECISA. PARA QUEM FAZ.</span><h2 id="audience-title">Dois lados, um mesmo propósito.</h2><p>Um ponto de encontro digital que simplifica a descoberta e prepara novas formas de conexão entre pessoas e prestadores.</p></div>
+<div class="audience-grid"><article class="audience-card audience-clients"><div aria-hidden="true" class="audience-icon">⌕</div><span class="audience-tag">PARA CLIENTES</span><h3>Encontre por onde começar.</h3><p>Explore as categorias disponíveis e identifique o tipo de serviço adequado à sua demanda.</p><a class="audience-link" href="categorias.html">Ir para o catálogo <span aria-hidden="true">↗</span></a></article><article class="audience-card audience-pros"><div aria-hidden="true" class="audience-icon">✦</div><span class="audience-tag">PARA PRESTADORES</span><h3>Seu trabalho merece espaço.</h3><p>Cadastre as áreas em que atua, publique seu portfólio e acompanhe os comentários recebidos.</p><a class="audience-link" href="cadastro.html?tipo=prestador">Criar conta de prestador <span aria-hidden="true">↗</span></a></article></div></div></section>
+<section class="section pricing-section" id="planos" aria-labelledby="pricing-title">
+  <div class="container">
+    <div class="section-head centered pricing-header">
+      <span class="section-kicker">PREÇOS ACESSÍVEIS PARA CRESCER JUNTOS</span>
+      <h2 id="pricing-title">Seu talento merece espaço. <span class="pricing-accent">Sem pesar no bolso.</span></h2>
+      <p>Conheça os planos planejados para a plataforma. A infraestrutura de assinatura está em integração e a cobrança permanecerá desativada até a homologação.</p>
+    </div>
+    <div class="pricing-control-wrap">
+      <span class="pricing-period-label" id="pricing-period-label">Escolha o ciclo de referência:</span>
+      <div class="pricing-switch" role="group" aria-labelledby="pricing-period-label" data-pricing-switch>
+        <button type="button" class="pricing-switch-button is-selected" aria-pressed="true" data-pricing-cycle="monthly">Mensal</button>
+        <button type="button" class="pricing-switch-button" aria-pressed="false" data-pricing-cycle="yearly">Anual <span class="pricing-switch-saving">Economize 17%</span></button>
+      </div>
+    </div>
+    <div class="pricing-cards">
+      <article class="pricing-card pricing-free" aria-labelledby="pricing-free-title">
+        <div class="pricing-card-icon" aria-hidden="true">⌕</div>
+        <span class="pricing-plan-type">PARA CLIENTES</span>
+        <h3 id="pricing-free-title">Conta gratuita</h3>
+        <p class="pricing-plan-intro">Encontre informações para decidir com mais segurança.</p>
+        <div class="pricing-price-block">
+          <span class="pricing-amount">R$ 0,00</span>
+          <span class="pricing-price-suffix">/ acesso gratuito</span>
+        </div>
+        <p class="pricing-price-detail">Sem mensalidade para procurar serviços.</p>
+        <ul class="pricing-feature-list">
+          <li>Pesquisa de serviços por cidade e categoria</li>
+          <li>Acesso a perfis, portfólios e avaliações publicadas</li>
+          <li>Favoritos e histórico da própria conta, após login</li>
+          <li>Avaliações sujeitas à confirmação e moderação</li>
+        </ul>
+        <a class="button button-outline pricing-button" href="cadastro.html?tipo=cliente">Criar conta de cliente <span aria-hidden="true">↗</span></a>
+      </article>
+      <article class="pricing-card pricing-featured" aria-labelledby="pricing-pro-title">
+        <span class="pricing-card-flag">PREÇO DE REFERÊNCIA PARA O LANÇAMENTO</span>
+        <div class="pricing-card-icon pricing-card-icon-pro" aria-hidden="true">✦</div>
+        <span class="pricing-plan-type">PARA PRESTADORES</span>
+        <h3 id="pricing-pro-title">Plano Profissional</h3>
+        <p class="pricing-plan-intro">Apresente seu trabalho e construa sua reputação profissional.</p>
+        <div class="pricing-price-block" aria-live="polite" aria-atomic="true">
+          <span class="pricing-amount" data-pricing-amount>R$ 14,90</span>
+          <span class="pricing-price-suffix" data-pricing-unit>/ mês</span>
+        </div>
+        <p class="pricing-price-detail" data-pricing-detail>Valor mensal proposto; sem cobrança no cadastro atual.</p>
+        <p class="pricing-yearly-note" data-pricing-equivalent hidden>Equivalente a R$ 12,42/mês · economia de R$ 29,80 ao ano.</p>
+        <ul class="pricing-feature-list">
+          <li>Perfil profissional após verificação e aprovação</li>
+          <li>Cadastro de serviços, especialidades e cidade</li>
+          <li>Portfólio com imagens dos trabalhos</li>
+          <li>Avaliações moderadas e respostas do prestador</li>
+          <li>Painel para acompanhar seus dados e serviços</li>
+        </ul>
+        <a class="button button-primary pricing-button" href="cadastro.html?tipo=prestador">Criar conta de prestador <span aria-hidden="true">↗</span></a>
+        <a class="pricing-manage-link" data-billing-plan-link href="painel.html?ciclo=monthly#assinatura">Já tenho conta: ver assinatura →</a>
+        <small class="pricing-button-note">Contratação disponível somente após ativação da integração; criar conta não gera cobrança.</small>
+      </article>
+    </div>
+    <p class="pricing-disclaimer"><strong>Transparência:</strong> valores sugeridos, ainda em estudo. A integração do checkout e da confirmação de pagamentos está preparada, mas ainda não está habilitada para cobranças reais. Condições, impostos, cancelamento e eventuais planos serão definidos e divulgados antes da comercialização. A publicação de perfis depende de homologação e aprovação.</p>
+  </div>
+</section>
+<section aria-labelledby="faq-title" class="section faq-section" id="perguntas"><div class="container faq-layout"><div class="faq-heading"><span class="section-kicker">DÚVIDAS FREQUENTES</span><h2 id="faq-title">Tudo mais claro, desde o começo.</h2><p>Transparência sobre o que a plataforma já oferece e sobre os recursos previstos para as próximas etapas.</p><a class="text-link" href="termos.html">Conhecer os termos do projeto ↗</a></div><div class="faq-list"><details><summary>Quanto custará o SERÁ QUEM FAZ?<span aria-hidden="true">+</span></summary><p>O acesso para clientes é proposto como gratuito. Para prestadores, estamos estudando um Plano Profissional de R$ 14,90 por mês ou R$ 149,00 por ano. Esses valores ainda não são cobrados: a integração de assinatura ainda não está disponível para cobrança real e as condições comerciais serão divulgadas antes da oferta.</p></details><details><summary>O que é o SERÁ QUEM FAZ?<span aria-hidden="true">+</span></summary><p>É uma plataforma digital em desenvolvimento para aproximar clientes e prestadores de serviços. A versão inclui catálogo, perfis profissionais analisados, portfólios e avaliações moderadas de atendimentos confirmados por ambas as contas, sujeitos à implantação e homologação do Supabase.</p></details><details><summary>Posso contratar um profissional pelo site?<span aria-hidden="true">+</span></summary><p>Ainda não. É possível consultar perfis públicos e avaliações após configurar o Supabase. Agendamento, mensagens diretas, contratação e pagamento ainda não estão implementados.</p></details><details><summary>Preciso permitir acesso à minha localização?<span aria-hidden="true">+</span></summary><p>Não. A plataforma não solicita GPS automaticamente. A pesquisa aceita municípios de todo o Brasil, sem GPS. A operação da comunidade tem foco inicial em Santa Inês, Maranhão.</p></details><details><summary>Qual é o objetivo do cadastro?<span aria-hidden="true">+</span></summary><p>Permitir que clientes ou prestadores criem uma conta e acompanhem a evolução da plataforma. Prestadores precisam completar o perfil, cadastrar ao menos um serviço e optar por torná-lo público.</p></details></div></div></section><section class="section final-cta"><div class="container final-inner"><div><span class="section-kicker">PRONTO PARA DESCOBRIR?</span><h2>Encontre profissionais e serviços na sua cidade.</h2></div><a class="button button-primary" href="categorias.html">Explorar categorias <span aria-hidden="true">→</span></a></div></section>
+</main>
+<footer class="site-footer">
+<div class="container footer-grid">
+<div><a class="footer-brand" href="index.html" aria-label="SERÁ QUEM FAZ? — início"><img src="assets/brand/logo-horizontal-footer.png" alt="SERÁ QUEM FAZ?" width="240" height="80"/></a><p>Uma plataforma para aproximar pessoas, profissões e oportunidades.</p><span class="footer-local">Projeto com foco inicial em Santa Inês · Maranhão</span></div>
+<div><strong>Explorar</strong><a href="categorias.html">Catálogo e pesquisa</a><a href="index.html#como-funciona">Como funciona</a><a href="index.html#profissionais">Para profissionais</a></div>
+<div><strong>Minha conta</strong><a href="entrar.html">Entrar</a><a href="cadastro.html">Criar conta</a><a href="painel.html">Área da conta</a></div>
+<div><strong>Institucional</strong><a href="privacidade.html">Privacidade</a><a href="termos.html">Termos de uso</a><a href="index.html#perguntas">Sobre o projeto</a></div>
+</div>
+<div class="container footer-bottom"><span>© <span data-year="">2026</span> SERÁ QUEM FAZ?. Projeto em desenvolvimento.</span><span>Transparência, simplicidade e conexão.</span></div>
+</footer></body>
+</html>

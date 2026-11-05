@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="pt-BR">
+<head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><meta name="theme-color" content="#103957"/><meta name="description" content="Detalhes de uma área e profissionais publicados"/><title>Área de serviço | SERÁ QUEM FAZ?</title><link href="assets/brand/favicon.ico" rel="icon" sizes="any"/><link href="assets/brand/icone-192.png" rel="icon" type="image/png" sizes="192x192"/><link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&amp;family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/><link href="assets/site.css" rel="stylesheet"/><script defer src="assets/site.js"></script>
+<script defer src="assets/utils.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script defer src="assets/supabase-config.js"></script><script defer src="assets/account-compat.js"></script><script defer src="assets/auth-navigation.js"></script>
+<script defer src="assets/profile-ui.js"></script>
+<script defer src="assets/category-summary.js"></script>
+<script defer src="assets/cities.js"></script>
+<script defer src="assets/category-original-images.js"></script><script defer src="assets/catalog-preview.js"></script><script defer src="assets/category-detail.js"></script>
+</head>
+<body class="legal-page"><a class="skip-link" href="#conteudo">Pular para o conteúdo</a><header class="site-header">
+<div class="container header-inner">
+<a aria-label="SERÁ QUEM FAZ? — página inicial" class="brand" href="index.html"><img class="brand-logo" src="assets/brand/logo-horizontal.png" alt="SERÁ QUEM FAZ?" width="240" height="80"/></a>
+<button aria-controls="site-menu" aria-expanded="false" aria-label="Abrir menu" class="menu-toggle" type="button"><span></span><span></span><span></span></button>
+<nav aria-label="Menu principal" class="site-nav" id="site-menu">
+<a data-nav="home" href="index.html">Início</a>
+<a data-nav="catalog" href="categorias.html">Catálogo e pesquisa</a>
+<a href="index.html#como-funciona">Como funciona</a>
+<a href="index.html#profissionais">Para profissionais</a>
+<div class="nav-actions" data-auth-loading="true"><a class="button button-ghost" data-nav="login" href="entrar.html">Entrar</a><a class="button button-primary" data-nav="signup" href="cadastro.html">Criar conta <span aria-hidden="true">↗</span></a></div>
+</nav>
+</div>
+</header>
+<main id="conteudo" class="container detail-main">
+<nav class="breadcrumb" aria-label="Você está aqui"><a href="index.html">Início</a><span>/</span><a href="categorias.html">Catálogo</a><span>/</span><span aria-current="page">Área de serviço</span></nav>
+<div class="city-context-banner" id="categoryCityContext" role="status" aria-live="polite"></div><p id="categoryStatus" class="subtle-status" role="status" aria-live="polite">Carregando área de serviço...</p>
+<section id="categoryContent" hidden>
+<div class="detail-hero"><div class="detail-hero-image" id="categoryImage"><img src="assets/brand/simbolo.png" alt="" /></div><div class="detail-hero-copy"><span class="section-kicker">ÁREA DE SERVIÇO</span><h1 id="categoryName"></h1><p id="categoryDescription"></p><div class="category-summary"><h2>Sobre esta área de serviço</h2><p id="categorySummary">Conheça as atividades e os serviços desta categoria.</p></div><div class="detail-chips"><span>Profissionais com cadastro analisado e perfil publicado</span><span id="categoryProviderCount">— prestadores</span></div></div></div>
+<section class="detail-section"><div class="section-head"><div><span class="section-kicker">CONHEÇA QUEM FAZ</span><h2>Profissionais desta categoria na cidade selecionada</h2><p>Perfis publicados de prestadores que informaram atendimento na cidade selecionada.</p></div></div><div class="sqf-provider-filters" id="sqfProviderFilters" hidden>
+  <div class="form-field"><label for="sqfSpecialtyFilter">Buscar especialidade</label><input type="search" id="sqfSpecialtyFilter" maxlength="100" placeholder="Ex.: instalação, manutenção..."/></div>
+  <div class="form-field"><label for="sqfModeFilter">Modalidade</label><select id="sqfModeFilter"><option value="">Todas</option><option value="presencial">Presencial</option><option value="remoto">Remoto</option><option value="hibrido">Presencial e remoto</option></select></div>
+  <p class="sqf-filter-trust muted">Os perfis visíveis exigem aprovação cadastral, mas isso não certifica idoneidade.</p>
+  <button type="button" id="sqfProviderFilterClear" class="button button-outline button-small">Limpar filtros</button>
+  <p id="sqfProviderFilteredCount" class="muted" role="status" aria-live="polite"></p>
+</div><div id="providersList" class="provider-grid" aria-live="polite"></div><p id="providersError" class="category-error-note" role="status" hidden>Os dados dos prestadores estão temporariamente indisponíveis. A apresentação da área e sua imagem continuam disponíveis. Verifique as políticas de acesso e a migração SQL do Supabase.</p></section>
+</section><div class="detail-cta"><strong>Você trabalha nesta área?</strong><p>Crie seu perfil, adicione um serviço e publique seus trabalhos para ser encontrado.</p><a class="button button-primary" href="cadastro.html?tipo=prestador">Cadastrar como prestador ↗</a></div></main>
+<footer class="site-footer">
+<div class="container footer-grid">
+<div><a class="footer-brand" href="index.html" aria-label="SERÁ QUEM FAZ? — início"><img src="assets/brand/logo-horizontal-footer.png" alt="SERÁ QUEM FAZ?" width="240" height="80"/></a><p>Uma plataforma para aproximar pessoas, profissões e oportunidades.</p><span class="footer-local">Projeto com foco inicial em Santa Inês · Maranhão</span></div>
+<div><strong>Explorar</strong><a href="categorias.html">Catálogo e pesquisa</a><a href="index.html#como-funciona">Como funciona</a><a href="index.html#profissionais">Para profissionais</a></div>
+<div><strong>Minha conta</strong><a href="entrar.html">Entrar</a><a href="cadastro.html">Criar conta</a><a href="painel.html">Área da conta</a></div>
+<div><strong>Institucional</strong><a href="privacidade.html">Privacidade</a><a href="termos.html">Termos de uso</a><a href="index.html#perguntas">Sobre o projeto</a></div>
+</div>
+<div class="container footer-bottom"><span>© <span data-year="">2026</span> SERÁ QUEM FAZ?. Projeto em desenvolvimento.</span><span>Transparência, simplicidade e conexão.</span></div>
+</footer></body></html>

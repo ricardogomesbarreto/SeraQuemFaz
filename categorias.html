@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"/><meta content="width=device-width, initial-scale=1" name="viewport"/><meta content="#103957" name="theme-color"/>
+<meta content="Explore categorias de serviços e filtre por palavra-chave na plataforma SERÁ QUEM FAZ?." name="description"/>
+<title>Catálogo e pesquisa | SERÁ QUEM FAZ?</title>
+<link href="assets/brand/favicon.ico" rel="icon" sizes="any"/><link href="assets/brand/icone-192.png" rel="icon" type="image/png" sizes="192x192"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&amp;family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="assets/site.css" rel="stylesheet"/>
+<script defer="" src="assets/site.js"></script><script defer="" src="assets/utils.js"></script>
+<script defer="" src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script defer="" src="assets/supabase-config.js"></script><script defer src="assets/account-compat.js"></script><script defer src="assets/auth-navigation.js"></script><script defer src="assets/cities.js"></script><script defer src="assets/category-original-images.js"></script><script defer src="assets/catalog-preview.js"></script><script defer="" src="assets/categories.js"></script>
+</head>
+<body class="catalog-page">
+<a class="skip-link" href="#conteudo">Pular para o conteúdo</a><header class="site-header">
+<div class="container header-inner">
+<a aria-label="SERÁ QUEM FAZ? — página inicial" class="brand" href="index.html"><img class="brand-logo" src="assets/brand/logo-horizontal.png" alt="SERÁ QUEM FAZ?" width="240" height="80"/></a>
+<button aria-controls="site-menu" aria-expanded="false" aria-label="Abrir menu" class="menu-toggle" type="button"><span></span><span></span><span></span></button>
+<nav aria-label="Menu principal" class="site-nav" id="site-menu">
+<a data-nav="home" href="index.html">Início</a>
+<a aria-current="page" class="current" data-nav="catalog" href="categorias.html">Catálogo e pesquisa</a>
+<a href="index.html#como-funciona">Como funciona</a>
+<a href="index.html#profissionais">Para profissionais</a>
+<div class="nav-actions" data-auth-loading="true"><a class="button button-ghost" data-nav="login" href="entrar.html">Entrar</a><a class="button button-primary" data-nav="signup" href="cadastro.html">Criar conta <span aria-hidden="true">↗</span></a></div>
+</nav>
+</div>
+</header>
+<main id="conteudo">
+<section aria-labelledby="catalog-title" class="catalog-intro catalog-intro-v2">
+<div class="container">
+<nav aria-label="Você está aqui" class="breadcrumb"><a href="index.html">Início</a><span aria-hidden="true">/</span><span aria-current="page">Catálogo e pesquisa</span></nav>
+<div class="catalog-intro-grid">
+<div><span class="section-kicker">DESCUBRA O QUE VOCÊ PRECISA</span><h1 id="catalog-title">Encontre sua próxima <em>solução.</em></h1><p>Escolha a cidade em que deseja atendimento e depois selecione o tipo de serviço. Veja apenas profissionais cadastrados naquela localidade.</p></div>
+<div class="catalog-intro-mark" aria-hidden="true"><img src="assets/brand/simbolo.png" alt=""/></div>
+</div>
+</div>
+</section>
+<section aria-label="Pesquisar e filtrar categorias" class="catalog-workspace-section">
+<div class="container">
+<div class="catalog-mobile-toolbar"><span>Refine sua pesquisa</span><button aria-controls="catalogSidebar" aria-expanded="false" class="button button-outline" id="filterToggle" type="button"><span aria-hidden="true">☷</span> Filtros e busca</button></div>
+<div class="catalog-scrim" hidden="" id="filterBackdrop"></div>
+<div class="catalog-workspace">
+<aside aria-label="Filtros do catálogo" class="catalog-sidebar" id="catalogSidebar">
+<div class="sidebar-heading"><div><span class="sidebar-overline">SEU CATÁLOGO</span><h2>Explorar serviços</h2></div><button aria-label="Fechar filtros" class="sidebar-close" id="filterClose" type="button">✕</button></div>
+<div class="sidebar-location"><span class="search-step-label">ETAPA 1 · LOCALIZAÇÃO</span><div class="city-picker" data-city-picker data-city-from-url><label class="city-picker-label" for="catalogCity">Em qual cidade você procura atendimento?</label><div class="city-picker-control"><span class="city-pin" aria-hidden="true">⌖</span><input data-city-input id="catalogCity" list="catalogCitySuggestions" type="search" placeholder="Digite a cidade e a UF..." autocomplete="off" maxlength="120"/><datalist id="catalogCitySuggestions"></datalist></div><input data-city-id id="catalogCityId" type="hidden" name="cidade"/><small class="city-picker-status" data-city-status aria-live="polite">Carregando cidades do IBGE...</small></div></div><div class="sidebar-rule"></div><span class="search-step-label">ETAPA 2 · SERVIÇO</span><form class="sidebar-search" id="categorySearch" role="search"><label for="categoryQuery">Qual tipo de serviço você precisa?</label><div class="sidebar-search-input"><span aria-hidden="true">⌕</span><input autocomplete="off" id="categoryQuery" maxlength="100" name="q" placeholder="Ex.: mecânica, reforma..." type="search"/></div><button class="button button-primary button-block" type="submit">Pesquisar categorias <span aria-hidden="true">→</span></button></form>
+<div class="sidebar-rule"></div>
+<div class="sidebar-filter"><label for="sortSelect">Ordenar resultados</label><select id="sortSelect"><option value="relevance">Mais relevantes para a busca</option><option value="az">Nome: A a Z</option><option value="za">Nome: Z a A</option><option value="recent">Categorias recentes</option><option value="description">Descrições mais completas</option></select></div>
+<fieldset class="sidebar-filter sidebar-checkbox-group"><legend>Exibição</legend><label class="filter-check"><input id="withImage" type="checkbox"/><span>Somente com imagem</span></label><label class="filter-check"><input id="withDescription" type="checkbox"/><span>Somente com descrição</span></label></fieldset>
+<div class="sidebar-filter"><label for="initialLetter">Nome da categoria</label><select id="initialLetter"><option value="">Todas as letras</option></select></div>
+<fieldset class="sidebar-filter sidebar-checkbox-group"><legend>Como exibir</legend><div class="view-switch" role="group" aria-label="Visualização dos resultados"><button type="button" id="viewGrid" class="view-choice is-selected" aria-pressed="true" title="Visualização em grade">▦ <span>Grade</span></button><button type="button" id="viewList" class="view-choice" aria-pressed="false" title="Visualização em lista">☰ <span>Lista</span></button></div></fieldset>
+<div class="sidebar-rule"></div>
+<div class="sidebar-suggestions"><h3>Pesquisas sugeridas</h3><p>Ideias para começar a explorar o catálogo.</p><div class="suggestion-list"><button data-search-suggestion="Manutenção" type="button">Manutenção <span aria-hidden="true">↗</span></button><button data-search-suggestion="Elétrica" type="button">Elétrica <span aria-hidden="true">↗</span></button><button data-search-suggestion="Ar-condicionado" type="button">Ar-condicionado <span aria-hidden="true">↗</span></button><button data-search-suggestion="Limpeza" type="button">Limpeza <span aria-hidden="true">↗</span></button><button data-search-suggestion="Construção" type="button">Construção <span aria-hidden="true">↗</span></button><button data-search-suggestion="Automotivo" type="button">Automotivo <span aria-hidden="true">↗</span></button><button data-search-suggestion="Informática" type="button">Informática <span aria-hidden="true">↗</span></button><button data-search-suggestion="Jardinagem" type="button">Jardinagem <span aria-hidden="true">↗</span></button><button data-search-suggestion="Beleza" type="button">Beleza <span aria-hidden="true">↗</span></button><button data-search-suggestion="Pintura" type="button">Pintura <span aria-hidden="true">↗</span></button><button data-search-suggestion="Educação" type="button">Educação <span aria-hidden="true">↗</span></button><button data-search-suggestion="Design" type="button">Design <span aria-hidden="true">↗</span></button></div></div>
+<button class="sidebar-reset" id="resetFilters" type="button">↺ Limpar filtros do serviço</button><button class="button button-primary button-block sidebar-apply" id="applyFilters" type="button">Aplicar filtros e ver resultados</button>
+<div class="sidebar-footnote"><span aria-hidden="true" class="pulse-dot"></span><span id="sidebarStatus">Sincronizando categorias disponíveis...</span></div>
+</aside>
+<div class="catalog-main">
+<div class="catalog-main-top"><div><span class="catalog-city-highlight" id="catalogCityHighlight" aria-live="polite" hidden></span><span class="section-kicker">RESULTADOS DA PESQUISA</span><h2 id="results-title" tabindex="-1">Áreas de serviço na sua cidade</h2><p aria-live="polite" id="resultsDescription" role="status">Escolha uma cidade para começar.</p></div><div class="catalog-top-actions"><span aria-hidden="true" class="catalog-count" id="catalogCount">—</span><button class="button button-outline button-small" hidden="" id="clearSearch" type="button">Limpar busca</button></div></div>
+<div id="catalogReferenceNotice" class="catalog-reference-notice" hidden role="status"><strong>Catálogo de referência — dados reais pendentes</strong><p data-reference-message>As áreas a seguir são ilustrativas.</p><button type="button" class="button button-outline button-small" data-retry-catalog>Tentar carregar dados reais</button></div><div aria-live="polite" class="active-filter-bar" hidden="" id="activeFilters"></div><p class="catalog-visible-count" id="catalogVisibleCount" aria-live="polite"></p>
+<div class="catalog-quick-picks" id="popularSearches" aria-label="Atalhos para áreas de serviço" hidden></div>
+<div aria-busy="true" aria-live="polite" class="category-results category-results-v2" id="categorias"><div class="status-panel">Carregando categorias...</div></div>
+<div class="catalog-pagination" id="paginationControls" hidden><button class="button button-outline" id="loadMore" type="button">Mostrar mais categorias <span aria-hidden="true">↓</span></button><span class="pagination-summary" id="paginationSummary"></span></div>
+<div class="catalog-disclaimer"><span aria-hidden="true">ⓘ</span><p>Selecione uma área para conhecer a descrição dos serviços, os prestadores que optaram por publicar seus perfis e suas avaliações. A disponibilidade depende de cadastros ativos e da configuração do Supabase.</p></div>
+</div>
+</div>
+</div>
+</section>
+<section class="section catalog-help"><div class="container help-panel"><div><span class="section-kicker">CONECTAR É O PRIMEIRO PASSO</span><h2>Você também pode fazer parte.</h2><p>Crie sua conta para acompanhar a evolução da plataforma, seja como cliente ou prestador de serviços.</p></div><a class="button button-primary" href="cadastro.html">Criar minha conta ↗</a></div></section>
+</main>
+<footer class="site-footer">
+<div class="container footer-grid">
+<div><a class="footer-brand" href="index.html" aria-label="SERÁ QUEM FAZ? — início"><img src="assets/brand/logo-horizontal-footer.png" alt="SERÁ QUEM FAZ?" width="240" height="80"/></a><p>Uma plataforma para aproximar pessoas, profissões e oportunidades.</p><span class="footer-local">Projeto com foco inicial em Santa Inês · Maranhão</span></div>
+<div><strong>Explorar</strong><a href="categorias.html">Catálogo e pesquisa</a><a href="index.html#como-funciona">Como funciona</a><a href="index.html#profissionais">Para profissionais</a></div>
+<div><strong>Minha conta</strong><a href="entrar.html">Entrar</a><a href="cadastro.html">Criar conta</a><a href="painel.html">Área da conta</a></div>
+<div><strong>Institucional</strong><a href="privacidade.html">Privacidade</a><a href="termos.html">Termos de uso</a><a href="index.html#perguntas">Sobre o projeto</a></div>
+</div>
+<div class="container footer-bottom"><span>© <span data-year="">2026</span> SERÁ QUEM FAZ?. Projeto em desenvolvimento.</span><span>Transparência, simplicidade e conexão.</span></div>
+</footer></body></html>

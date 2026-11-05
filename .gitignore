@@ -1,0 +1,20 @@
+.env
+.env.*
+!.env.example
+node_modules/
+.DS_Store
+*.log
+*.local
+coverage/
+
+__pycache__/
+*.pyc
+
+# Artefatos transitórios de testes e capturas Playwright
+.artifacts/
+PREVIA-*.png
+previews-v*/
+.pytest_cache/
+
+# Pacotes para publicação, gerados por scripts/build-distribution.sh
+dist/
