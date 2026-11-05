@@ -1,3 +1,8 @@
+## v3.9.11 — Continuidade de atendimentos aceitos
+
+- Prestadores aprovados podem cumprir serviços já aceitos após o vencimento da assinatura. O banco bloqueia novos aceites quando a cobrança obrigatória está ativa.
+- A suspensão continua impedindo o início e a finalização do atendimento. O teste de integração cobre as transições e o acesso de terceiros.
+
 ## v3.9.10 — Vigência da assinatura e README
 
 - Vitrine e novas solicitações passam a depender de faturas aprovadas e vigentes quando o controle comercial está ativo.

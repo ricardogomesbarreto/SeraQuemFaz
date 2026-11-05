@@ -1,4 +1,4 @@
-# SERÁ QUEM FAZ? — v3.9.10
+# SERÁ QUEM FAZ? — v3.9.11
 
 <img src="assets/brand/logo-horizontal.png" alt="Logomarca do Será Quem Faz?" width="380">
 
@@ -37,6 +37,8 @@ A mensalidade é do prestador. Clientes podem continuar usando o catálogo, a co
 | --- | --- |
 | Aparecer no catálogo, abrir perfil, serviços, portfólio e avaliações pela vitrine | Indisponível ao público. Fotos em buckets públicos podem continuar acessíveis por links diretos já conhecidos. |
 | Receber novas solicitações de orçamento | Bloqueado pelo banco. |
+| Aceitar um orçamento ainda pendente | Bloqueado até regularizar a assinatura. |
+| Iniciar ou finalizar um serviço com orçamento já aceito | Permitido ao prestador com perfil público e aprovado. O cliente pode confirmar a conclusão. |
 | Entrar, editar a conta, preparar serviços e portfólio | Disponível ao titular. |
 | Acessar conversas, orçamentos e atendimentos existentes | Disponível aos participantes, sujeito às regras de cada atendimento. |
 | Consultar cobranças e regularizar a assinatura | Disponível quando a integração financeira estiver operante. |
@@ -63,7 +65,7 @@ Por padrão, `assets/supabase-config.js` aponta para o projeto conectado. Para h
 ## Organização das pastas
 
 ```text
-SeraQuemFaz-v3.9.10/
+SeraQuemFaz-v3.9.11/
 ├── index.html                 # Landing page
 ├── cadastro.html / entrar.html
 ├── painel.html / admin.html
@@ -102,8 +104,8 @@ npm run verify
 npm run build:dist
 ```
 
-- **`dist/SeraQuemFaz_site_v3.9.10.zip`** — publicar somente os arquivos HTML e `assets/` no servidor, junto dos cabeçalhos aplicáveis.
-- **`dist/SeraQuemFaz_codigo_v3.9.10.zip`** — documentação, testes, CI e migrações para desenvolvimento/GitHub.
+- **`dist/SeraQuemFaz_site_v3.9.11.zip`** — publicar somente os arquivos HTML e `assets/` no servidor, junto dos cabeçalhos aplicáveis.
+- **`dist/SeraQuemFaz_codigo_v3.9.11.zip`** — documentação, testes, CI e migrações para desenvolvimento/GitHub.
 
 A separação evita expor SQL, testes e relatórios no diretório público da hospedagem. O script não altera o Supabase, não habilita pagamento e não executa deploy.
 
