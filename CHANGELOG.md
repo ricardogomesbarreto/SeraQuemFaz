@@ -1,3 +1,7 @@
+## v3.9.12 — Links para solicitações antigas
+
+- Links diretos abrem solicitações autorizadas mesmo fora das 40 mais recentes. O painel avisa quando o registro está indisponível para a conta.
+
 ## v3.9.11 — Continuidade de atendimentos aceitos
 
 - Prestadores aprovados podem cumprir serviços já aceitos após o vencimento da assinatura. O banco bloqueia novos aceites quando a cobrança obrigatória está ativa.

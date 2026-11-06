@@ -1,4 +1,4 @@
-# SERÁ QUEM FAZ? — v3.9.11
+# SERÁ QUEM FAZ? — v3.9.12
 
 <img src="assets/brand/logo-horizontal.png" alt="Logomarca do Será Quem Faz?" width="380">
 
@@ -65,7 +65,7 @@ Por padrão, `assets/supabase-config.js` aponta para o projeto conectado. Para h
 ## Organização das pastas
 
 ```text
-SeraQuemFaz-v3.9.11/
+SeraQuemFaz-v3.9.12/
 ├── index.html                 # Landing page
 ├── cadastro.html / entrar.html
 ├── painel.html / admin.html
@@ -104,8 +104,8 @@ npm run verify
 npm run build:dist
 ```
 
-- **`dist/SeraQuemFaz_site_v3.9.11.zip`** — publicar somente os arquivos HTML e `assets/` no servidor, junto dos cabeçalhos aplicáveis.
-- **`dist/SeraQuemFaz_codigo_v3.9.11.zip`** — documentação, testes, CI e migrações para desenvolvimento/GitHub.
+- **`dist/SeraQuemFaz_site_v3.9.12.zip`** — publicar somente os arquivos HTML e `assets/` no servidor, junto dos cabeçalhos aplicáveis.
+- **`dist/SeraQuemFaz_codigo_v3.9.12.zip`** — documentação, testes, CI e migrações para desenvolvimento/GitHub.
 
 A separação evita expor SQL, testes e relatórios no diretório público da hospedagem. O script não altera o Supabase, não habilita pagamento e não executa deploy.
 

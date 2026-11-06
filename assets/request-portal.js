@@ -3,6 +3,9 @@
 (async()=>{
  const $=id=>document.getElementById(id);
  const panel=$('sqfRequestPortal');if(!panel)return;
+ const requested=new URLSearchParams(location.search).get('solicitacao');
+ const requestedId=/^[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}$/i.test(requested||'')?requested.toLowerCase():null;
+ let linkedRequest=null;
  const create=(tag,cls,text)=>{const n=document.createElement(tag);if(cls)n.className=cls;if(text!==undefined)n.textContent=String(text);return n;};
  const stateNames={requested:'Aguardando prestador',quoted:'Orçamento disponível',accepted:'Orçamento aceito',in_progress:'Em atendimento',awaiting_confirmation:'Aguardando confirmação do cliente',completed:'Atendimento confirmado',declined:'Recusada',canceled:'Cancelada'};
  const currency=cents=>new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(cents/100);
@@ -51,10 +54,19 @@
    const refresh=$('sqfRequestRefresh');
    refresh.disabled=true;
    try{
-   const {data,error}=await client.from('sqf_service_requests').select('id,client_id,provider_id,service_id,city_ibge,description,desired_date,status,quote_cents,quote_terms,created_at,completed_at').order('created_at',{ascending:false}).order('id',{ascending:false}).limit(40);
+   const fields='id,client_id,provider_id,service_id,city_ibge,description,desired_date,status,quote_cents,quote_terms,created_at,completed_at';
+   const {data,error}=await client.from('sqf_service_requests').select(fields).order('created_at',{ascending:false}).order('id',{ascending:false}).limit(40);
    if(error)throw error;
-   requests=data||[];
-   if(selected && !requests.some(x=>x.id===selected)){selected=null;selectionSequence++;}
+   const recent=data||[];
+   const linkedId=selected||requestedId;
+   linkedRequest=null;
+   if(linkedId && !recent.some(item=>item.id===linkedId)){
+     const {data:linked,error:linkedError}=await client.from('sqf_service_requests').select(fields).eq('id',linkedId).maybeSingle();
+     if(linkedError)throw linkedError;
+     linkedRequest=linked;
+   }
+   requests=recent;
+   if(selected && linkedRequest?.id!==selected && !requests.some(x=>x.id===selected)){selected=null;selectionSequence++;}
    await Promise.all([loadUnread(),loadTotals()]);renderSummary();drawList();
    if(selected)await show(selected);
    else $('sqfRequestDetail').replaceChildren(create('p','muted',requests.length
@@ -96,7 +108,7 @@
  }
  async function show(id){
    selected=id;const current=++selectionSequence;drawList();
-   const item=requests.find(x=>x.id===id);if(!item)return;
+   const item=requests.find(x=>x.id===id)||(linkedRequest?.id===id?linkedRequest:null);if(!item)return;
    const target=$('sqfRequestDetail');target.replaceChildren();
    const head=create('div','sqf-request-head');head.append(create('h3','',stateNames[item.status]||'Solicitação'));
    head.append(create('span','muted','Criada em '+dateLabel(item.created_at)));target.append(head);
@@ -229,7 +241,9 @@
    $('sqfRequestRefresh').addEventListener('click',()=>load().catch(e=>say(e.message,true)));
    await load();
    if(location.hash==='#sqfRequestPortal')requestAnimationFrame(()=>panel.scrollIntoView({block:'start'}));
-   const requested=new URLSearchParams(location.search).get('solicitacao');
-   if(requested&&requests.some(r=>r.id===requested))await show(requested);
+   if(requestedId){
+     if(linkedRequest||requests.some(item=>item.id===requestedId))await show(requestedId);
+     else say('Solicitação indisponível para esta conta.',true);
+   }
  }catch(error){panel.hidden=false;say('Não foi possível carregar as solicitações. Confira a conexão e tente atualizar.',true);}
 })();
