@@ -1,10 +1,30 @@
-# SERÁ QUEM FAZ? — v3.9.14
+# SERÁ QUEM FAZ? — v3.9.15
 
-<img src="assets/brand/logo-horizontal.png" alt="Logomarca do Será Quem Faz?" width="380">
+<p align="center">
+  <img src="assets/brand/logo-horizontal.png" alt="Logomarca do Será Quem Faz?" width="380">
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/Frontend-HTML%2FCSS%2FJS-e34f26" alt="Frontend HTML, CSS e JavaScript">
+  <img src="https://img.shields.io/badge/Banco-PostgreSQL-4169e1?logo=postgresql&logoColor=white" alt="Banco PostgreSQL">
+  <img src="https://img.shields.io/badge/Backend-Supabase-3ecf8e?logo=supabase&logoColor=white" alt="Backend Supabase">
+  <a href="https://github.com/ricardogomesbarreto/SeraQuemFaz/releases"><img src="https://img.shields.io/badge/vers%C3%A3o-v3.9.15-8b3a45" alt="Versão v3.9.15"></a>
+  <a href="https://github.com/ricardogomesbarreto/SeraQuemFaz/actions/workflows/ci.yml"><img src="https://github.com/ricardogomesbarreto/SeraQuemFaz/actions/workflows/ci.yml/badge.svg?branch=main" alt="Status da integração contínua"></a>
+</p>
 
 ## Proposta de valor
 
-Plataforma brasileira para encontrar e contratar serviços locais. O catálogo com sidebar reúne categorias profissionais e permite pesquisar por município. O projeto começou em Santa Inês (MA) e usa o cadastro nacional de municípios do IBGE.
+O **Será Quem Faz?** conecta quem precisa contratar um serviço a profissionais da sua região. O catálogo com sidebar permite pesquisar por município e categoria, consultar perfis e solicitar orçamentos. Clientes e prestadores conversam pelo painel e acompanham cada atendimento até a conclusão. O projeto começou em Santa Inês (MA) e usa o cadastro nacional de municípios do IBGE.
+
+## Última versão · v3.9.15
+
+- **Anexos:** o banco passou a aceitar caminhos válidos de arquivos das solicitações, respeitando as permissões de cada participante.
+- **Orçamentos:** o envio sem valor agora é rejeitado antes de alterar a solicitação.
+- **Banco de dados:** removidos três índices duplicados de serviços e portfólio.
+- **Testes de integração:** acrescentados cenários de criação e cancelamento, privacidade de mensagens, leitura, anexos, vencimento e estorno.
+- **README:** logomarca centralizada, selos de tecnologia, versão e CI, além do resumo do projeto e das novidades da versão.
+
+[Histórico de versões](CHANGELOG.md)
 
 ## Funcionalidades e estágio atual
 
@@ -65,7 +85,7 @@ Por padrão, `assets/supabase-config.js` aponta para o projeto conectado. Para h
 ## Organização das pastas
 
 ```text
-SeraQuemFaz-v3.9.14/
+SeraQuemFaz-v3.9.15/
 ├── index.html                 # Landing page
 ├── cadastro.html / entrar.html
 ├── painel.html / admin.html
@@ -104,8 +124,8 @@ npm run verify
 npm run build:dist
 ```
 
-- **`dist/SeraQuemFaz_site_v3.9.14.zip`** — publicar somente os arquivos HTML e `assets/` no servidor, junto dos cabeçalhos aplicáveis.
-- **`dist/SeraQuemFaz_codigo_v3.9.14.zip`** — documentação, testes, CI e migrações para desenvolvimento/GitHub.
+- **`dist/SeraQuemFaz_site_v3.9.15.zip`** — publicar somente os arquivos HTML e `assets/` no servidor, junto dos cabeçalhos aplicáveis.
+- **`dist/SeraQuemFaz_codigo_v3.9.15.zip`** — documentação, testes, CI e migrações para desenvolvimento/GitHub.
 
 A separação evita expor SQL, testes e relatórios no diretório público da hospedagem. O script não altera o Supabase, não habilita pagamento e não executa deploy.
 

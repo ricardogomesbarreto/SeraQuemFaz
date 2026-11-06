@@ -1,3 +1,10 @@
+## v3.9.15 — Anexos, orçamentos e apresentação do projeto
+
+- Corrigida a validação dos caminhos de anexos e rejeitado o envio de orçamentos sem valor.
+- Removidos três índices redundantes de serviços e portfólio.
+- Incluídos testes SQL para solicitações, mensagens, anexos e assinatura.
+- Reorganizado o README com logomarca centralizada, selos e resumo da versão.
+
 ## v3.9.14 — Recuperação de links de solicitações
 
 - O painel mantém a lista de solicitações disponível se a consulta de um link direto falhar. Atualizar tenta abrir o link novamente.
