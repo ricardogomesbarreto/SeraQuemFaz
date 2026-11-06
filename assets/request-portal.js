@@ -59,16 +59,35 @@
    const recent=data||[];
    const linkedId=selected||requestedId;
    linkedRequest=null;
+   let linkedLookupFailed=false;
    if(linkedId && !recent.some(item=>item.id===linkedId)){
-     const {data:linked,error:linkedError}=await client.from('sqf_service_requests').select(fields).eq('id',linkedId).maybeSingle();
-     if(linkedError)throw linkedError;
-     linkedRequest=linked;
+     try{
+       const {data:linked,error:linkedError}=await client.from('sqf_service_requests').select(fields).eq('id',linkedId).maybeSingle();
+       linkedLookupFailed=Boolean(linkedError);
+       if(!linkedLookupFailed)linkedRequest=linked;
+     }catch{linkedLookupFailed=true;}
    }
    requests=recent;
-   if(selected && linkedRequest?.id!==selected && !requests.some(x=>x.id===selected)){selected=null;selectionSequence++;}
-   await Promise.all([loadUnread(),loadTotals()]);renderSummary();drawList();
-   if(selected)await show(selected);
-   else $('sqfRequestDetail').replaceChildren(create('p','muted',requests.length
+   const visible=linkedId && (linkedRequest?.id===linkedId || recent.some(item=>item.id===linkedId));
+   await Promise.all([loadUnread(),loadTotals()]);renderSummary();
+   if(visible){
+     await show(linkedId);
+     say('Solicitações atualizadas. Mensagens e anexos são acessíveis somente aos participantes.');
+     return;
+   }
+   selected=linkedLookupFailed ? linkedId : null;
+   selectionSequence++;
+   drawList();
+   const detail=$('sqfRequestDetail');
+   if(linkedId){
+     const message=linkedLookupFailed
+       ? 'Não foi possível abrir a solicitação. Use Atualizar para tentar novamente.'
+       : 'Solicitação indisponível para esta conta.';
+     detail.replaceChildren(create('p','muted',message));
+     say(message,true);
+     return;
+   }
+   detail.replaceChildren(create('p','muted',requests.length
      ?'Selecione uma solicitação para acompanhar o orçamento, as mensagens e o histórico.'
      :'Ainda não há solicitações nesta conta.'));
    say('Solicitações atualizadas. Mensagens e anexos são acessíveis somente aos participantes.');
@@ -240,9 +259,6 @@
    $('sqfRequestRefresh').addEventListener('click',()=>load().catch(e=>say(e.message,true)));
    await load();
    if(location.hash==='#sqfRequestPortal')requestAnimationFrame(()=>panel.scrollIntoView({block:'start'}));
-   if(requestedId){
-     if(linkedRequest||requests.some(item=>item.id===requestedId))await show(requestedId);
-     else say('Solicitação indisponível para esta conta.',true);
-   }
+
  }catch(error){panel.hidden=false;say('Não foi possível carregar as solicitações. Confira a conexão e tente atualizar.',true);}
 })();

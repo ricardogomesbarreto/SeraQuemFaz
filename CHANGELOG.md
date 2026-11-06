@@ -1,3 +1,7 @@
+## v3.9.14 — Recuperação de links de solicitações
+
+- O painel mantém a lista de solicitações disponível se a consulta de um link direto falhar. Atualizar tenta abrir o link novamente.
+
 ## v3.9.13 — Links de solicitação após login
 
 - Ao entrar por um link de solicitação, o painel reabre a solicitação após autenticação. Somente o identificador válido é repassado entre as páginas.
