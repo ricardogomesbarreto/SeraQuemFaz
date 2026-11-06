@@ -1,3 +1,11 @@
+# v3.9.16 — Busca e municípios resilientes
+
+- **Busca integrada:** cidade e serviço na página inicial, preservados ao abrir o catálogo.
+- **Municípios:** cópia versionada com 5.571 registros e metadados de origem, data e integridade; seleção sem depender de uma consulta externa ao IBGE.
+- **Validação:** rejeição de códigos duplicados, códigos fora do formato IBGE e UFs incompatíveis, inclusive no cache do navegador.
+- **Recuperação:** limite de tempo nas consultas, botão para tentar carregar cidades novamente e ação para limpar uma busca sem resultados.
+- **Celular e acessibilidade:** controles maiores, barra de filtros fixa e navegação por teclado contida nos filtros abertos.
+
 ## v3.9.15 — Anexos, orçamentos e apresentação do projeto
 
 - Corrigida a validação dos caminhos de anexos e rejeitado o envio de orçamentos sem valor.

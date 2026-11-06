@@ -53,7 +53,7 @@ test('logo ampliada e campo de localização disponíveis em todas as etapas',()
 test('carrega a lista completa, pesquisa nomes acentuados e reutiliza cache sem repetir download',async()=>{
  let calls=0;
  const cities=[{id:2109908,nome:'Santa Inês',microrregiao:{mesorregiao:{UF:{sigla:'MA'}}}}];
- for(let i=0;i<5501;i++)cities.push({id:5000000+i,nome:'Município de teste '+i,microrregiao:{mesorregiao:{UF:{sigla:'SP'}}}});
+ for(let i=0;i<5501;i++)cities.push({id:3500000+i,nome:'Município de teste '+i,microrregiao:{mesorregiao:{UF:{sigla:'SP'}}}});
  const session=new Map();
  const ctx={
   sessionStorage:{getItem:k=>session.get(k)||null,setItem:(k,v)=>session.set(k,v)},

@@ -1024,3 +1024,7 @@ body{min-width:320px}
 .sqf-dashboard-page .sqf-request-summary {
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 9rem), 1fr));
 }
+
+/* v3.9.16: busca integrada e controles confortáveis em telas pequenas. */
+.home-service-field{display:grid;gap:8px;width:100%}.home-service-field label{font-weight:700;color:#113a59}.home-service-field input{width:100%;min-height:48px;border:1px solid #a8bac6;border-radius:12px;background:#fff;padding:12px 16px;font:inherit}.home-service-field small{color:#506474;font-size:.8rem}.city-retry{margin-top:8px;min-height:44px}.status-panel .button{margin-top:16px}.city-picker-control:focus-within,.home-service-field input:focus-visible{outline:3px solid #156b9b;outline-offset:3px}
+@media(max-width:900px){.catalog-mobile-toolbar{position:sticky;top:0;z-index:20;background:#fff;padding:12px;border-bottom:1px solid #dbe4ea}.sidebar-apply{position:sticky;bottom:0;min-height:48px}.filter-tag-removable{min-height:44px}.home-service-field input{font-size:16px}}

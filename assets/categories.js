@@ -86,6 +86,12 @@
   filterClose?.addEventListener('click', () => showFilters(false));
   backdrop?.addEventListener('click', () => showFilters(false));
   document.addEventListener('keydown', (event) => {
+    if (event.key === 'Tab' && sidebar?.classList.contains('is-open')) {
+      const items=[...sidebar.querySelectorAll('button,input,select,a[href]')].filter(el=>!el.disabled && el.getClientRects().length);
+      const first=items[0],last=items.at(-1);
+      if(event.shiftKey && document.activeElement===first){event.preventDefault();last?.focus();}
+      else if(!event.shiftKey && document.activeElement===last){event.preventDefault();first?.focus();}
+    }
     if (event.key === 'Escape' && sidebar?.classList.contains('is-open')) showFilters(false);
   });
   const desktopMedia = window.matchMedia?.('(min-width: 901px)');
@@ -262,7 +268,7 @@
       return;
     }
     if (failure) {
-      const errorPanel = panel('Não foi possível carregar o catálogo', 'Verifique sua conexão e tente novamente. Se o erro continuar, revise as permissões públicas de leitura no Supabase.', 'error');
+      const errorPanel = panel('Não foi possível carregar o catálogo', 'Verifique sua conexão e tente novamente em alguns instantes.', 'error');
       const retry = document.createElement('button'); retry.type = 'button'; retry.className = 'button button-outline button-small'; retry.textContent = 'Tentar novamente'; retry.addEventListener('click', init);
       errorPanel.appendChild(retry); list.appendChild(errorPanel);
       count.textContent = '—'; description.textContent = 'Catálogo temporariamente indisponível'; status.textContent = 'Não foi possível sincronizar';
@@ -271,7 +277,8 @@
     status.textContent = referenceMode ? `${allCategories.length} áreas ilustrativas · banco de dados pendente` : `${allCategories.length} ${allCategories.length === 1 ? 'categoria pública' : 'categorias públicas'} no catálogo`;
     description.textContent = `${filtered.length} ${referenceMode ? 'áreas de referência' : (filtered.length === 1 ? 'categoria encontrada' : 'categorias encontradas')} · ${window.SQFCities.format(selectedCity)}` + (query ? ` · “${query}”` : '');
     if (!filtered.length) {
-      list.append(panel('Nenhuma categoria encontrada', query || withImage.checked || withDescription.checked || letter ? 'Experimente outro termo ou limpe os filtros para visualizar todas as categorias.' : 'Ainda não há categorias públicas disponíveis.'));
+      const emptyPanel = panel('Nenhuma categoria encontrada', query || withImage.checked || withDescription.checked || letter ? 'Experimente outro termo ou limpe os filtros para visualizar todas as categorias.' : 'Ainda não há categorias públicas disponíveis.');
+      const clear = document.createElement('button'); clear.type='button'; clear.className='button button-outline'; clear.textContent='Limpar filtros e explorar serviços'; clear.addEventListener('click',resetFilters); emptyPanel.append(clear); list.append(emptyPanel);
       return;
     }
     const fragment = document.createDocumentFragment();

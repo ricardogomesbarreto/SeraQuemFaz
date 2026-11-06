@@ -1,4 +1,4 @@
-# SERÁ QUEM FAZ? — v3.9.15
+# SERÁ QUEM FAZ? — v3.9.16
 
 <p align="center">
   <img src="assets/brand/logo-horizontal.png" alt="Logomarca do Será Quem Faz?" width="380">
@@ -8,7 +8,7 @@
   <img src="https://img.shields.io/badge/Frontend-HTML%2FCSS%2FJS-e34f26" alt="Frontend HTML, CSS e JavaScript">
   <img src="https://img.shields.io/badge/Banco-PostgreSQL-4169e1?logo=postgresql&logoColor=white" alt="Banco PostgreSQL">
   <img src="https://img.shields.io/badge/Backend-Supabase-3ecf8e?logo=supabase&logoColor=white" alt="Backend Supabase">
-  <a href="https://github.com/ricardogomesbarreto/SeraQuemFaz/releases"><img src="https://img.shields.io/badge/vers%C3%A3o-v3.9.15-8b3a45" alt="Versão v3.9.15"></a>
+  <a href="https://github.com/ricardogomesbarreto/SeraQuemFaz/releases"><img src="https://img.shields.io/badge/vers%C3%A3o-v3.9.16-8b3a45" alt="Versão v3.9.16"></a>
   <a href="https://github.com/ricardogomesbarreto/SeraQuemFaz/actions/workflows/ci.yml"><img src="https://github.com/ricardogomesbarreto/SeraQuemFaz/actions/workflows/ci.yml/badge.svg?branch=main" alt="Status da integração contínua"></a>
 </p>
 
@@ -16,13 +16,13 @@
 
 O **Será Quem Faz?** conecta quem precisa contratar um serviço a profissionais da sua região. O catálogo com sidebar permite pesquisar por município e categoria, consultar perfis e solicitar orçamentos. Clientes e prestadores conversam pelo painel e acompanham cada atendimento até a conclusão. O projeto começou em Santa Inês (MA) e usa o cadastro nacional de municípios do IBGE.
 
-## Última versão · v3.9.15
+## Última versão · v3.9.16
 
-- **Anexos:** o banco passou a aceitar caminhos válidos de arquivos das solicitações, respeitando as permissões de cada participante.
-- **Orçamentos:** o envio sem valor agora é rejeitado antes de alterar a solicitação.
-- **Banco de dados:** removidos três índices duplicados de serviços e portfólio.
-- **Testes de integração:** acrescentados cenários de criação e cancelamento, privacidade de mensagens, leitura, anexos, vencimento e estorno.
-- **README:** logomarca centralizada, selos de tecnologia, versão e CI, além do resumo do projeto e das novidades da versão.
+- **Busca integrada:** cidade e serviço na página inicial, preservados ao abrir o catálogo.
+- **Municípios:** cópia versionada com 5.571 registros e metadados de origem, data e integridade; seleção sem depender de uma consulta externa ao IBGE.
+- **Validação:** rejeição de códigos duplicados, códigos fora do formato IBGE e UFs incompatíveis, inclusive no cache do navegador.
+- **Recuperação:** limite de tempo nas consultas, botão para tentar carregar cidades novamente e ação para limpar uma busca sem resultados.
+- **Celular e acessibilidade:** controles maiores, barra de filtros fixa e navegação por teclado contida nos filtros abertos.
 
 [Histórico de versões](CHANGELOG.md)
 
@@ -85,7 +85,7 @@ Por padrão, `assets/supabase-config.js` aponta para o projeto conectado. Para h
 ## Organização das pastas
 
 ```text
-SeraQuemFaz-v3.9.15/
+SeraQuemFaz-v3.9.16/
 ├── index.html                 # Landing page
 ├── cadastro.html / entrar.html
 ├── painel.html / admin.html
@@ -124,8 +124,8 @@ npm run verify
 npm run build:dist
 ```
 
-- **`dist/SeraQuemFaz_site_v3.9.15.zip`** — publicar somente os arquivos HTML e `assets/` no servidor, junto dos cabeçalhos aplicáveis.
-- **`dist/SeraQuemFaz_codigo_v3.9.15.zip`** — documentação, testes, CI e migrações para desenvolvimento/GitHub.
+- **`dist/SeraQuemFaz_site_v3.9.16.zip`** — publicar somente os arquivos HTML e `assets/` no servidor, junto dos cabeçalhos aplicáveis.
+- **`dist/SeraQuemFaz_codigo_v3.9.16.zip`** — documentação, testes, CI e migrações para desenvolvimento/GitHub.
 
 A separação evita expor SQL, testes e relatórios no diretório público da hospedagem. O script não altera o Supabase, não habilita pagamento e não executa deploy.
 
@@ -158,3 +158,11 @@ Consulte [SECURITY.md](SECURITY.md), [autenticação por e-mail](docs/contas/AUT
 - [Validações e diagnóstico do Supabase](docs/relatorios/)
 
 **Licenciamento:** antes de tornar público o código ou imagens de terceiros, confirmar a licença de cada recurso e o direito de distribuição. Não presuma que URLs de buscadores concedem licença de uso.
+
+## Cadastro municipal versionado
+
+O código IBGE de sete dígitos identifica cada cidade. `assets/municipios-br.json` inclui 5.571 registros copiados do cadastro do projeto, cuja origem registrada é “IBGE (espelho público)”, importado em 05/11/2026. A API oficial estava indisponível durante o empacotamento: esta versão não afirma uma nova sincronização oficial. O arquivo `.meta.json` registra origem, data, quantidade e SHA-256.
+
+Execute `npm run cities:update` com acesso à API oficial para atualizar a lista. O processo verifica códigos únicos, correspondência entre código e UF e presença das 27 UFs antes de substituir o arquivo. Revise e publique juntos os dados e seus metadados. O navegador valida cache e arquivo local; usa a API oficial como alternativa, com limite de tempo e opção de tentar novamente. A cópia local permite selecionar cidades quando o IBGE está fora do ar; os serviços e contas continuam dependendo da conexão com o backend.
+
+Esta versão melhora a descoberta de serviços e não altera tabelas, pagamentos ou regras de acesso. Modernizações adicionais dos painéis e dos cartões de profissionais continuam como próximas etapas.
