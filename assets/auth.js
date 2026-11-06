@@ -103,6 +103,8 @@
   if (login) {
     const client = clientOrError();
     const resetForm = $('resetForm');
+    const requestId=utils.requestIdFromSearch(location.search);
+    const destination=requestId ? `painel.html?solicitacao=${requestId}#sqfRequestPortal` : 'painel.html';
     const otpForm=$('emailCodeForm');
     const showCodeForm=()=>{
       if(!otpForm)return;
@@ -129,7 +131,7 @@
         const {data,error}=await current.auth.verifyOtp({email,token,type:'email'});
         if(error)throw error;
         status('codeMessage','E-mail confirmado com sucesso. Você pode entrar na sua conta.');
-        if(data?.session){location.assign('painel.html');return;}
+        if(data?.session){location.assign(destination);return;}
         showLoginForm();$('email').value=email;
         status('message','E-mail confirmado. Entre com sua senha.');
       }catch(error){
@@ -158,7 +160,7 @@
       try {
         const { data, error } = await current.auth.signInWithPassword({ email, password });
         if (error || !data?.session) throw error || new Error('Nenhuma sessão retornada.');
-        location.assign('painel.html');
+        location.assign(destination);
       } catch (error) {
         console.warn('Autenticação não concluída:',error?.message);
         status('message',window.SQFAuthFeedback.message(error,'login'),true);

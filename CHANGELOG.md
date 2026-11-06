@@ -1,3 +1,7 @@
+## v3.9.13 — Links de solicitação após login
+
+- Ao entrar por um link de solicitação, o painel reabre a solicitação após autenticação. Somente o identificador válido é repassado entre as páginas.
+
 ## v3.9.12 — Links para solicitações antigas
 
 - Links diretos abrem solicitações autorizadas mesmo fora das 40 mais recentes. O painel avisa quando o registro está indisponível para a conta.

@@ -403,7 +403,11 @@
   try {
     client=window.getSQFClient();
     const {data,error}=await client.auth.getUser();
-    if(error || !data?.user){location.replace('entrar.html');return;}
+    if(error || !data?.user){
+      const requestId=window.SQFUtils.requestIdFromSearch(location.search);
+      location.replace(requestId ? `entrar.html?solicitacao=${requestId}` : 'entrar.html');
+      return;
+    }
     user=data.user;
     const {data:myProfile,error:pe}=await client.from('profiles')
       .select('id,full_name,account_type,city,city_ibge,bio,avatar_path,is_public').eq('id',user.id).maybeSingle();

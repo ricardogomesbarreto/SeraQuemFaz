@@ -46,3 +46,12 @@ test('telas incluem confirmação por código e orientação de localhost',()=>{
   assert.match(entrar,/localhost/);
   assert.match(cadastro,/entrar\.html#confirmar-email/);
 });
+
+test('preserva apenas UUIDs de solicitações no retorno ao painel', () => {
+  const context = { URLSearchParams };
+  vm.runInNewContext(fs.readFileSync(path.join(root, 'assets/utils.js'), 'utf8'), context);
+  const parse = context.SQFUtils.requestIdFromSearch;
+  assert.equal(parse('?solicitacao=ABCD1234-1234-1234-1234-ABCDEF123456&next=https://example.com'), 'abcd1234-1234-1234-1234-abcdef123456');
+  assert.equal(parse('?solicitacao=https%3A%2F%2Fexample.com'), null);
+  assert.equal(parse('?next=//example.com'), null);
+});

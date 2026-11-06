@@ -17,5 +17,9 @@
   // Nunca associar uma foto a outra profissão por regex: o cadastro é a fonte da verdade.
   const categoryImage = (entity) => safeImageUrl(entity && typeof entity === 'object' ? entity.image_url : null);
   const isValidEmail = (value) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(value || '').trim()) && String(value).length <= 254;
-  scope.SQFUtils = Object.freeze({ normalize, matchesCategory, safeImageUrl, categoryImage, isValidEmail });
+  const requestIdFromSearch = (search) => {
+    const id = new URLSearchParams(search).get('solicitacao');
+    return /^[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}$/i.test(id || '') ? id.toLowerCase() : null;
+  };
+  scope.SQFUtils = Object.freeze({ normalize, matchesCategory, safeImageUrl, categoryImage, isValidEmail, requestIdFromSearch });
 })(typeof window === 'undefined' ? globalThis : window);

@@ -3,8 +3,7 @@
 (async()=>{
  const $=id=>document.getElementById(id);
  const panel=$('sqfRequestPortal');if(!panel)return;
- const requested=new URLSearchParams(location.search).get('solicitacao');
- const requestedId=/^[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}$/i.test(requested||'')?requested.toLowerCase():null;
+ const requestedId=window.SQFUtils.requestIdFromSearch(location.search);
  let linkedRequest=null;
  const create=(tag,cls,text)=>{const n=document.createElement(tag);if(cls)n.className=cls;if(text!==undefined)n.textContent=String(text);return n;};
  const stateNames={requested:'Aguardando prestador',quoted:'Orçamento disponível',accepted:'Orçamento aceito',in_progress:'Em atendimento',awaiting_confirmation:'Aguardando confirmação do cliente',completed:'Atendimento confirmado',declined:'Recusada',canceled:'Cancelada'};
