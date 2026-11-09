@@ -20,4 +20,28 @@
     if (!picker?.validate()) event.preventDefault();
   });
   document.querySelectorAll('[data-year]').forEach((el) => { el.textContent = new Date().getFullYear(); });
+  // PWA opcional: instalar somente em contexto seguro. Service Worker não
+  // armazena páginas autenticadas nem respostas privadas da API.
+  if(typeof navigator!=='undefined'&&typeof window!=='undefined'&&
+    'serviceWorker' in navigator &&
+    (location.protocol==='https:'||['localhost','127.0.0.1'].includes(location.hostname))){
+    window.addEventListener('load',()=>{
+      navigator.serviceWorker.register(new URL('service-worker.js',document.baseURI))
+        .catch(()=>{/* A versão web continua operacional sem PWA. */});
+    },{once:true});
+  }
+  let installPrompt=null;
+  const install=document.getElementById('sqfInstallApp');
+  if(typeof window==='undefined')return;
+  window.addEventListener('beforeinstallprompt',event=>{
+    if(!install)return;
+    event.preventDefault();
+    installPrompt=event;install.hidden=false;
+  });
+  install?.addEventListener('click',async()=>{
+    if(!installPrompt)return;
+    installPrompt.prompt();
+    await installPrompt.userChoice;
+    installPrompt=null;install.hidden=true;
+  });
 })();

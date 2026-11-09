@@ -91,11 +91,21 @@
         if(!e)for(const detail of professional||[])details.set(detail.provider_id,detail);
       }catch{console.warn('Filtro profissional adicional indisponível');}
     }
+    const photoOwners=new Set();
+    if(ids.length){
+      const {data:photoRows,error:photoError}=await client.from('portfolio_photos')
+        .select('provider_id').in('provider_id',ids).limit(1000);
+      const control=document.getElementById('sqfOnlyPortfolio');
+      if(photoError){if(control)control.disabled=true;}
+      else for(const photo of photoRows||[])photoOwners.add(photo.provider_id);
+    }
     const cards=[];
     const filterBox=document.getElementById('sqfProviderFilters');
     const specialtyFilter=document.getElementById('sqfSpecialtyFilter');
     const modeFilter=document.getElementById('sqfModeFilter');
     const countFilter=document.getElementById('sqfProviderFilteredCount');
+    const sortControl=document.getElementById('sqfProviderSort');
+    const photoControl=document.getElementById('sqfOnlyPortfolio');
     const applyFilter=()=>{
       const query=window.SQFUtils.normalize(specialtyFilter.value);
       const mode=modeFilter.value;
@@ -105,9 +115,19 @@
           details.get(entry.profile.id)?.specialties||'',...entry.services].join(' '));
         const serviceMode=details.get(entry.profile.id)?.service_mode||'nao_informado';
         const fitsMode=!mode || serviceMode===mode || (serviceMode==='hibrido'&&['presencial','remoto'].includes(mode));
-        const visible=(!query||text.includes(query))&&fitsMode;
+        const visible=(!query||text.includes(query))&&fitsMode&&
+          (!photoControl?.checked||entry.hasPortfolio);
         entry.card.hidden=!visible;if(visible)found++;
       }
+      const order=sortControl?.value||'name';
+      const ordered=[...cards].sort((a,b)=>{
+        const byName=a.profile.full_name.localeCompare(b.profile.full_name,'pt-BR');
+        if(order==='rating')return b.rating-a.rating||b.reviewCount-a.reviewCount||byName;
+        if(order==='reviews')return b.reviewCount-a.reviewCount||byName;
+        if(order==='services')return b.serviceCount-a.serviceCount||byName;
+        return byName;
+      });
+      for(const entry of ordered)results.append(entry.card);
       countFilter.textContent=`${found} de ${cards.length} profissionais encontrados`;
       if(cards.length && !found)countFilter.textContent+=' · Tente ampliar os filtros.';
     };
@@ -115,8 +135,13 @@
       filterBox.hidden=false;
       specialtyFilter.addEventListener('input',applyFilter);
       modeFilter.addEventListener('change',applyFilter);
+      sortControl?.addEventListener('change',applyFilter);
+      photoControl?.addEventListener('change',applyFilter);
       document.getElementById('sqfProviderFilterClear').addEventListener('click',()=>{
-        specialtyFilter.value='';modeFilter.value='';applyFilter();
+        specialtyFilter.value='';modeFilter.value='';
+        if(sortControl)sortControl.value='name';
+        if(photoControl)photoControl.checked=false;
+        applyFilter();
       });
     }
     document.getElementById('categoryProviderCount').textContent = `${profiles.length} ${profiles.length === 1 ? 'prestador' : 'prestadores'}`;
@@ -143,7 +168,14 @@
       link.append(speciality);
       servicesForPro.forEach(title => tags.append(ui.make('span','service-tag',title)));
       link.append(tags,ui.make('span','profile-link-label','Ver perfil, fotos e feedback →'));
-      card.append(link); results.append(card);cards.push({card,profile:pro,services:servicesForPro});
+      const publicReviews=reviews.filter(r=>r.provider_id===pro.id);
+      const rating=publicReviews.length
+        ?publicReviews.reduce((total,r)=>total+Number(r.rating||0),0)/publicReviews.length:0;
+      const serviceCount=services.filter(s=>s.provider_id===pro.id).length;
+      if(photoOwners.has(pro.id))link.append(ui.make('span','sqf-has-portfolio','Portfólio com fotos'));
+      card.append(link);results.append(card);
+      cards.push({card,profile:pro,services:servicesForPro,rating,
+        reviewCount:publicReviews.length,serviceCount,hasPortfolio:photoOwners.has(pro.id)});
     }
     if(cards.length)applyFilter();
     } catch (providerError) {
