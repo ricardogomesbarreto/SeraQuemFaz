@@ -34,3 +34,14 @@ jobs:
         run: npm test
       - name: Empacotar site e código
         run: npm run build:dist
+
+      - name: Disponibilizar ZIP para teste da versão
+        if: github.ref == 'refs/heads/main' && matrix.node == '24'
+        uses: actions/upload-artifact@v4
+        with:
+          name: SeraQuemFaz-site-e-codigo-${{ github.sha }}
+          path: |
+            dist/SeraQuemFaz_site_v*.zip
+            dist/SeraQuemFaz_codigo_v*.zip
+          if-no-files-found: error
+          retention-days: 30
