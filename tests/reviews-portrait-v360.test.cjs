@@ -17,10 +17,11 @@ test('retrato preserva proporção e aceita imagens de diferentes orientações'
     assert.ok(Math.abs(rect.sw/rect.sh-rect.width/rect.height)<.004);
   }
 });
-test('retrato admite zoom e posição controlados, mas rejeita arquivo pequeno ou excessivo',()=>{
+test('retrato admite qualquer dimensão positiva e enquadramento controlado',()=>{
   const rect=portrait.crop(1280,720,{zoom:1.8,panX:80,panY:30});
   assert.ok(rect.sx>0 && rect.sw<1280);
-  for(const [w,h] of [[100,100],[310,600],[9000,12000],[0,640]]) assert.throws(()=>portrait.crop(w,h));
+  for(const [w,h] of [[100,100],[310,600],[9000,12000],[1,1]]) assert.doesNotThrow(()=>portrait.crop(w,h));
+  for(const [w,h] of [[0,640],[-1,600],[1.2,300]]) assert.throws(()=>portrait.crop(w,h));
   assert.throws(()=>portrait.crop(1024,1024,{zoom:10}));
   assert.throws(()=>portrait.crop(1024,1024,{panY:-1}));
 });
@@ -28,6 +29,7 @@ test('retrato restringe arquivo e não confunde portfólio com perfil',()=>{
   assert.doesNotThrow(()=>portrait.validateFile({type:'image/jpeg',size:1024}));
   assert.throws(()=>portrait.validateFile({type:'image/svg+xml',size:1024}));
   assert.throws(()=>portrait.validateFile({type:'image/jpeg',size:6*1024*1024}));
+  assert.equal(portrait.MAX_OUTPUT,5*1024*1024);
   const panel=read('painel.html');const acc=read('assets/account.js');
   assert.match(panel,/Fotografia do rosto para o perfil/);
   assert.match(panel,/id="portraitZoom"/);
