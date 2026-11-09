@@ -262,4 +262,91 @@ $fn$;
 REVOKE ALL ON FUNCTION public.sqf_staff_dashboard_metrics() FROM PUBLIC,anon;
 GRANT EXECUTE ON FUNCTION public.sqf_staff_dashboard_metrics() TO authenticated;
 
+
+-- Opt-in explícito: fila privada para envio por provedor externo. Nenhum email
+-- é disparado pelo banco; uma Edge Function com credenciais privadas é necessária.
+CREATE TABLE IF NOT EXISTS public.sqf_notification_outbox(
+ notification_id uuid PRIMARY KEY REFERENCES public.sqf_notifications(id) ON DELETE CASCADE,
+ recipient_id uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+ status text NOT NULL DEFAULT 'pending' CHECK(status IN ('pending','sent','skipped','failed')),
+ attempts integer NOT NULL DEFAULT 0 CHECK(attempts BETWEEN 0 AND 20),
+ next_attempt_at timestamptz NOT NULL DEFAULT now(),
+ processed_at timestamptz,
+ created_at timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS sqf_notification_outbox_queue_idx
+ ON public.sqf_notification_outbox(next_attempt_at) WHERE status='pending';
+ALTER TABLE public.sqf_notification_outbox ENABLE ROW LEVEL SECURITY;
+REVOKE ALL ON public.sqf_notification_outbox FROM PUBLIC,anon,authenticated;
+
+CREATE OR REPLACE FUNCTION public.sqf_queue_notification_email()
+RETURNS trigger LANGUAGE plpgsql SECURITY DEFINER SET search_path='' AS $fn$
+BEGIN
+ IF EXISTS(SELECT 1 FROM public.sqf_notification_preferences p
+   WHERE p.user_id=NEW.recipient_id AND p.email_enabled) THEN
+  INSERT INTO public.sqf_notification_outbox(notification_id,recipient_id)
+   VALUES(NEW.id,NEW.recipient_id) ON CONFLICT DO NOTHING;
+ END IF;
+ RETURN NEW;
+END;
+$fn$;
+DROP TRIGGER IF EXISTS sqf_queue_notification_email_tg ON public.sqf_notifications;
+CREATE TRIGGER sqf_queue_notification_email_tg AFTER INSERT ON public.sqf_notifications
+ FOR EACH ROW EXECUTE FUNCTION public.sqf_queue_notification_email();
+
+-- Impedir abuso simples em suporte, sem revelar existência de tickets alheios.
+CREATE OR REPLACE FUNCTION public.sqf_support_rate_guard()
+RETURNS trigger LANGUAGE plpgsql SECURITY DEFINER SET search_path='' AS $fn$
+BEGIN
+ IF (SELECT auth.uid()) IS NULL OR NEW.user_id<>(SELECT auth.uid()) THEN
+  RAISE EXCEPTION 'Identidade incompatível';
+ END IF;
+ IF (SELECT count(*) FROM public.sqf_support_tickets s
+     WHERE s.user_id=NEW.user_id AND s.created_at>now()-interval '1 hour')>=3 THEN
+  RAISE EXCEPTION 'Limite de três pedidos por hora atingido';
+ END IF;
+ RETURN NEW;
+END;
+$fn$;
+DROP TRIGGER IF EXISTS sqf_support_rate_guard_tg ON public.sqf_support_tickets;
+CREATE TRIGGER sqf_support_rate_guard_tg BEFORE INSERT ON public.sqf_support_tickets
+ FOR EACH ROW EXECUTE FUNCTION public.sqf_support_rate_guard();
+
+CREATE OR REPLACE FUNCTION public.sqf_staff_support_queue()
+RETURNS TABLE(ticket_id uuid,topic text,message text,status text,created_at timestamptz)
+LANGUAGE plpgsql SECURITY DEFINER SET search_path='' AS $fn$
+DECLARE actor uuid:=(SELECT auth.uid());
+BEGIN
+ IF actor IS NULL OR COALESCE((SELECT auth.jwt()->>'aal'),'')<>'aal2' OR
+ NOT EXISTS(SELECT 1 FROM public.sqf_admin_members m WHERE m.user_id=actor
+  AND m.active AND m.role IN ('admin','moderator')) THEN
+   RAISE EXCEPTION 'Acesso de suporte negado'; END IF;
+ RETURN QUERY SELECT t.id,t.topic,t.message,t.status,t.created_at
+  FROM public.sqf_support_tickets t ORDER BY t.created_at DESC LIMIT 50;
+END;
+$fn$;
+REVOKE ALL ON FUNCTION public.sqf_staff_support_queue() FROM PUBLIC,anon;
+GRANT EXECUTE ON FUNCTION public.sqf_staff_support_queue() TO authenticated;
+
+CREATE OR REPLACE FUNCTION public.sqf_staff_support_action(p_ticket uuid,p_action text)
+RETURNS void LANGUAGE plpgsql SECURITY DEFINER SET search_path='' AS $fn$
+DECLARE actor uuid:=(SELECT auth.uid()); t public.sqf_support_tickets%ROWTYPE;
+BEGIN
+ IF actor IS NULL OR COALESCE((SELECT auth.jwt()->>'aal'),'')<>'aal2' OR
+ NOT EXISTS(SELECT 1 FROM public.sqf_admin_members m WHERE m.user_id=actor
+  AND m.active AND m.role IN ('admin','moderator')) THEN
+  RAISE EXCEPTION 'Acesso de suporte negado'; END IF;
+ IF p_action NOT IN ('review','resolve') THEN RAISE EXCEPTION 'Ação inválida'; END IF;
+ SELECT * INTO t FROM public.sqf_support_tickets WHERE id=p_ticket FOR UPDATE;
+ IF NOT FOUND OR t.status='resolved' THEN RAISE EXCEPTION 'Pedido indisponível'; END IF;
+ UPDATE public.sqf_support_tickets
+ SET status=CASE WHEN p_action='review' THEN 'reviewing' ELSE 'resolved' END,updated_at=now()
+ WHERE id=p_ticket;
+ INSERT INTO public.sqf_notifications(recipient_id,kind,title,body)
+ VALUES(t.user_id,'support','Suporte atualizado','Consulte a situação da solicitação no painel da conta.');
+END;
+$fn$;
+REVOKE ALL ON FUNCTION public.sqf_staff_support_action(uuid,text) FROM PUBLIC,anon;
+GRANT EXECUTE ON FUNCTION public.sqf_staff_support_action(uuid,text) TO authenticated;
+
 COMMIT;
