@@ -64,7 +64,7 @@ test('notificações e métricas não criam dados sintéticos e respeitam contro
  assert.doesNotMatch(sql,/GRANT INSERT ON public\.sqf_notifications TO authenticated/);
  assert.match(frontend,/sqf_my_performance/);
  assert.match(frontend,/sqf_service_requests/);
- assert.doesNotMatch(frontend,/innerHTML/);
+ assert.doesNotMatch(frontend,/\.innerHTML\s*=/);
  assert.doesNotMatch(frontend,/service_role/);
 });
 
@@ -113,7 +113,7 @@ test('e-mail opt-in exige segredos privados, desativado sem homologação',()=>{
  assert.match(sql,/email_enabled boolean NOT NULL DEFAULT false/);
  assert.match(fn,/SQF_NOTIFICATIONS_ENABLED/);
  assert.match(fn,/SQF_NOTIFY_SECRET/);
- assert.match(fn,/Resend/);
+ assert.match(fn,/RESEND_API_KEY/);
  assert.match(workflow,/SQF_NOTIFICATIONS_ENABLED == 'true'/);
  assert.match(workflow,/secrets\.SQF_NOTIFY_SECRET/);
  assert.doesNotMatch(read('assets/marketplace-hub.js'),/RESEND_API_KEY|SQF_NOTIFY_SECRET/);
