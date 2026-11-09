@@ -41,5 +41,6 @@ test('relatórios exportam somente indicadores agregados após consulta autoriza
  assert.match(js,/metricsSnapshot=null/);
  assert.match(js,/exportButton\?\.addEventListener\('click',exportMetrics\)/);
  assert.match(js,/text\/csv;charset=utf-8/);
- assert.doesNotMatch(js,/auth\.admin|service_role|\.innerHTML\s*=/);
+ const executable=js.replace(/\/\*[\s\S]*?\*\//g,'');
+ assert.doesNotMatch(executable,/auth\.admin|service_role|\.innerHTML\s*=/);
 });
