@@ -11,6 +11,8 @@
 - Catálogo com filtros de portfólio e ordenação por avaliações moderadas e serviços.
 - PWA com cache limitado a páginas públicas, sem armazenar conta, mensagens ou solicitações.
 - Novo teste de regressão, atualização da CI e empacotamento da distribuição.
+- Decisões da equipe de suporte registradas na auditoria mediante MFA; seis índices de chaves estrangeiras adicionados.
+- Relatórios administrativos exportáveis em CSV com indicadores agregados, sem identificação pessoal.
 
 **Estado:** código preparado. Requer migração SQL aditiva, homologação de contas reais, configuração do provedor de e-mails e publicação HTTPS para operação completa. Mercado Pago permanece desativado.
 

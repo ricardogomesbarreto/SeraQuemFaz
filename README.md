@@ -28,9 +28,15 @@ O **Será Quem Faz?** conecta quem precisa contratar um serviço a profissionais
 - **Suporte:** central de ajuda, registro e acompanhamento de chamados e triagem administrativa restrita.
 - **PWA:** instalação em HTTPS e cache exclusivamente para páginas públicas; conteúdo privado sempre exige conexão.
 
-**Estado da implantação (09/11/2026):** a migração aditiva `supabase/migrations/20261109_14_marketplace_experience.sql` foi aplicada ao projeto Supabase conectado e seguida de uma migração de endurecimento das permissões de gatilhos. Confirmados RLS, ausência de leitura anônima e permissões restritas das funções novas. Em outros ambientes, aplicar migrations somente após backup e validação. **Ainda faltam testes ponta a ponta com contas reais**, configuração de e-mail e homologação da experiência no navegador. A função de e-mails não foi implantada. Consulte [homologação v3.10.0](docs/operacao/HOMOLOGACAO-v3.10.0.md).
+**Estado da implantação (09/11/2026):** as migrações de marketplace, endurecimento dos gatilhos, auditoria de suporte e índices de relações foram aplicadas ao projeto Supabase conectado. As versões SQL correspondentes estão em `supabase/migrations/20261109_14...17`. Confirmados RLS, ausência de leitura anônima e permissões restritas das funções novas. Em outros ambientes, aplicar migrations somente após backup e validação. **Ainda faltam testes ponta a ponta com contas reais**, configuração de e-mail e homologação da experiência no navegador. A função de e-mails não foi implantada. Consulte [homologação v3.10.0](docs/operacao/HOMOLOGACAO-v3.10.0.md).
 
 [Histórico de versões](CHANGELOG.md)
+
+## Pacote de testes e uso local
+
+Após uma execução bem-sucedida da **CI na branch `main`**, os dois arquivos ZIP estarão disponíveis por 30 dias em [GitHub Actions → CI → Artefatos](https://github.com/ricardogomesbarreto/SeraQuemFaz/actions/workflows/ci.yml): o pacote do site estático e o pacote de código completo. Essa distribuição não equivale a release comercial.
+
+Para avaliar a interface, prefira servir a pasta do site em `http://localhost` (por exemplo, `python -m http.server 8000`) em vez de abrir páginas por `file://`. A instalação como PWA exige HTTPS ou localhost e conexão para todos os dados da conta. A leitura da central de ajuda e da landing page é pública; **solicitações, mensagens, perfis privados e administração não são disponibilizados offline**.
 
 ## Funcionalidades e estágio atual
 
