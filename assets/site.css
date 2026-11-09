@@ -1275,3 +1275,49 @@ body{min-width:320px}
  .sqf-provider-layout .sqf-provider-overview .dashboard-section-nav{max-height:132px;overflow-y:auto}
 }
 @media(prefers-reduced-motion:reduce){.sqf-requests-card .sqf-request-list-item{transition:none}}
+
+
+/* v3.10.0 — pesquisa, suporte e catálogo profissional */
+.sqf-provider-filters{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,185px),1fr));gap:14px;align-items:end}
+.sqf-provider-filters .form-field{margin:0}
+.sqf-provider-filters .sqf-filter-trust{grid-column:1/-1;margin:0;font-size:.77rem}
+.sqf-provider-filters #sqfProviderFilteredCount{grid-column:1/-1;font-size:.84rem;font-weight:700}
+.sqf-filter-checkbox{display:flex;align-items:center;gap:9px;color:#173f59;font-size:.84rem;font-weight:750;min-height:45px}
+.sqf-filter-checkbox input{width:19px;height:19px;accent-color:#e77b34}
+.sqf-has-portfolio{display:inline-block;margin:4px 0;color:#0b6667;font-weight:800;font-size:.74rem}
+.sqf-public-portfolio-toolbar{display:flex;align-items:center;gap:11px;flex-wrap:wrap;margin:15px 0}
+.sqf-public-portfolio-toolbar label{color:#173b55;font-size:.84rem;font-weight:800}
+.sqf-public-portfolio-toolbar select{max-width:300px;min-height:40px;border:1px solid #cbdde6;border-radius:10px;padding:9px 12px;background:#fff;color:#103957}
+.sqf-activity-unread{border-left:4px solid #ed843a;background:#fffaf6}
+.sqf-help-main{max-width:1120px;padding-block:35px 85px}
+.sqf-help-hero{display:flex;flex-direction:column;align-items:flex-start;gap:14px;background:linear-gradient(132deg,#123c5b,#174e65);border-radius:26px;padding:clamp(28px,5vw,60px);color:#fff;box-shadow:0 18px 45px #14355220}
+.sqf-help-hero .section-kicker{color:#ffb884}
+.sqf-help-hero h1{font:800 clamp(2rem,4vw,3.1rem) Manrope,sans-serif;letter-spacing:-.04em;margin:0;color:#fff}
+.sqf-help-hero p{max-width:680px;font-size:1rem;color:#d9eaf3;line-height:1.8;margin:0}
+.sqf-help-actions{display:flex;gap:11px;flex-wrap:wrap;margin-top:8px}
+.sqf-help-hero .button-outline{color:#fff;background:transparent;border:1px solid #ffffff80}
+.sqf-help-grid,.sqf-help-faq{margin-block:38px}
+.sqf-help-main h2{font-size:clamp(1.35rem,2.7vw,2rem);color:#113954;margin:10px 0 22px;letter-spacing:-.035em}
+.sqf-help-categories{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:15px}
+.sqf-help-categories>a{display:flex;flex-direction:column;justify-content:center;gap:12px;min-height:146px;padding:20px;border:1px solid #dfe9ef;border-top:4px solid #ed873f;border-radius:17px;background:#fff;box-shadow:0 8px 28px #1237500d;text-decoration:none}
+.sqf-help-categories strong{color:#143c59;font-size:1rem}
+.sqf-help-categories span{color:#5b7382;font-size:.83rem;line-height:1.5}
+.sqf-help-categories a:hover{border-color:#f0aa77;transform:translateY(-2px)}
+.sqf-help-faq details{background:#fff;border:1px solid #dfe8ef;border-radius:12px;margin:10px 0;padding:0 19px;scroll-margin-top:115px}
+.sqf-help-faq details[open]{border-color:#f3b484;box-shadow:0 5px 15px #1d49600b}
+.sqf-help-faq summary{list-style:none;cursor:pointer;padding:17px 32px 17px 0;font-weight:800;color:#143d59;position:relative}
+.sqf-help-faq summary::-webkit-details-marker{display:none}
+.sqf-help-faq summary:after{content:'+';position:absolute;right:0;top:12px;color:#bd602a;font-size:1.45rem}
+.sqf-help-faq details[open] summary:after{content:'−'}
+.sqf-help-faq details p{color:#577184;line-height:1.8;padding-bottom:17px;margin:0}
+.sqf-help-bottom{background:#fff;border:1px solid #dde9ef;border-radius:20px;padding:26px 30px;display:flex;gap:20px;justify-content:space-between;align-items:center}
+.sqf-help-bottom p{color:#5a7284;max-width:710px;line-height:1.75;margin:0}
+.sqf-help-bottom .button{flex:none}
+@media(max-width:900px){.sqf-help-categories{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:570px){
+ .sqf-help-main{padding-block:18px 55px}
+ .sqf-help-categories{grid-template-columns:1fr}
+ .sqf-help-categories>a{min-height:110px}
+ .sqf-help-bottom{flex-direction:column;align-items:stretch;padding:22px}
+ .sqf-help-bottom .button{align-self:flex-start}
+}
