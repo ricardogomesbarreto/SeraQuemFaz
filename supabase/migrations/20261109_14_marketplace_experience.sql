@@ -349,4 +349,11 @@ $fn$;
 REVOKE ALL ON FUNCTION public.sqf_staff_support_action(uuid,text) FROM PUBLIC,anon;
 GRANT EXECUTE ON FUNCTION public.sqf_staff_support_action(uuid,text) TO authenticated;
 
+-- Funções de gatilho não são endpoints públicos e não devem ter EXECUTE público.
+REVOKE EXECUTE ON FUNCTION public.sqf_notify_request() FROM PUBLIC,anon,authenticated;
+REVOKE EXECUTE ON FUNCTION public.sqf_notify_message() FROM PUBLIC,anon,authenticated;
+REVOKE EXECUTE ON FUNCTION public.sqf_notify_appointment() FROM PUBLIC,anon,authenticated;
+REVOKE EXECUTE ON FUNCTION public.sqf_queue_notification_email() FROM PUBLIC,anon,authenticated;
+REVOKE EXECUTE ON FUNCTION public.sqf_support_rate_guard() FROM PUBLIC,anon,authenticated;
+
 COMMIT;
