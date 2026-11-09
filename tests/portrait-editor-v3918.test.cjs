@@ -69,7 +69,8 @@ test('editor usa uma prévia e não bloqueia foto privada de cliente por declara
   assert.match(js,/savedPreview\.hidden=Boolean\(url\)/);
   assert.match(js,/\$\('portraitDeclarationLabel'\)\.hidden=profile\?\.account_type!=='prestador'/);
   assert.match(js,/selectedAvatar && profile\.account_type==='prestador' && !\$\('portraitDeclaration'\)\.checked/);
-  assert.doesNotMatch(js,/function schedulePortraitPreview\(\)[\s\S]*?clearTimeout\(portraitDebounce\);[\s\S]*?\$\('portraitDeclaration'\)\.checked=false/);
+  const sliderSection=js.slice(js.indexOf('function schedulePortraitPreview'),js.indexOf('function updateProfessionalExtrasProgress'));
+  assert.doesNotMatch(sliderSection,/portraitDeclaration'\)\.checked=false/);
   assert.match(js,/await preparePortrait\(selectedAvatar\)/);
   assert.match(js,/discardPortraitSelection/);
   assert.match(html,/id="portraitDiscard"/);
