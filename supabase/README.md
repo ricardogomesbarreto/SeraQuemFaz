@@ -17,8 +17,8 @@ Na v3.9.10, `applied/sqf_billing_publication_verified_invoice.sql` registra a at
 
 ## v3.10.0 — Recursos de marketplace
 
-A migração `migrations/20261109_14_marketplace_experience.sql` é **aditiva** em relação ao banco consolidado: agenda bilateral, notificações, preferências opt-in, fila privada de e-mail, suporte, métricas autenticadas, relatórios administrativos e vínculo portfólio-serviço.
+A migração `migrations/20261109_14_marketplace_experience.sql` foi **aplicada ao banco conectado em 09/11/2026**, seguida da entrada de histórico `sqf_marketplace_trigger_hardening_20261109` para revogar EXECUTE público de funções de gatilho. Ela é **aditiva** em relação ao banco consolidado: agenda bilateral, notificações, preferências opt-in, fila privada de e-mail, suporte, métricas autenticadas, relatórios administrativos e vínculo portfólio-serviço.
 
-Antes de aplicá-la: registrar backup, testar em homologação, revisar os controles de segurança e validar consultas com perfis separados. **Não reaplicar migrações legadas 01–12** no banco remoto. A integração de e-mail usa `sqf-notifications` com segredo privado e exige implantação/ativação separada.
+Para outros ambientes: registrar backup, testar em homologação, revisar os controles de segurança e validar consultas com perfis separados. Não repetir a execução no projeto já atualizado. **Não reaplicar migrações legadas 01–12** no banco remoto. A integração de e-mail usa `sqf-notifications` com segredo privado e exige implantação/ativação separada.
 
 Leia `docs/operacao/HOMOLOGACAO-v3.10.0.md`. Nenhum pagamento ou aprovação de prestador é ativado por esta migração.
