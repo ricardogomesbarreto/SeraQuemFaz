@@ -366,7 +366,7 @@
     if(!label)return;
     const {data,error}=await client.from('provider_verifications').select('status,requested_at,reviewed_at').eq('provider_id',user.id).maybeSingle();
     if(error){label.textContent='Não foi possível consultar a análise cadastral.';return;}
-    currentVerification=data?.status||null;updateReadiness();
+    currentVerification=data?.status||null;updateReadiness();syncProviderSidebar();
     const statusText={pending:'Análise pendente pela equipe.',approved:'Cadastro analisado e aprovado para exibição pública (não é certificação de idoneidade).',rejected:'Solicitação não aprovada. Revise os dados e peça nova análise.',suspended:'Cadastro suspenso. Solicite revisão administrativa.'};
     label.textContent=data ? statusText[data.status]||'Situação não identificada.' : 'Ainda não houve solicitação de análise.';
     $('requestVerification').hidden=Boolean(data && ['approved','pending','suspended'].includes(data.status));
@@ -645,7 +645,7 @@
       $('privacyRequestCard').before($('clientPrivacySection'));
       $('clientLogoutSlot').append($('logoutButton'));
       const clientColumn=$('accountSharedGrid').querySelector('.dashboard-main-col');
-      for(const id of ['sqfQuoteCompare','sqfAppointmentHub','sqfNotificationHub','sqfSupportHub']){
+      for(const id of ['sqfRequestPortal','sqfQuoteCompare','sqfAppointmentHub','sqfNotificationHub','sqfSupportHub']){
         const element=$(id);if(element)clientColumn.append(element);
       }
       syncClientSidebar();
