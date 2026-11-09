@@ -84,8 +84,33 @@
       showPreparedPortrait(null);
     }finally{if(token===portraitVersion)portraitBusy=false;}
   }
+  function updatePortraitControlLabels() {
+    for (const [rangeId,labelId] of [
+      ['portraitZoom','portraitZoomValue'],['portraitPanX','portraitPanXValue'],['portraitPanY','portraitPanYValue']
+    ]) {
+      const range=$(rangeId), label=$(labelId);
+      if(range && label)label.textContent=range.value+'%';
+    }
+  }
+  function discardPortraitSelection() {
+    clearTimeout(portraitDebounce);
+    ++portraitVersion;
+    portraitBusy=false;
+    preparedPortrait=null;
+    $('avatarFile').value='';
+    $('portraitDeclaration').checked=false;
+    $('portraitDeclarationLabel').hidden=true;
+    $('portraitCandidateBox').hidden=true;
+    showPreparedPortrait(null);
+    if(portraitPreviewUrl){URL.revokeObjectURL(portraitPreviewUrl);portraitPreviewUrl=null;}
+    for(const [id,value] of [['portraitZoom','100'],['portraitPanX','50'],['portraitPanY','50']])$(id).value=value;
+    updatePortraitControlLabels();
+    announce('portraitMessage','Foto não salva descartada. Seus dados e a fotografia anterior foram preservados.');
+    announce('profileMessage','');
+  }
   function schedulePortraitPreview(){
     const file=$('avatarFile').files?.[0];
+    updatePortraitControlLabels();
     ++portraitVersion; preparedPortrait=null; portraitBusy=Boolean(file);
     // O titular confirma a fotografia selecionada uma vez; mover os
     // controles não deve apagar a confirmação.
@@ -596,6 +621,7 @@
         return;
       }
       for(const [id,value] of [['portraitZoom','100'],['portraitPanX','50'],['portraitPanY','50']])$(id).value=value;
+      updatePortraitControlLabels();
       preparePortrait(file);
     });
     for(const id of ['portraitZoom','portraitPanX','portraitPanY']) {
@@ -605,6 +631,8 @@
       for(const [id,value] of [['portraitZoom','100'],['portraitPanX','50'],['portraitPanY','50']])$(id).value=value;
       schedulePortraitPreview();
     });
+    $('portraitDiscard')?.addEventListener('click',discardPortraitSelection);
+    updatePortraitControlLabels();
     $('profileForm').addEventListener('submit',async(event)=>{
       event.preventDefault();
       const fullName=$('profileFullName').value.trim();
