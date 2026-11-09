@@ -41,9 +41,13 @@
     if (pe) throw pe;
     if (!profile) { status.textContent='Perfil não encontrado, não aprovado ou indisponível.'; return; }
     const authUser = authData?.user || null;
+    if(authUser?.id && authUser.id!==providerId){
+      // Contagem única de visitantes autenticados por dia, sem rastreamento anônimo.
+      void client.rpc('sqf_register_profile_view',{p_provider:providerId}).then(()=>{},()=>{});
+    }
     const [{data: services,error: se},{data: photos,error: fe},{data: reviews,error: re}] = await Promise.all([
       client.from('provider_services').select('id,category_id,service_title,description').eq('provider_id',providerId).order('service_title'),
-      client.from('portfolio_photos').select('id,storage_path,caption').eq('provider_id',providerId).order('created_at',{ascending:false}),
+      client.from('portfolio_photos').select('id,storage_path,caption,service_id').eq('provider_id',providerId).order('created_at',{ascending:false}),
       client.rpc('sqf_public_reviews',{p_provider_ids:[providerId]})
     ]);
     if (se || fe || re) throw se || fe || re;
@@ -133,6 +137,13 @@
       if(service.description)tile.append(ui.make('p','muted',service.description));serviceBox.append(tile);
     }
     const gallery=$('providerGallery');
+    const portfolioFilter=$('sqfPublicPortfolioService');
+    if(portfolioFilter){
+      for(const service of services||[]){
+        if(!(photos||[]).some(photo=>photo.service_id===service.id))continue;
+        const option=ui.make('option','',service.service_title);option.value=service.id;portfolioFilter.append(option);
+      }
+    }
     if(!photos?.length)ui.state(gallery,'Sem fotos publicadas','O prestador ainda não adicionou imagens do trabalho.');
     for(const photo of photos || []){
       const uri=ui.publicUrl(client,'sqf-portfolios',photo.storage_path);if(!uri)continue;
@@ -140,8 +151,16 @@
       const full=ui.make('a','portfolio-full-link');full.href=uri;full.target='_blank';full.rel='noopener noreferrer';
       full.setAttribute('aria-label',`Abrir foto: ${photo.caption || 'trabalho publicado'}`);
       full.append(ui.safeImg(uri,photo.caption || `Trabalho de ${profile.full_name}`));figure.append(full);
-      if(photo.caption)figure.append(ui.make('figcaption','',photo.caption));gallery.append(figure);
+      if(photo.caption)figure.append(ui.make('figcaption','',photo.caption));
+      const linked=(services||[]).find(service=>service.id===photo.service_id);
+      if(linked)figure.append(ui.make('small','sqf-portfolio-category',linked.service_title));
+      figure.dataset.serviceId=photo.service_id||'';
+      gallery.append(figure);
     }
+    portfolioFilter?.addEventListener('change',()=>{
+      for(const photo of gallery.querySelectorAll('.portfolio-photo'))
+        photo.hidden=Boolean(portfolioFilter.value && photo.dataset.serviceId!==portfolioFilter.value);
+    });
     const revBox=$('providerReviews');
     const breakdown=$('ratingBreakdown');
     const summary=$('ratingSummary');
