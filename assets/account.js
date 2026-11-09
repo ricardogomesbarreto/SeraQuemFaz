@@ -8,6 +8,18 @@
   let client,user,profile,categories=[];
   let preparedPortrait=null, portraitPreviewUrl=null, portraitBusy=false, portraitVersion=0, portraitDebounce=null;
   let currentServiceCount=0, currentPhotoCount=0, currentVerification=null, professionalExtras=null;
+  let providerServicesCache=[];
+  function syncProviderSidebar(){
+    if(profile?.account_type!=='prestador')return;
+    const label=$('providerSideName'),avatar=$('providerSideAvatar'),existing=$('avatarPreview')?.querySelector('.avatar');
+    if(label)label.textContent=profile.full_name || 'Profissional';
+    if(avatar && existing)avatar.replaceChildren(existing.cloneNode(true));
+    const state=$('providerSideStatus');
+    if(state)state.textContent=currentVerification==='approved'
+      ? 'Cadastro analisado' : currentVerification==='rejected'
+      ? 'Revisão necessária' : currentVerification==='suspended'
+      ? 'Cadastro suspenso' : 'Aguardando análise';
+  }
   function syncClientSidebar() {
     if (profile?.account_type !== 'cliente') return;
     const label=$('clientSideName'), target=$('clientSideAvatar');
@@ -20,9 +32,8 @@
   function showPreparedPortrait(url) {
     const savedPreview=$('avatarPreview');
     if(savedPreview) savedPreview.hidden=Boolean(url);
-    if(profile?.account_type !== 'cliente') return;
-    if(!url){syncClientSidebar();return;}
-    const target=$('clientSideAvatar');
+    if(!url){syncClientSidebar();syncProviderSidebar();return;}
+    const target=profile?.account_type==='cliente' ? $('clientSideAvatar') : $('providerSideAvatar');
     if(!target)return;
     const img=document.createElement('img');
     img.src=url;
@@ -173,7 +184,21 @@
     const list = $('myServices');list.replaceChildren();
     const {data,error}=await client.from('provider_services').select('id,category_id,service_title,description').eq('provider_id',user.id).order('service_title');
     if(error) throw error;
+    providerServicesCache=data||[];
     currentServiceCount=data?.length||0;updateReadiness();
+    for(const id of ['portfolioService','portfolioServiceFilter']){
+      const select=$(id);if(!select)continue;
+      const previous=select.value;
+      select.replaceChildren();
+      const empty=document.createElement('option');empty.value='';
+      empty.textContent=id==='portfolioService'?'Sem serviço específico':'Todos os serviços';
+      select.append(empty);
+      for(const item of providerServicesCache){
+        const option=document.createElement('option');option.value=item.id;option.textContent=item.service_title;
+        select.append(option);
+      }
+      if([...select.options].some(o=>o.value===previous))select.value=previous;
+    }
     if($('providerStatServices'))$('providerStatServices').textContent=String(currentServiceCount);
     if(!data?.length) {ui.state(list,'Nenhum serviço cadastrado','Adicione uma categoria e descreva a sua atividade.'); return data || [];}
     for(const service of data){
@@ -369,16 +394,20 @@
   }
   async function loadPhotos() {
     const list=$('myGallery');list.replaceChildren();
-    const {data,error}=await client.from('portfolio_photos').select('id,storage_path,caption').eq('provider_id',user.id).order('created_at',{ascending:false});
+    const {data,error}=await client.from('portfolio_photos').select('id,storage_path,caption,service_id').eq('provider_id',user.id).order('created_at',{ascending:false});
     if(error) throw error;
     currentPhotoCount=data?.length||0;
     if($('providerStatPhotos'))$('providerStatPhotos').textContent=String(currentPhotoCount);
     if(!data?.length){ui.state(list,'Sem fotos no portfólio','Mostre fotos autorais de serviços que você realizou.');return;}
+    const chosen=$('portfolioServiceFilter')?.value||'';
     for(const photo of data){
+      if(chosen && photo.service_id!==chosen)continue;
       const imgUrl=ui.publicUrl(client,'sqf-portfolios',photo.storage_path);
       if(!imgUrl)continue;
       const card=ui.make('figure','portfolio-photo');card.append(ui.safeImg(imgUrl,photo.caption || 'Trabalho do prestador'));
       if(photo.caption)card.append(ui.make('figcaption','',photo.caption));
+      const linked=providerServicesCache.find(s=>s.id===photo.service_id);
+      card.append(ui.make('small','sqf-portfolio-category',linked?.service_title||'Trabalho geral'));
       const remove=ui.make('button','button button-outline button-small','Excluir foto');remove.type='button';
       remove.addEventListener('click',async()=>{
         if(!confirm('Excluir esta foto do portfólio público?'))return;
@@ -393,6 +422,7 @@
       });
       card.append(remove);list.append(card);
     }
+    if(!list.childElementCount)ui.state(list,'Nenhuma imagem deste serviço','Selecione outro filtro para ver o portfólio.');
   }
   async function renderOwnAvatar() {
     const target=$('avatarPreview');
@@ -400,6 +430,7 @@
     target.hidden=false;
     if(profile.account_type!=='cliente') {
       target.replaceChildren(ui.avatar(client,profile.avatar_path,profile.full_name));
+      syncProviderSidebar();
       return;
     }
     // A fotografia de clientes é privada; nunca construir uma URL pública para ela.
@@ -531,6 +562,18 @@
       catch{status.textContent='Não foi possível encerrar a sessão. Tente novamente.';button.disabled=false;}
     });
     if(profile.account_type==='prestador'){
+      document.body.classList.add('sqf-provider-layout');
+      const mainColumn=$('accountSharedGrid').querySelector('.dashboard-main-col');
+      mainColumn.prepend($('providerOverview'));
+      $('accountSummaryCard').after($('profileSettings'));
+      for(const id of ['sqfRequestPortal','sqfAppointmentHub','sqfNotificationHub','sqfPerformanceHub','sqfSupportHub']){
+        const element=$(id);if(element)mainColumn.append(element);
+      }
+      $('providerLogoutSlot').append($('logoutButton'));
+      $('clientAccountBadge').textContent='Conta profissional';
+      $('clientAccountBadge').hidden=false;
+      $('profileSettings').querySelector('h2').textContent='Editar meu perfil profissional';
+      syncProviderSidebar();
       if(window.SQFBillingUI) void window.SQFBillingUI.init(client,user,profile);
       $('providerEditor').hidden=false;
       $('providerOverview').hidden=false;
@@ -540,7 +583,9 @@
       const categorySelect=$('newServiceCategory');
       for(const cat of categories){const option=document.createElement('option');option.value=String(cat.id);option.textContent=cat.name;categorySelect.append(option);}
       if(!categories.length)announce('serviceMessage','Ainda não há categorias ativas; entre em contato com a administração.');
-      await Promise.all([loadServices(),loadPhotos(),loadOwnReviews(),loadVerification(),loadPendingEngagements(),loadProfessionalExtras()]);
+      await loadServices();
+      await Promise.all([loadPhotos(),loadOwnReviews(),loadVerification(),loadPendingEngagements(),loadProfessionalExtras()]);
+      $('portfolioServiceFilter')?.addEventListener('change',()=>loadPhotos().catch(e=>announce('galleryMessage',e.message,true)));
       const extrasForm=$('professionalDetailsForm');
       const refreshExtrasPreview=()=>{
         try{updateProfessionalExtrasProgress(window.SQFProfessionalDetails.readForm(extrasForm));}
@@ -599,6 +644,10 @@
       $('accountSummaryCard').after($('profileSettings'),$('clientDashboard'));
       $('privacyRequestCard').before($('clientPrivacySection'));
       $('clientLogoutSlot').append($('logoutButton'));
+      const clientColumn=$('accountSharedGrid').querySelector('.dashboard-main-col');
+      for(const id of ['sqfQuoteCompare','sqfAppointmentHub','sqfNotificationHub','sqfSupportHub']){
+        const element=$(id);if(element)clientColumn.append(element);
+      }
       syncClientSidebar();
       $('profileSettings').querySelector('h2').textContent='Editar meu perfil';
       const cityLabel=$('profileCity')?.closest('[data-city-picker]')?.querySelector('.city-picker-label');
@@ -726,9 +775,12 @@
       let path;
       try{
         path=await imageUpload(file,'sqf-portfolios');
-        const {error}=await client.from('portfolio_photos').insert({provider_id:user.id,storage_path:path,caption});
+        const {error}=await client.from('portfolio_photos').insert({
+          provider_id:user.id,storage_path:path,caption,
+          service_id:$('portfolioService')?.value||null
+        });
         if(error)throw error;
-        $('portfolioFile').value='';$('portfolioCaption').value='';
+        $('portfolioFile').value='';$('portfolioCaption').value='';if($('portfolioService'))$('portfolioService').value='';
         announce('galleryMessage','Imagem adicionada. A aprovação anterior pode precisar de nova análise.');await loadPhotos();await loadVerification();
       }catch(error){if(path)await client.storage.from('sqf-portfolios').remove([path]);console.warn(error?.message);announce('galleryMessage',error?.message?.includes('Escolha uma imagem')?error.message:'Não foi possível enviar a foto.',true);}
       finally{button.disabled=false;}
