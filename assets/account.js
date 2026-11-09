@@ -15,6 +15,20 @@
     const avatar=$('avatarPreview')?.querySelector('.avatar');
     if (target && avatar) target.replaceChildren(avatar.cloneNode(true));
   }
+  // Durante a edição, mostramos somente a foto recortada, evitando a
+  // duplicação do avatar antigo (a caixa com a inicial do usuário).
+  function showPreparedPortrait(url) {
+    const savedPreview=$('avatarPreview');
+    if(savedPreview) savedPreview.hidden=Boolean(url);
+    if(profile?.account_type !== 'cliente') return;
+    if(!url){syncClientSidebar();return;}
+    const target=$('clientSideAvatar');
+    if(!target)return;
+    const img=document.createElement('img');
+    img.src=url;
+    img.alt='Prévia da fotografia antes de salvar';
+    target.replaceChildren(img);
+  }
   function openSettingsForHash() {
     if (!['#accountSettings','#privacyRequestCard'].includes(location.hash)) return;
     const settings=$('accountSettings');
@@ -56,19 +70,25 @@
       portraitPreviewUrl=URL.createObjectURL(blob);
       $('portraitCandidate').src=portraitPreviewUrl;
       $('portraitCandidateBox').hidden=false;
-      $('portraitCandidateStatus').textContent=`Retrato pronto para revisão · ${(blob.size/1024).toFixed(0)} KB · Fotografia original aceita independentemente da proporção.`;
-      $('portraitDeclarationLabel').hidden=false;
-      announce('portraitMessage','Prévia atualizada. Confira o rosto antes de salvar.');
+      showPreparedPortrait(portraitPreviewUrl);
+      $('portraitCandidateStatus').textContent=`Prévia final do recorte (3:4) · ${(blob.size/1024).toFixed(0)} KB · Ajustes refletidos na imagem enviada.`;
+      $('portraitDeclarationLabel').hidden=profile?.account_type!=='prestador';
+      announce('portraitMessage',profile?.account_type==='prestador'
+        ? 'Prévia atualizada. Confira a fotografia e confirme a declaração para salvar.'
+        : 'Prévia atualizada. Clique em Salvar informações para aplicar a fotografia.');
     }catch(error){
       if(token!==portraitVersion)return;
       announce('portraitMessage',error?.message||'Não foi possível preparar o retrato.',true);
       $('portraitDeclarationLabel').hidden=true;
+      $('portraitCandidateBox').hidden=true;
+      showPreparedPortrait(null);
     }finally{if(token===portraitVersion)portraitBusy=false;}
   }
   function schedulePortraitPreview(){
     const file=$('avatarFile').files?.[0];
     ++portraitVersion; preparedPortrait=null; portraitBusy=Boolean(file);
-    $('portraitDeclaration').checked=false;
+    // O titular confirma a fotografia selecionada uma vez; mover os
+    // controles não deve apagar a confirmação.
     clearTimeout(portraitDebounce);
     portraitDebounce=setTimeout(()=>preparePortrait(file),180);
   }
@@ -352,6 +372,7 @@
   async function renderOwnAvatar() {
     const target=$('avatarPreview');
     if(!target || !profile)return;
+    target.hidden=false;
     if(profile.account_type!=='cliente') {
       target.replaceChildren(ui.avatar(client,profile.avatar_path,profile.full_name));
       return;
@@ -568,7 +589,12 @@
       $('portraitCandidateBox').hidden=true;
       if(portraitPreviewUrl){URL.revokeObjectURL(portraitPreviewUrl);portraitPreviewUrl=null;}
       const file=$('avatarFile').files?.[0];
-      if(!file){portraitBusy=false;announce('portraitMessage','');return;}
+      if(!file){
+        portraitBusy=false;
+        showPreparedPortrait(null);
+        announce('portraitMessage','');
+        return;
+      }
       for(const [id,value] of [['portraitZoom','100'],['portraitPanX','50'],['portraitPanY','50']])$(id).value=value;
       preparePortrait(file);
     });
@@ -583,14 +609,30 @@
       event.preventDefault();
       const fullName=$('profileFullName').value.trim();
       const selectedCity=cityPicker?.getSelected();
-      if (!selectedCity) { cityPicker?.validate(); return; }
+      if (!selectedCity) {
+        cityPicker?.validate();
+        announce('profileMessage','Selecione uma cidade válida na lista antes de salvar.',true);
+        return;
+      }
       const city=window.SQFCities.format(selectedCity);
       const bio=$('profileBio').value.trim();
       const publish=$('profilePublic').checked && profile.account_type==='prestador';
       const selectedAvatar=$('avatarFile').files?.[0];
-      if(portraitBusy){announce('profileMessage','Aguarde a preparação da foto de perfil.',true);return;}
-      if(selectedAvatar && (!preparedPortrait || preparedPortrait.source!==selectedAvatar || !$('portraitDeclaration').checked)){
-        announce('profileMessage','Confira o enquadramento e confirme que a foto mostra somente seu rosto de frente.',true);return;
+      // Salvar imediatamente depois de mover um controle conclui a última
+      // conversão antes do upload, sem exigir um segundo clique.
+      if(selectedAvatar && (portraitBusy || !preparedPortrait || preparedPortrait.source!==selectedAvatar)){
+        clearTimeout(portraitDebounce);
+        announce('profileMessage','Finalizando o enquadramento da fotografia...');
+        await preparePortrait(selectedAvatar);
+      }
+      if(selectedAvatar && (!preparedPortrait || preparedPortrait.source!==selectedAvatar)){
+        announce('profileMessage','Não foi possível preparar essa fotografia. Selecione-a novamente.',true);
+        return;
+      }
+      if(selectedAvatar && profile.account_type==='prestador' && !$('portraitDeclaration').checked){
+        announce('profileMessage','Confirme a declaração sobre a fotografia antes de salvar o perfil profissional.',true);
+        $('portraitDeclaration').focus();
+        return;
       }
       if(fullName.length<2 || fullName.length>120 || city.length>100 || bio.length>1500){announce('profileMessage','Confira os tamanhos dos campos.',true);return;}
       if(publish){
@@ -621,6 +663,7 @@
         $('portraitDeclaration').checked=false;
         $('portraitDeclarationLabel').hidden=true;
         $('portraitCandidateBox').hidden=true;
+        showPreparedPortrait(null);
         preparedPortrait=null;
         if(portraitPreviewUrl){URL.revokeObjectURL(portraitPreviewUrl);portraitPreviewUrl=null;}
         if(profile.account_type==='prestador'){
