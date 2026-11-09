@@ -1153,3 +1153,7 @@ body{min-width:320px}
 .sqf-dashboard-page .portrait-candidate{max-width:100%;gap:16px}
 .sqf-dashboard-page .portrait-controls{min-width:min(100%,205px);flex:1 1 205px}
 @media(max-width:560px){.sqf-dashboard-page .portrait-candidate>img{width:125px}}
+
+/* Categorias: recarregar sem bloquear o resto do perfil. */
+.sqf-dashboard-page #reloadCategories{display:inline-flex;margin-top:9px;max-width:100%;font-size:.79rem}
+.sqf-dashboard-page #reloadCategories[disabled]{opacity:.6;cursor:progress}

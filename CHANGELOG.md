@@ -1,3 +1,12 @@
+# v3.9.19 — Categorias disponíveis para prestadores
+
+- **Supabase:** corrigida a política RLS de leitura de `public.categories` para contas autenticadas, limitada a registros `active`; o catálogo já permitia leitura anônima.
+- **Cadastro de serviços:** carregamento de categorias com estados de carregamento, falha de consulta e lista vazia distintos.
+- **Recuperação:** novo botão **Recarregar categorias**, sem reiniciar a edição do perfil.
+- **Segurança:** nenhuma concessão de edição, exclusão ou inclusão de categorias.
+- **Validação:** papel `authenticated` e papel `anon` retornam as mesmas 51 categorias ativas no projeto Supabase, após ajuste da política.
+- **Testes:** regressão para leitura RLS e formulário de cadastro do prestador.
+
 # v3.9.18 — Enquadramento e salvamento de fotografias
 
 - **Enquadramento funcional:** zoom e deslocamento alteram o recorte 3:4 salvo, com valores visíveis nos controles.

@@ -169,6 +169,44 @@
       if(error)throw error;return path;
     }finally{bitmap.close();}
   }
+  async function reloadActiveCategories() {
+    const select=$('newServiceCategory'),retry=$('reloadCategories'),save=$('addServiceBtn');
+    if(!select)return;
+    const previous=select.value;
+    const placeholder=document.createElement('option');
+    placeholder.value='';placeholder.textContent='Selecione uma área de serviço';
+    select.replaceChildren(placeholder);
+    select.disabled=true;
+    if(save)save.disabled=true;
+    if(retry)retry.disabled=true;
+    announce('serviceMessage','Consultando categorias de serviços...');
+    try {
+      const {data,error}=await client.from('categories')
+        .select('id,name,status').eq('status','active').order('name');
+      if(error)throw error;
+      categories=(data||[]).filter(item=>ui.validId(item.id)&&
+        typeof item.name==='string'&&item.name.trim().length>0);
+      for(const category of categories){
+        const option=document.createElement('option');
+        option.value=String(category.id);
+        option.textContent=category.name;
+        select.append(option);
+      }
+      if(categories.some(item=>String(item.id)===previous))select.value=previous;
+      announce('serviceMessage',categories.length
+        ?`${categories.length} categorias disponíveis. Selecione sua área e cadastre o serviço.`
+        :'Não há categorias ativas disponíveis. Tente novamente ou consulte o suporte.',
+        !categories.length);
+    } catch(error) {
+      categories=[];
+      console.warn('Consulta de categorias:',error?.message);
+      announce('serviceMessage','Falha ao consultar as categorias. Clique em Recarregar categorias e tente novamente.',true);
+    } finally {
+      select.disabled=!categories.length;
+      if(save)save.disabled=!categories.length;
+      if(retry)retry.disabled=false;
+    }
+  }
   async function loadServices() {
     const list = $('myServices');list.replaceChildren();
     const {data,error}=await client.from('provider_services').select('id,category_id,service_title,description').eq('provider_id',user.id).order('service_title');
@@ -534,12 +572,8 @@
       if(window.SQFBillingUI) void window.SQFBillingUI.init(client,user,profile);
       $('providerEditor').hidden=false;
       $('providerOverview').hidden=false;
-      const [{data:catData,error:ce}] = await Promise.all([client.from('categories').select('id,name,status').eq('status','active').order('name')]);
-      if(ce)throw ce;
-      categories=catData||[];
-      const categorySelect=$('newServiceCategory');
-      for(const cat of categories){const option=document.createElement('option');option.value=String(cat.id);option.textContent=cat.name;categorySelect.append(option);}
-      if(!categories.length)announce('serviceMessage','Ainda não há categorias ativas; entre em contato com a administração.');
+      $('reloadCategories')?.addEventListener('click',()=>void reloadActiveCategories());
+      await reloadActiveCategories();
       await Promise.all([loadServices(),loadPhotos(),loadOwnReviews(),loadVerification(),loadPendingEngagements(),loadProfessionalExtras()]);
       const extrasForm=$('professionalDetailsForm');
       const refreshExtrasPreview=()=>{
