@@ -1,14 +1,14 @@
 # SERÁ QUEM FAZ? — Homologação da v3.10.0
 
 ## Escopo e limites
-Esta versão amplia a experiência visual e o fluxo operacional, mas **não comprova homologação de dados reais**. A CI Node cobre sintaxe, contratos de código e testes locais, não substitui o navegador autenticado nem tentativas de acesso cruzado com usuários diferentes.
+Esta versão amplia a experiência visual e o fluxo operacional, mas **não comprova homologação de dados reais**. A migração aditiva e uma migração de hardening foram aplicadas ao projeto Supabase conectado em 09/11/2026; todas as tabelas novas estão com RLS habilitada, e a leitura anônima foi negada. Os testes com contas distintas e o navegador autenticado permanecem pendentes. A CI Node cobre sintaxe, contratos de código e testes locais, não substitui o navegador autenticado nem tentativas de acesso cruzado com usuários diferentes.
 
 A agenda não representa reserva automática. Visualizações são contabilizadas **somente para visitantes autenticados** (máximo de uma por prestador/dia). A comparação de orçamentos mostra propostas independentes e não garante equivalência de escopo. O envio de e-mails fica desativado até configurar a integração externa. O Mercado Pago permanece desligado.
 
 ## 1. Ambiente
 1. Fazer backup e testar restauração em ambiente de homologação **separado**. Não compartilhar usuários ou tokens de produção nos testes.
 2. Confirmar esquema consolidado do Supabase, `profiles`, `sqf_service_requests`, `sqf_request_messages`, `sqf_admin_members`, `portfolio_photos`, `provider_services` e suas políticas.
-3. Aplicar **apenas** `supabase/migrations/20261109_14_marketplace_experience.sql` sobre o banco consolidado. Não reaplicar a sequência histórica de migrations.
+3. No projeto conectado, verificar que as migrações `sqf_marketplace_experience_20261109` e `sqf_marketplace_trigger_hardening_20261109` já constam do histórico; **não reaplicá-las**. Para outro projeto, aplicar o SQL aditivo e garantir revogação de EXECUTE das funções de gatilho. Não reaplicar migrações históricas.
 4. Executar Security Advisor, confirmar todas as tabelas novas com RLS, grants e execução explícita de funções apenas por `authenticated`.
 5. Publicar os arquivos HTML, CSS, JS, manifesto e Service Worker em origem HTTPS dedicada. Não validar PWA em `file://`.
 
