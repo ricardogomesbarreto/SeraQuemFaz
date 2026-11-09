@@ -1321,3 +1321,7 @@ body{min-width:320px}
  .sqf-help-bottom{flex-direction:column;align-items:stretch;padding:22px}
  .sqf-help-bottom .button{align-self:flex-start}
 }
+
+/* Categorias: recarregar sem bloquear o resto do perfil. */
+.sqf-dashboard-page #reloadCategories{display:inline-flex;margin-top:9px;max-width:100%;font-size:.79rem}
+.sqf-dashboard-page #reloadCategories[disabled]{opacity:.6;cursor:progress}
