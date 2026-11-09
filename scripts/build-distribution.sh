@@ -13,7 +13,7 @@ mkdir -p "${STAGING}/${SITE}" "${STAGING}/${SOURCE}"
 # Deploy estático: somente páginas e recursos necessários no servidor web.
 for page in "${ROOT}"/*.html; do cp "${page}" "${STAGING}/${SITE}/"; done
 cp -a "${ROOT}/assets" "${STAGING}/${SITE}/assets"
-for file in .htaccess _headers .nojekyll; do
+for file in .htaccess _headers .nojekyll manifest.webmanifest service-worker.js; do
   if [[ -e "${ROOT}/${file}" ]]; then cp "${ROOT}/${file}" "${STAGING}/${SITE}/"; fi
 done
 # Código completo: histórico, documentação, SQL, testes, CI, mas nunca segredos/artifacts.
