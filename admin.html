@@ -16,7 +16,7 @@
 <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script defer src="assets/supabase-config.js"></script><script defer src="assets/account-compat.js"></script><script defer src="assets/auth-navigation.js"></script>
 <script defer src="assets/admin.js"></script>
-<script defer src="assets/admin-finance.js"></script>
+<script defer src="assets/admin-finance.js"></script><script defer src="assets/admin-reports.js"></script>
 </head>
 <body class="legal-page sqf-admin-page">
 <a class="skip-link" href="#conteudo">Pular para o conteúdo</a>
@@ -41,7 +41,22 @@
 </section>
 <div id="adminContent" hidden>
 <div class="admin-panel"><div class="admin-heading-row"><div><span class="section-kicker">VISÃO GERAL</span><h2>Filas de trabalho</h2><p>Os indicadores apresentam registros pendentes, não resultados de investigação.</p></div><div class="admin-actions"><span id="adminRole" class="admin-role"></span><button id="refreshAdmin" class="button button-outline button-small" type="button">Atualizar</button></div></div><div id="adminStats" class="admin-stats" aria-label="Indicadores administrativos"></div></div>
-<section class="admin-panel" id="sqfAdminBilling" hidden aria-labelledby="sqfAdminBillingTitle"><span class="section-kicker">OPERAÇÃO FINANCEIRA</span><h2 id="sqfAdminBillingTitle">Monitoramento das assinaturas</h2>
+<section class="admin-panel sqf-admin-report-card" id="sqfAdminReports" aria-labelledby="sqfAdminReportsTitle">
+ <div class="sqf-card-head"><div><span class="section-kicker">DADOS DO SISTEMA</span>
+ <h2 id="sqfAdminReportsTitle">Relatórios administrativos</h2>
+ <p class="muted">Contadores consultados do banco somente após MFA, sem identificação pessoal. Não são estimativas de negócios.</p></div>
+ <button id="sqfAdminReportsRefresh" type="button" class="button button-outline button-small">Atualizar relatório</button></div>
+ <div id="sqfAdminReportsStats" class="admin-stats" aria-live="polite"></div>
+ <p class="form-feedback" id="sqfAdminReportsStatus" role="status"></p>
+ </section>
+ <section class="admin-panel sqf-admin-support-card" id="sqfAdminSupport" aria-labelledby="sqfAdminSupportHeading">
+  <div class="sqf-card-head"><div><span class="section-kicker">ATENDIMENTO AO USUÁRIO</span><h2 id="sqfAdminSupportHeading">Solicitações de suporte</h2>
+  <p class="muted">Somente equipe autorizada com MFA. Não compartilhe conteúdos de chamados fora do painel.</p></div>
+  <button id="sqfAdminSupportRefresh" type="button" class="button button-outline button-small">Consultar solicitações</button></div>
+  <div id="sqfAdminSupportList" class="sqf-activity-list"></div>
+  <p class="form-feedback" id="sqfAdminSupportStatus" role="status"></p>
+ </section>
+ <section class="admin-panel" id="sqfAdminBilling" hidden aria-labelledby="sqfAdminBillingTitle"><span class="section-kicker">OPERAÇÃO FINANCEIRA</span><h2 id="sqfAdminBillingTitle">Monitoramento das assinaturas</h2>
 <p class="muted">Somente administradores com MFA podem consultar estes dados agregados. Alertas não equivalem a confirmação de fraude.</p>
 <button type="button" class="button button-outline button-small" id="sqfBillingAdminRefresh">Atualizar indicadores financeiros</button>
 <div id="sqfBillingAdminStats" class="admin-stats" aria-live="polite"></div><p id="sqfBillingAdminStatus" role="status" class="form-feedback"></p></section>
