@@ -67,7 +67,7 @@ Deno.serve(async req=>{
     const account=await identity.json();
     if(typeof account.email!=='string'||!account.email.includes('@'))throw new Error('E-mail ausente');
     const text=notes[0].title+'\n\n'+(notes[0].body||'Você possui uma atualização na plataforma.')+
-     '\n\nAcesse sua conta: '+new URL('/painel.html',site).toString()+
+     '\n\nAcesse sua conta: '+new URL('painel.html',site.endsWith('/')?site:site+'/').toString()+
      '\n\nNão responda a este aviso nem compartilhe dados sensíveis por e-mail.';
     const outgoing=await fetch('https://api.resend.com/emails',{
      method:'POST',headers:{
