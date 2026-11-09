@@ -5,15 +5,13 @@
   const UUID=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
   const MAX_FILES=3;
   const MAX_INPUT=5*1024*1024;
-  const MAX_OUTPUT=2*1024*1024;
+  const MAX_OUTPUT=5*1024*1024;
   const accept=['image/jpeg','image/png','image/webp'];
   async function encode(file) {
     if(!file || !accept.includes(file.type) || file.size<=0 || file.size>MAX_INPUT)
       throw new Error('Use JPG, PNG ou WebP com até 5 MB por imagem.');
     const bitmap=await createImageBitmap(file);
     try {
-      if(bitmap.width<64 || bitmap.height<64 || bitmap.width>8192 || bitmap.height>8192)
-        throw new Error('Dimensões da foto fora dos limites.');
       for(const width of [1600,1200,900]){
         const factor=Math.min(1,width/Math.max(bitmap.width,bitmap.height));
         const canvas=document.createElement('canvas');
@@ -23,7 +21,7 @@
         const blob=await new Promise(resolve=>canvas.toBlob(resolve,'image/webp',0.78));
         if(blob?.type==='image/webp' && blob.size<=MAX_OUTPUT)return blob;
       }
-      throw new Error('Não foi possível reduzir a foto para 2 MB.');
+      throw new Error('A imagem processada ultrapassou 5 MB.');
     }finally{bitmap.close();}
   }
   async function upload(client,requestId,userId,files){

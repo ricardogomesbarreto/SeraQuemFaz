@@ -8,6 +8,18 @@
   let client,user,profile,categories=[];
   let preparedPortrait=null, portraitPreviewUrl=null, portraitBusy=false, portraitVersion=0, portraitDebounce=null;
   let currentServiceCount=0, currentPhotoCount=0, currentVerification=null, professionalExtras=null;
+  function syncClientSidebar() {
+    if (profile?.account_type !== 'cliente') return;
+    const label=$('clientSideName'), target=$('clientSideAvatar');
+    if (label) label.textContent=profile.full_name || 'Cliente';
+    const avatar=$('avatarPreview')?.querySelector('.avatar');
+    if (target && avatar) target.replaceChildren(avatar.cloneNode(true));
+  }
+  function openSettingsForHash() {
+    if (!['#accountSettings','#privacyRequestCard'].includes(location.hash)) return;
+    const settings=$('accountSettings');
+    if (settings) settings.open=true;
+  }
   function updateReadiness(){
     const box=$('providerReadiness');
     if(!box || profile?.account_type!=='prestador')return;
@@ -100,8 +112,6 @@
     // Não substitui a inspeção de arquivos no servidor nem moderação do conteúdo.
     const bitmap=await createImageBitmap(file);
     try {
-      if(bitmap.width>8192 || bitmap.height>8192 || bitmap.width<64 || bitmap.height<64)
-        throw new Error('A imagem tem dimensões inválidas ou excessivas.');
       const maxSide=1600, scale=Math.min(1,maxSide/Math.max(bitmap.width,bitmap.height));
       const canvas=document.createElement('canvas');
       canvas.width=Math.max(1,Math.round(bitmap.width*scale));
@@ -365,6 +375,7 @@
       }catch{ /* Sem bucket privado, manter a inicial em vez de expor a foto. */ }
     }
     target.replaceChildren(visual);
+    syncClientSidebar();
   }
   function wireFallbackActions() {
     const signout = async (button, label) => {
@@ -417,6 +428,12 @@
     }
     profile=myProfile;
     $('accountEditShortcut').href='#profileSettings';
+    $('accountSettingsShortcut')?.addEventListener('click',()=>{ $('accountSettings').open=true; });
+    document.querySelectorAll('[data-open-settings]').forEach(link=>
+      link.addEventListener('click',()=>{ $('accountSettings').open=true; })
+    );
+    window.addEventListener('hashchange',openSettingsForHash);
+    openSettingsForHash();
     $('accountToolbar').hidden=false;
     $('accountName').textContent=profile.full_name;
     $('accountEmail').textContent=user.email || 'Não informado';
@@ -526,10 +543,18 @@
     }else {
       $('profileBioGroup').hidden=true;$('profilePublicGroup').hidden=true;
       $('avatarEditor').querySelector('label[for="avatarFile"]').textContent='Foto opcional da minha conta';
-      $('avatarHelp').textContent='Sua foto ficará em armazenamento privado e será mostrada somente na sua conta autenticada. Se preferir, aparecerão apenas suas iniciais.';
+      $('avatarHelp').textContent='JPG, PNG ou WebP, até 5 MB, sem dimensão mínima. Sua foto é armazenada de forma privada e exibida somente em sua conta autenticada. Se preferir, serão mostradas suas iniciais.';
+      document.body.classList.add('sqf-client-layout');
       $('providerAsideBrand').hidden=true;
       $('clientInfo').hidden=false;
-      $('profileSettings').querySelector('h2').textContent='Meus dados pessoais';
+      $('clientAccountBadge').hidden=false;
+      const mainColumn=$('accountSharedGrid').querySelector('.dashboard-main-col');
+      mainColumn.prepend($('clientDashboard'));
+      $('accountSummaryCard').after($('profileSettings'),$('clientDashboard'));
+      $('privacyRequestCard').before($('clientPrivacySection'));
+      $('clientLogoutSlot').append($('logoutButton'));
+      syncClientSidebar();
+      $('profileSettings').querySelector('h2').textContent='Editar meu perfil';
       const cityLabel=$('profileCity')?.closest('[data-city-picker]')?.querySelector('.city-picker-label');
       if(cityLabel)cityLabel.textContent='Minha cidade';
       await window.SQFClientDashboard.init(client,user);

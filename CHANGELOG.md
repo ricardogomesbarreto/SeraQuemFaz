@@ -1,3 +1,12 @@
+# v3.9.17 — Perfil do cliente e fotografias de até 5 MB
+
+- **Perfil:** reorganizados dados, edição e atividades em uma área compacta, com menu lateral responsivo nas cores da plataforma.
+- **Configurações:** solicitações de acesso, correção, exclusão e portabilidade de dados ficam na seção Configurações, separadas da edição do perfil.
+- **Fotografias:** JPG, PNG e WebP com limite de entrada de 5 MB; removida a exigência de tamanho mínimo em pixels em retratos e anexos; conversão para WebP mantém a retirada de metadados.
+- **Supabase:** buckets privados de fotos de conta, cliente e anexos configurados para 5 MB sem modificar acesso privado ou RLS.
+- **Cadastro:** mantida a confirmação de e-mail e a mensagem de erro HTTP 429; o envio público depende de SMTP próprio no Supabase.
+- **Qualidade:** adicionados testes de regressão para uploads, armazenamento e separação das seções de perfil e configurações.
+
 # v3.9.16 — Busca e municípios resilientes
 
 - **Busca integrada:** cidade e serviço na página inicial, preservados ao abrir o catálogo.

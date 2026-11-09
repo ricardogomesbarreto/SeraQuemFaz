@@ -3,11 +3,10 @@
    A imagem é recodificada para WebP sem EXIF. Frontalidade e identidade são
    verificadas por pessoas, não inferidas de pixels nem de tamanho da imagem. */
 (function (scope) {
-  const MIN_WIDTH = 320;
-  const MIN_HEIGHT = 320;
-  const MAX_DIMENSION = 8192;
+  const MIN_WIDTH = 1;
+  const MIN_HEIGHT = 1;
   const MAX_FILE = 5 * 1024 * 1024;
-  const MAX_OUTPUT = 1536 * 1024;
+  const MAX_OUTPUT = 5 * 1024 * 1024;
   const MAX_SIDE = 1600;
   const TYPES = Object.freeze(['image/jpeg', 'image/png', 'image/webp']);
 
@@ -27,8 +26,8 @@
     return { zoom, panX, panY };
   }
   function crop(width, height, options = {}) {
-    if (!Number.isInteger(width) || !Number.isInteger(height) || width < MIN_WIDTH || height < MIN_HEIGHT || width > MAX_DIMENSION || height > MAX_DIMENSION) {
-      throw new Error('Escolha uma foto nítida de pelo menos 320 pixels em cada lado.');
+    if (!Number.isInteger(width) || !Number.isInteger(height) || width < MIN_WIDTH || height < MIN_HEIGHT || false) {
+      throw new Error('Não foi possível abrir a imagem. Selecione uma fotografia válida.');
     }
     const { zoom, panX, panY } = optionsFor(options);
     const sw = Math.max(1, Math.round(width / zoom));
@@ -54,7 +53,7 @@
         value => value?.type === 'image/webp' ? resolve(value) : reject(new Error('Conversão WebP indisponível neste navegador.')),
         'image/webp', 0.84
       ));
-      if (blob.size > MAX_OUTPUT) throw new Error('A imagem ultrapassou 1,5 MB após a conversão. Escolha uma foto menor.');
+      if (blob.size > MAX_OUTPUT) throw new Error('A imagem processada ultrapassou 5 MB. Escolha uma foto menor.');
       return blob;
     } finally { image.close(); }
   }
