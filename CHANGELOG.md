@@ -14,6 +14,13 @@
 
 **Estado:** código preparado. Requer migração SQL aditiva, homologação de contas reais, configuração do provedor de e-mails e publicação HTTPS para operação completa. Mercado Pago permanece desativado.
 
+# v3.9.19 — Categorias disponíveis para prestadores
+
+- **Supabase:** corrigida a política RLS de leitura de categorias ativas para contas autenticadas; antes a política atendia apenas visitantes anônimos.
+- **Cadastro de serviços:** diferencia falha de consulta de lista vazia, possui opção de recarregar categorias sem perder os demais campos e preserva as permissões de edição restritas.
+- **Verificação:** o banco conectado retornou 51 categorias ativas com os papéis `anon` e `authenticated`.
+- **Testes:** regressão de carregamento, segurança e interface profissional; CI Node 22/24.
+
 # v3.9.18 — Enquadramento e salvamento de fotografias
 
 - **Enquadramento funcional:** zoom e deslocamento alteram o recorte 3:4 salvo, com valores visíveis nos controles.
