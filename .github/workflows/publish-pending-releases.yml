@@ -42,7 +42,7 @@ jobs:
       - name: Conferir origem, validar versoes e gerar pacotes
         shell: bash
         env:
-          GH_TOKEN: \${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
           mkdir -p "$RUNNER_TEMP/sqf_notes"
