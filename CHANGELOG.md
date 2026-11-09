@@ -1,3 +1,12 @@
+# v3.9.18 — Enquadramento e salvamento de fotografias
+
+- **Enquadramento funcional:** zoom e deslocamento alteram o recorte 3:4 salvo, com valores visíveis nos controles.
+- **Prévia única:** o avatar anterior (quadrado com a inicial) fica oculto durante a edição de uma nova fotografia e reaparece apenas ao cancelar o envio.
+- **Salvamento:** contas de clientes não precisam assinar declaração de retrato profissional; para prestadores, a confirmação não se perde ao mover controles.
+- **Atualização rápida:** clicar em Salvar logo após um ajuste aguarda o processamento mais recente, evitando perda da prévia.
+- **Interface:** botão para descartar a seleção, correção do estado oculto de elementos e mensagem clara quando a cidade não está selecionada.
+- **Testes:** recorte efetivo, movimentos horizontal/vertical, zoom, segurança de cancelamento e regras de salvamento.
+
 # v3.9.17 — Perfil do cliente e fotografias de até 5 MB
 
 - **Perfil:** reorganizados dados, edição e atividades em uma área compacta, com menu lateral responsivo nas cores da plataforma.
