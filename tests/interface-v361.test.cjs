@@ -55,12 +55,12 @@ test('foto do perfil aceita orientações variadas e não exige resolução fixa
     assert.ok(result.sw>0 && result.sh>0 && result.width>0 && result.height>0);
     assert.ok(Math.max(result.width,result.height)<=portrait.MAX_SIDE);
   }
-  assert.throws(()=>portrait.crop(100,100));
+  assert.doesNotThrow(()=>portrait.crop(100,100));
   const html=read('painel.html');
   assert.match(html,/id="portraitZoom"/);
   assert.match(html,/id="portraitPanX"/);
   assert.match(html,/id="portraitPanY"/);
-  assert.match(html,/a imagem enviada não precisa ser 3×4/);
+  assert.match(html,/Sem exigência de dimensão mínima ou proporção/);
 });
 test('retrato processado permanece separado da galeria de portfólio',()=>{
   const js=read('assets/account.js');
