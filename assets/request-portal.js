@@ -168,14 +168,28 @@
      if(item.status==='awaiting_confirmation')act('Confirmar que o serviço foi realizado','confirm','Confirma que o atendimento foi realizado? Uma avaliação poderá ser enviada pelos mecanismos existentes.');
    }
    if(actions.childElementCount)target.append(actions);
+   await window.SQFAgenda?.render({
+     client,user,request:item,root:target,
+     stillCurrent:()=>current===selectionSequence,
+     onSaved:()=>show(item.id)
+   });
+   if(current!==selectionSequence)return;
    // Mensagens privadas. Remetente e limites são validados no servidor.
-   const messageSection=create('section','sqf-messages');messageSection.append(create('h4','','Mensagens privadas'));
+   const messageSection=create('section','sqf-messages');
+   const messageHeader=create('div','sqf-card-head');
+   const messageTitle=create('div');
+   messageTitle.append(create('h4','','Conversa privada'),create('p','muted','Somente os participantes podem consultar as mensagens.'));
+   messageHeader.append(messageTitle,button('Atualizar conversa',()=>show(id)));
+   messageSection.append(messageHeader);
    const thread=create('div','sqf-messages-thread');thread.append(create('p','muted','Carregando conversa...'));messageSection.append(thread);
    const messageForm=create('form','sqf-message-form');
    const msgLabel=create('label','','Nova mensagem (até 2000 caracteres)');
    const msg=create('textarea');msg.required=true;msg.minLength=2;msg.maxLength=2000;msg.rows=3;
    msg.placeholder='Escreva somente sobre o serviço. Nunca compartilhe senhas, documentos, dados bancários ou contatos pessoais.';
    msgLabel.append(msg);const submitMsg=create('button','button button-primary button-small','Enviar mensagem');submitMsg.type='submit';
+   msg.addEventListener('keydown',e=>{
+     if(e.key==='Enter'&&(e.ctrlKey||e.metaKey)){e.preventDefault();messageForm.requestSubmit();}
+   });
    messageForm.append(msgLabel,submitMsg);
    if(['completed','declined','canceled'].includes(item.status))messageForm.hidden=true;
    messageForm.addEventListener('submit',async e=>{e.preventDefault();submitMsg.disabled=true;
@@ -198,6 +212,7 @@
      bubble.append(create('small','',`${mine?'Você':role==='cliente'?'Prestador':'Cliente'} · ${dateLabel(row.created_at)}`));
      bubble.append(create('p','',row.body));thread.append(bubble);
    }
+   if(messages.data?.length)thread.scrollTop=thread.scrollHeight;
    if(!events.error && events.data?.length){
      const timeline=create('details','sqf-request-timeline');
      timeline.append(create('summary','','Histórico de alterações e orçamentos'));
