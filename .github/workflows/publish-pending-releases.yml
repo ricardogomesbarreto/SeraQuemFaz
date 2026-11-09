@@ -1,0 +1,108 @@
+name: Publicar releases historicos - Sera Quem Faz
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - '.github/workflows/publish-pending-releases.yml'
+      - 'docs/versoes/RELEASE-NOTES-v3.9.17.md'
+      - 'docs/versoes/RELEASE-NOTES-v3.9.18.md'
+      - 'docs/versoes/RELEASE-NOTES-v3.9.19.md'
+      - 'docs/versoes/RELEASE-NOTES-v3.10.0.md'
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/publish-pending-releases.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: sqf-publicacao-versoes-20261109
+  cancel-in-progress: false
+
+jobs:
+  releases:
+    name: Verificar SHAs e publicar ZIPs oficiais
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout do historico completo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Preparar Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Conferir origem, validar versoes e gerar pacotes
+        shell: bash
+        env:
+          GH_TOKEN: \${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/sqf_notes"
+          cp docs/versoes/RELEASE-NOTES-v3.9.17.md "$RUNNER_TEMP/sqf_notes/"
+          cp docs/versoes/RELEASE-NOTES-v3.9.18.md "$RUNNER_TEMP/sqf_notes/"
+          cp docs/versoes/RELEASE-NOTES-v3.9.19.md "$RUNNER_TEMP/sqf_notes/"
+          cp docs/versoes/RELEASE-NOTES-v3.10.0.md "$RUNNER_TEMP/sqf_notes/"
+          if [[ "$GITHUB_EVENT_NAME" == 'pull_request' ]]; then
+            echo "PREVIEW: somente verificacao. Nenhuma tag ou release sera criada."
+          fi
+          while IFS='|' read -r version sha; do
+            [[ -n "$version" ]] || continue
+            tag="v$version"
+            echo "::group::$tag - $sha"
+            git cat-file -e "$sha^{commit}"
+            git checkout --detach "$sha" >/dev/null
+            test "$(git rev-parse HEAD)" = "$sha"
+            actual="$(node -p "require('./package.json').version")"
+            test "$actual" = "$version" || {
+              echo "::error::Versao esperada $version, mas package.json = $actual"
+              exit 1
+            }
+            npm run verify
+            npm run build:dist
+            site="dist/SeraQuemFaz_site_v$version.zip"
+            source="dist/SeraQuemFaz_codigo_v$version.zip"
+            test -s "$site"
+            test -s "$source"
+            unzip -tq "$site" >/dev/null
+            unzip -tq "$source" >/dev/null
+            if [[ "$GITHUB_EVENT_NAME" != 'pull_request' ]]; then
+              if gh release view "$tag" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+                echo "Release $tag ja existe; nao substituir publicacao existente."
+              else
+                notes="$RUNNER_TEMP/sqf_notes/RELEASE-NOTES-$tag.md"
+                test -s "$notes"
+                if [[ "$tag" == "v3.10.0" ]]; then
+                  gh release create "$tag" "$site" "$source" \
+                    --repo "$GITHUB_REPOSITORY" \
+                    --target "$sha" \
+                    --title "SERÁ QUEM FAZ? $tag" \
+                    --notes-file "$notes" \
+                    --latest
+                else
+                  gh release create "$tag" "$site" "$source" \
+                    --repo "$GITHUB_REPOSITORY" \
+                    --target "$sha" \
+                    --title "SERÁ QUEM FAZ? $tag" \
+                    --notes-file "$notes" \
+                    --latest=false
+                fi
+              fi
+              gh release view "$tag" --repo "$GITHUB_REPOSITORY" \
+                --json tagName,assets,url \
+                --jq '{tag: .tagName, url: .url, assets: [.assets[].name]}'
+            fi
+            echo "::endgroup::"
+          done <<'RELEASES'
+          3.9.17|f0a9acf15c24965a5cd527d0a7fd558a3c9a15df
+          3.9.18|b7aafb80d4d070e8009cebf6354729c74ad09c19
+          3.9.19|5ac33f63f916492af6ab163ec702f5d23c819f1d
+          3.10.0|70e8a4a799000ea7673f216896475641205a7347
+          RELEASES
