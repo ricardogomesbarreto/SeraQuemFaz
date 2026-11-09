@@ -118,3 +118,15 @@ test('e-mail opt-in exige segredos privados, desativado sem homologação',()=>{
  assert.match(workflow,/secrets\.SQF_NOTIFY_SECRET/);
  assert.doesNotMatch(read('assets/marketplace-hub.js'),/RESEND_API_KEY|SQF_NOTIFY_SECRET/);
 });
+
+test('categorias ativas acessíveis a prestador autenticado e com ação de recuperação',()=>{
+ const sql=read('supabase/migrations/20261109_15_authenticated_categories_rls.sql');
+ const account=read('assets/account.js'),panel=read('painel.html');
+ assert.match(sql,/CREATE POLICY authenticated_read_active_categories/);
+ assert.match(sql,/FOR SELECT TO authenticated/);
+ assert.match(sql,/status = 'active'/);
+ assert.doesNotMatch(sql,/FOR (?:UPDATE|DELETE|INSERT)/);
+ assert.match(account,/function reloadActiveCategories/);
+ assert.match(account,/reloadCategories/);
+ assert.match(panel,/id="reloadCategories"/);
+});
