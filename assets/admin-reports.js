@@ -7,6 +7,21 @@
  const make=(tag,cls,text)=>{const n=document.createElement(tag);if(cls)n.className=cls;if(text!==undefined)n.textContent=String(text);return n;};
  const msg=(id,txt,bad=false)=>{const el=$(id);el.textContent=txt;el.dataset.error=String(bad);};
  const client=()=>window.getSQFClient();
+ let metricsSnapshot=null;
+ const exportButton=$('sqfAdminReportsExport');
+ function exportMetrics(){
+  if(!metricsSnapshot?.length)return;
+  const rows=[['Indicador','Quantidade'],...metricsSnapshot];
+  const csv='\uFEFF'+rows.map(row=>row.map(value=>{
+   const txt=String(value);
+   return '"'+txt.replace(/"/g,'""')+'"';
+  }).join(';')).join('\r\n')+'\r\n';
+  const blob=new Blob([csv],{type:'text/csv;charset=utf-8'});
+  const url=URL.createObjectURL(blob),anchor=document.createElement('a');
+  anchor.href=url;anchor.download='sera-quem-faz-indicadores-'+new Date().toISOString().slice(0,10)+'.csv';
+  document.body.append(anchor);anchor.click();anchor.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),1000);
+ }
  async function loadMetrics(){
   const target=$('sqfAdminReportsStats'),button=$('sqfAdminReportsRefresh');
   button.disabled=true;msg('sqfAdminReportsStatus','Consultando métricas autorizadas...');
@@ -22,6 +37,8 @@
     ['Pedidos de suporte em aberto',data[0].tickets_open]
    ];
    target.replaceChildren();
+   metricsSnapshot=counters.map(([label,num])=>[label,Number.isFinite(Number(num))?Number(num):0]);
+   if(exportButton)exportButton.disabled=false;
    for(const [label,num] of counters){
     const card=make('div','admin-stat');
     card.append(make('span','',label),make('strong','',Number.isFinite(Number(num))?String(num):'—'));
@@ -30,6 +47,8 @@
    msg('sqfAdminReportsStatus','Indicadores atualizados do banco, sujeitos às permissões administrativas.');
   }catch{
    target.replaceChildren();
+   metricsSnapshot=null;
+   if(exportButton)exportButton.disabled=true;
    msg('sqfAdminReportsStatus','Não foi possível consultar os relatórios. Verifique MFA e a migração de métricas.',true);
   }finally{button.disabled=false;}
  }
@@ -80,5 +99,6 @@
   }finally{button.disabled=false;}
  }
  $('sqfAdminReportsRefresh').addEventListener('click',()=>void loadMetrics());
+ exportButton?.addEventListener('click',exportMetrics);
  $('sqfAdminSupportRefresh').addEventListener('click',()=>void loadSupport());
 })();
