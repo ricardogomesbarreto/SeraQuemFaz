@@ -32,6 +32,12 @@ O **Será Quem Faz?** conecta quem precisa contratar um serviço a profissionais
 
 [Histórico de versões](CHANGELOG.md)
 
+## Pacote de testes e uso local
+
+Após uma execução bem-sucedida da **CI na branch `main`**, os dois arquivos ZIP estarão disponíveis por 30 dias em [GitHub Actions → CI → Artefatos](https://github.com/ricardogomesbarreto/SeraQuemFaz/actions/workflows/ci.yml): o pacote do site estático e o pacote de código completo. Essa distribuição não equivale a release comercial.
+
+Para avaliar a interface, prefira servir a pasta do site em `http://localhost` (por exemplo, `python -m http.server 8000`) em vez de abrir páginas por `file://`. A instalação como PWA exige HTTPS ou localhost e conexão para todos os dados da conta. A leitura da central de ajuda e da landing page é pública; **solicitações, mensagens, perfis privados e administração não são disponibilizados offline**.
+
 ## Funcionalidades e estágio atual
 
 | Área | O que fazer |
