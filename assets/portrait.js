@@ -8,6 +8,7 @@
   const MAX_FILE = 5 * 1024 * 1024;
   const MAX_OUTPUT = 5 * 1024 * 1024;
   const MAX_SIDE = 1600;
+  const FRAME_RATIO = 3 / 4;
   const TYPES = Object.freeze(['image/jpeg', 'image/png', 'image/webp']);
 
   function validateFile(file) {
@@ -37,11 +38,29 @@
     const scale = Math.min(1, MAX_SIDE / Math.max(sw, sh));
     return { sx, sy, sw, sh, width: Math.max(1, Math.round(sw * scale)), height: Math.max(1, Math.round(sh * scale)) };
   }
+  // O recorte final usa a mesma proporção 3:4 mostrada na prévia. Assim,
+  // mover os controles afeta de fato os pixels enviados ao armazenamento.
+  // Um eixo sem espaço para deslocamento exige zoom maior.
+  function frameCrop(width, height, options = {}) {
+    if (!Number.isInteger(width) || !Number.isInteger(height) || width < 1 || height < 1) {
+      throw new Error('A fotografia não tem dimensões válidas.');
+    }
+    const { zoom, panX, panY } = optionsFor(options);
+    const baseWidth = Math.min(width, height * FRAME_RATIO);
+    const baseHeight = baseWidth / FRAME_RATIO;
+    const sw = Math.max(1, Math.min(width, Math.round(baseWidth / zoom)));
+    const sh = Math.max(1, Math.min(height, Math.round(baseHeight / zoom)));
+    const sx = Math.round((width - sw) * panX / 100);
+    const sy = Math.round((height - sh) * panY / 100);
+    const scale = Math.min(1, MAX_SIDE / Math.max(sw, sh));
+    return { sx, sy, sw, sh, width: Math.max(1, Math.round(sw * scale)),
+      height: Math.max(1, Math.round(sh * scale)) };
+  }
   async function process(file, options = {}) {
     validateFile(file);
     const image = await createImageBitmap(file);
     try {
-      const rect = crop(image.width, image.height, options);
+      const rect = frameCrop(image.width, image.height, options);
       const canvas = document.createElement('canvas');
       canvas.width = rect.width; canvas.height = rect.height;
       const ctx = canvas.getContext('2d');
@@ -57,7 +76,7 @@
       return blob;
     } finally { image.close(); }
   }
-  const api = Object.freeze({ MIN_WIDTH, MIN_HEIGHT, MAX_FILE, MAX_OUTPUT, MAX_SIDE, validateFile, crop, process });
+  const api = Object.freeze({ MIN_WIDTH, MIN_HEIGHT, MAX_FILE, MAX_OUTPUT, MAX_SIDE, FRAME_RATIO, validateFile, crop, frameCrop, process });
   scope.SQFPortrait = api;
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
 })(typeof window === 'undefined' ? globalThis : window);
