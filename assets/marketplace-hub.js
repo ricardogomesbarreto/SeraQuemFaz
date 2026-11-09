@@ -65,11 +65,17 @@
    const {data,error}=await client.from('sqf_notification_preferences').select('email_enabled').eq('user_id',user.id).maybeSingle();
    if(error)throw error;
    control.checked=Boolean(data?.email_enabled);
+   let hasPreference=Boolean(data);
    control.addEventListener('change',async()=>{
     control.disabled=true;
-    const {error:saveError}=await client.from('sqf_notification_preferences').upsert({
-     user_id:user.id,email_enabled:control.checked
-    },{onConflict:'user_id'});
+    // UPDATE é permitido apenas na coluna email_enabled; não enviar outras
+    // colunas via UPSERT que exija permissões além da declaração de RLS.
+    const query=client.from('sqf_notification_preferences');
+    const result=hasPreference
+      ?await query.update({email_enabled:control.checked}).eq('user_id',user.id)
+      :await query.insert({user_id:user.id,email_enabled:control.checked});
+    const saveError=result.error;
+    if(!saveError)hasPreference=true;
     if(saveError){
      control.checked=!control.checked;
      tell('sqfNotifyStatus','Não foi possível salvar a preferência de e-mail.',true);
