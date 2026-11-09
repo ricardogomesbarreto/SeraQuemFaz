@@ -1,3 +1,19 @@
+# v3.10.0 — Central profissional e experiência ampliada
+
+- Reorganização visual do perfil profissional com sidebar consistente com o painel de cliente.
+- Serviço e fotografia do portfólio associados por chave estrangeira do mesmo prestador.
+- Agenda bilateral com proposta, aceite, recusa e cancelamento após orçamento aceito.
+- Notificações privadas por eventos reais, preferências de e-mail e fila de envio opcional.
+- Orçamentos comparados por valores e condições reais, com aviso sobre diferenças de escopo.
+- Chat privado com visual de conversa e ação de atualização, mantendo autorização no Postgres.
+- Métricas reais e painel de desempenho do prestador; relatórios agregados para administração com MFA.
+- Suporte protegido por RLS e triagem com MFA; central pública de ajuda.
+- Catálogo com filtros de portfólio e ordenação por avaliações moderadas e serviços.
+- PWA com cache limitado a páginas públicas, sem armazenar conta, mensagens ou solicitações.
+- Novo teste de regressão, atualização da CI e empacotamento da distribuição.
+
+**Estado:** código preparado. Requer migração SQL aditiva, homologação de contas reais, configuração do provedor de e-mails e publicação HTTPS para operação completa. Mercado Pago permanece desativado.
+
 # v3.9.19 — Categorias disponíveis para prestadores
 
 - **Supabase:** corrigida a política RLS de leitura de `public.categories` para contas autenticadas, limitada a registros `active`; o catálogo já permitia leitura anônima.
