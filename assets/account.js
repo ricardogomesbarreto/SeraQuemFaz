@@ -112,8 +112,6 @@
     // Não substitui a inspeção de arquivos no servidor nem moderação do conteúdo.
     const bitmap=await createImageBitmap(file);
     try {
-      if(bitmap.width>8192 || bitmap.height>8192 || bitmap.width<64 || bitmap.height<64)
-        throw new Error('A imagem tem dimensões inválidas ou excessivas.');
       const maxSide=1600, scale=Math.min(1,maxSide/Math.max(bitmap.width,bitmap.height));
       const canvas=document.createElement('canvas');
       canvas.width=Math.max(1,Math.round(bitmap.width*scale));
