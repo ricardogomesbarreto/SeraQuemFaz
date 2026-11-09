@@ -1,4 +1,4 @@
-# SERÁ QUEM FAZ? — v3.9.17
+# SERÁ QUEM FAZ? — v3.9.18
 
 <p align="center">
   <img src="assets/brand/logo-horizontal.png" alt="Logomarca do Será Quem Faz?" width="380">
@@ -8,7 +8,7 @@
   <img src="https://img.shields.io/badge/Frontend-HTML%2FCSS%2FJS-e34f26" alt="Frontend HTML, CSS e JavaScript">
   <img src="https://img.shields.io/badge/Banco-PostgreSQL-4169e1?logo=postgresql&logoColor=white" alt="Banco PostgreSQL">
   <img src="https://img.shields.io/badge/Backend-Supabase-3ecf8e?logo=supabase&logoColor=white" alt="Backend Supabase">
-  <a href="https://github.com/ricardogomesbarreto/SeraQuemFaz/releases"><img src="https://img.shields.io/badge/vers%C3%A3o-v3.9.17-8b3a45" alt="Versão v3.9.17"></a>
+  <a href="https://github.com/ricardogomesbarreto/SeraQuemFaz/releases"><img src="https://img.shields.io/badge/vers%C3%A3o-v3.9.18-8b3a45" alt="Versão v3.9.18"></a>
   <a href="https://github.com/ricardogomesbarreto/SeraQuemFaz/actions/workflows/ci.yml"><img src="https://github.com/ricardogomesbarreto/SeraQuemFaz/actions/workflows/ci.yml/badge.svg?branch=main" alt="Status da integração contínua"></a>
 </p>
 
@@ -16,12 +16,13 @@
 
 O **Será Quem Faz?** conecta quem precisa contratar um serviço a profissionais da sua região. O catálogo com sidebar permite pesquisar por município e categoria, consultar perfis e solicitar orçamentos. Clientes e prestadores conversam pelo painel e acompanham cada atendimento até a conclusão. O projeto começou em Santa Inês (MA) e usa o cadastro nacional de municípios do IBGE.
 
-## Última versão · v3.9.17
+## Última versão · v3.9.18
 
-- **Perfil do cliente renovado:** navegação lateral, cartões mais compactos, foto e dados pessoais com edição acessível.
-- **Privacidade em Configurações:** histórico de solicitações LGPD e formulário de acesso, correção, exclusão e portabilidade separados da edição do perfil.
-- **Fotos até 5 MB:** sem resolução mínima exigida. JPG, PNG e WebP são convertidos para WebP; os buckets privados aceitam até 5 MB.
-- **Autenticação:** a falha de limite de e-mails (HTTP 429) depende da configuração de SMTP próprio no Supabase, sem desativar confirmação de endereço.
+- **Editor de fotografia corrigido:** o movimento dos controles altera efetivamente o recorte final; valores de zoom e posição são exibidos.
+- **Apenas uma prévia durante a edição:** a inicial da foto antiga não fica duplicada ao lado da nova.
+- **Contas de clientes:** foto privada pode ser salva sem a declaração de retrato profissional. A declaração continua obrigatória aos prestadores.
+- **Cancelar a edição:** ação para descartar a nova fotografia sem alterar a conta.
+- **Validação:** testes automatizados do recorte e da interface, preservando os limites privados de até 5 MB definidos na v3.9.17.
 
 [Histórico de versões](CHANGELOG.md)
 
