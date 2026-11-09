@@ -22,7 +22,8 @@
   document.querySelectorAll('[data-year]').forEach((el) => { el.textContent = new Date().getFullYear(); });
   // PWA opcional: instalar somente em contexto seguro. Service Worker não
   // armazena páginas autenticadas nem respostas privadas da API.
-  if('serviceWorker' in navigator &&
+  if(typeof navigator!=='undefined'&&typeof window!=='undefined'&&
+    'serviceWorker' in navigator &&
     (location.protocol==='https:'||['localhost','127.0.0.1'].includes(location.hostname))){
     window.addEventListener('load',()=>{
       navigator.serviceWorker.register(new URL('service-worker.js',document.baseURI))
@@ -31,6 +32,7 @@
   }
   let installPrompt=null;
   const install=document.getElementById('sqfInstallApp');
+  if(typeof window==='undefined')return;
   window.addEventListener('beforeinstallprompt',event=>{
     if(!install)return;
     event.preventDefault();
