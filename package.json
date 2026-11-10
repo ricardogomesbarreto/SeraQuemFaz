@@ -1,7 +1,7 @@
 {
   "name": "sera-quem-faz",
   "private": true,
-  "version": "3.14.0-rc.9",
+  "version": "3.14.0-rc.10",
   "description": "Plataforma de serviços locais — PHP e MySQL/MariaDB",
   "scripts": {
     "check": "node database/audit/verify-mysql.mjs",

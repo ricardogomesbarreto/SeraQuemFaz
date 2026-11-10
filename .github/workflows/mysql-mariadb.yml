@@ -100,6 +100,7 @@ jobs:
           php database/tests/auth-integration.php
           mkdir -m 700 -p /tmp/sqf-private-media
           php database/tests/private-media-integration.php
+          php database/tests/subscription-actions.php
           php database/tests/notifications-integration.php
           php database/tests/maintenance-integration.php
 

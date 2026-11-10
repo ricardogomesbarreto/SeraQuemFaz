@@ -8,12 +8,12 @@ function sqfPaidUntil(PDO $db,string $provider):?string {
 }
 function sqfOwnBilling(PDO $db,string $actor):array {
     if(sqfQuery($db,'SELECT account_type FROM profiles WHERE id=?',[$actor])->fetchColumn()!=='prestador')throw new DomainException('Somente prestadores');
-    $settings=sqfQuery($db,'SELECT require_paid_subscription FROM sqf_billing_settings WHERE singleton=1')->fetch(PDO::FETCH_ASSOC);
+    $settings=sqfQuery($db,'SELECT require_paid_subscription,checkout_enabled FROM sqf_billing_settings WHERE singleton=1')->fetch(PDO::FETCH_ASSOC);
     $s=sqfQuery($db,'SELECT id,cycle,price_cents,currency,state,paid_until,cancel_requested_at FROM sqf_billing_subscriptions WHERE user_id=?',[$actor])->fetch(PDO::FETCH_ASSOC);
     $invoices=$s?sqfQuery($db,'SELECT status,amount_cents,currency,paid_at,paid_period_end,verified_at FROM sqf_billing_invoices WHERE subscription_id=? ORDER BY verified_at DESC LIMIT 100',[$s['id']])->fetchAll(PDO::FETCH_ASSOC):[];
     $paid=sqfPaidUntil($db,$actor);
     if($s){unset($s['id']);$s['paid_until']=$paid;$s['active']=$paid!==null;}
-    return ['subscription'=>$s?:null,'invoices'=>$invoices,'require_paid_subscription'=>(bool)($settings['require_paid_subscription']??true),'checkout_enabled'=>false,'plans'=>['monthly'=>1490,'yearly'=>14900]];
+    return ['subscription'=>$s?:null,'invoices'=>$invoices,'require_paid_subscription'=>(bool)($settings['require_paid_subscription']??true),'checkout_enabled'=>getenv('SQF_MP_CHECKOUT_ENABLED')==='1'&&(bool)($settings['checkout_enabled']??false),'cycle_request'=>sqfQuery($db,'SELECT next_cycle,effective_after,requested_at FROM sqf_billing_cycle_requests WHERE user_id=?',[$actor])->fetch(PDO::FETCH_ASSOC)?:null,'plans'=>['monthly'=>1490,'yearly'=>14900]];
 }
 function sqfStaffBilling(PDO $db,string $actor):array {
     if(sqfRequireStaff($db,$actor)!=='admin')throw new DomainException('Somente administradores');

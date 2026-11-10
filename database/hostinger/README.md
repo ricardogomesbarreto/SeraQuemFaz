@@ -26,3 +26,7 @@ Após homologação, configure um Cron Job PHP para `sqf-private/backend/bin/mai
 ## PWA e paridade funcional
 
 RC.8 recupera instalação PWA, favoritos de profissionais, comparação de propostas e métricas. O service worker não armazena páginas de conta, API, mensagens ou mídia privada. CDN deve respeitar a exclusão de API e páginas autenticadas. Node.js é usado no build e nos testes Chromium; o PHP continua sendo o runtime da API. Não há segunda aplicação Node obrigatória.
+
+## RC.10
+
+SMTP por TLS 465: SQF_SMTP_ENABLED, SQF_SMTP_USER, SQF_SMTP_PASSWORD e SQF_MAIL_FROM (mesma caixa), desativado por padrão. Homologue confirmação, recuperação e avisos com caixa autorizada. Checkout sandbox exige SQF_MP_CHECKOUT_ENABLED=1, credencial TEST-, SQF_SITE_URL HTTPS e flag checkout_enabled no banco descartável; não ativar em produção. A solicitação de ciclo não dispara renovação automática. Importador privado em backend/bin/import-snapshot.php, use dry-run e compare inventários antes de staging; rollback de produção ainda requer ensaio e plano de corte. Valide índices por EXPLAIN e latência no hPanel.
