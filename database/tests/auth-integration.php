@@ -29,3 +29,17 @@ sqfAuthLimit($db,'fixture-test-limit',2,900);sqfAuthLimit($db,'fixture-test-limi
 deny(fn()=>sqfAuthLimit($db,'fixture-test-limit',2,900),'rate limit enforced');
 deny(fn()=>sqfRegister($db,'other@example.invalid','short','Fixture','cliente'),'weak password rejected');
 
+
+require_once __DIR__.'/../../backend/src/AccountSecurity.php';
+$before=sqfLogin($db,$email,$replacement);
+deny(fn()=>sqfChangePassword($db,$u['id'],'incorrect-password',$password),'wrong current password rejected');
+sqfChangePassword($db,$u['id'],$replacement,$password);
+check(sqfSessionUser($db,$before)===null,'password change revokes prior sessions');
+$rotated=sqfLogin($db,$email,$password);
+sqfRevokeSessions($db,$u['id'],$password);
+check(sqfSessionUser($db,$rotated)===null,'revoke all invalidates existing sessions');
+sqfChangePassword($db,$u['id'],$password,$replacement);
+sqfNotificationPreference($db,$u['id'],true);
+check(sqfAccountSecurity($db,$u['id'])['email_enabled']===true,'email preference stored');
+sqfNotificationPreference($db,$u['id'],false);
+check(sqfAccountSecurity($db,$u['id'])['email_enabled']===false,'email preference opt-out stored');
