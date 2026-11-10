@@ -68,6 +68,8 @@
      for(const item of cases.responses)reviewRoot.append(el('p','Resposta: '+item.moderation_status+' — '+item.message));
      for(const item of cases.disputes)reviewRoot.append(el('p','Contestação: '+item.status+' — '+item.details));
    }
+   const favSection=$('mysqlFavoriteSection');favSection.hidden=profile.account_type!=='cliente';
+   if(!favSection.hidden){const items=(await api.favoriteCategories()).data,root=$('mysqlFavorites');empty(root,items,'Nenhuma categoria favorita.');for(const item of items){const card=wrap(item.name);const link=el('a','Pesquisar categoria');link.href='categorias.html?q='+encodeURIComponent(item.name)+(profile.city_ibge?'&cidade='+encodeURIComponent(profile.city_ibge):'');card.append(link,button('Remover favorito',async()=>{await api.favoriteCategory({category_id:item.id,saved:false});await load();}));root.append(card);}}
    const discoverySection=$('mysqlDiscoverySection');
    discoverySection.hidden=profile.account_type!=='cliente';
    if(!discoverySection.hidden&&profile.city_ibge&&!$('mysqlDiscoveryForm').elements.city.value)$('mysqlDiscoveryForm').elements.city.value=profile.city_ibge;
