@@ -79,7 +79,7 @@
   if(active!==next){
    active=next;
    const root=$('sqfRouteContent');
-   if(root)root.scrollIntoView({block:'start',behavior:'instant'});
+   if(root)root.scrollIntoView({block:'start',behavior:'auto'});
    if(focus&&title){title.setAttribute('tabindex','-1');title.focus({preventScroll:true});}
   }
   document.title=p.label+' | Minha conta | SERÁ QUEM FAZ?';
@@ -92,7 +92,11 @@
    const hit=definitions.find(x=>x.slug===parts[1]);
    if(hit)return hit.slug;
   }
-  const id=decodeURIComponent(location.hash.slice(1)||'');
+  // Endereços externos podem conter escapes inválidos: não deixar um hash
+  // malformado derrubar o painel depois da autenticação.
+  let id='';
+  try{id=decodeURIComponent(location.hash.slice(1)||'');}
+  catch{return 'visao-geral';}
   if(!id)return 'visao-geral';
   const node=$(id);
   if(node?.closest('[data-sqf-route]'))return node.closest('[data-sqf-route]').dataset.sqfRoute;
