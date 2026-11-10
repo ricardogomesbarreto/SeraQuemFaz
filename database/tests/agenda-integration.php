@@ -113,3 +113,17 @@ sqfStaffReviewCaseDecide($db,$u[2],'dispute',$dispute,'upheld',$note);
 check(count(sqfPublicReviews($db,$u[1]))===0,'upheld dispute hides review');
 execq($db,'UPDATE sqf_admin_members SET active=0 WHERE user_id=?',[$u[2]]);
 reject(fn()=>sqfReviewModerate($db,$u[2],$review,'hidden',$note),'revoked staff cannot moderate');
+
+require_once __DIR__.'/../../backend/src/Category.php';
+$selected=(string)sqfQuery($db,"SELECT category_id FROM provider_services WHERE id=?",[$service2])->fetchColumn();
+$page=sqfCategoryPage($db,$selected,'2111300');
+check(in_array($u[1],array_column($page['profiles'],'id'),true),'category lists approved provider with matching active service');
+check(count(sqfCategoryPage($db,$selected,'0000000')['profiles'])===0,'category filters by municipality');
+sqfFavoriteCategory($db,$u[0],$selected,true);sqfFavoriteCategory($db,$u[0],$selected,true);
+check(count(sqfFavoriteCategories($db,$u[0]))===1,'favorite insert is idempotent');
+check(count(sqfFavoriteCategories($db,$u[2]))===0,'favorites isolated by client');
+reject(fn()=>sqfFavoriteCategory($db,$u[1],$selected,true),'provider cannot save client favorites');
+sqfFavoriteCategory($db,$u[2],$selected,false);
+check(count(sqfFavoriteCategories($db,$u[0]))===1,'other client cannot remove favorite');
+sqfFavoriteCategory($db,$u[0],$selected,false);
+check(count(sqfFavoriteCategories($db,$u[0]))===0,'owner removes favorite');
