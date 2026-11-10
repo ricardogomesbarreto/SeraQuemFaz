@@ -64,6 +64,17 @@
    const discoverySection=$('mysqlDiscoverySection');
    discoverySection.hidden=profile.account_type!=='cliente';
    if(!discoverySection.hidden&&profile.city_ibge&&!$('mysqlDiscoveryForm').elements.city.value)$('mysqlDiscoveryForm').elements.city.value=profile.city_ibge;
+   const docsSection=$('mysqlDocumentsSection');
+   docsSection.hidden=profile.account_type!=='prestador';
+   if(!docsSection.hidden){
+     const result=await api.mediaList('verification');
+     const target=$('mysqlDocuments');empty(target,result.data,'Nenhum documento enviado.');
+     for(const document of result.data){
+       const item=wrap((document.document_kind==='identity_evidence'?'Identificação':'Documento profissional')+' — '+document.status);
+       const link=el('a','Visualizar documento');link.href=api.mediaUrl('verification',document.id);link.target='_blank';link.rel='noopener noreferrer';
+       item.append(link);target.append(item);
+     }
+   }
    const serviceSection=$('mysqlServiceSection');
    serviceSection.hidden=profile.account_type!=='prestador';
    if(!serviceSection.hidden){
@@ -124,6 +135,15 @@
        target.append(card);
      }
    }catch(error){target.replaceChildren(el('p',error.message||'Busca indisponível'));}
+ });
+ $('mysqlDocumentForm').addEventListener('submit',async event=>{
+   event.preventDefault();
+   const form=event.currentTarget,file=form.elements.file.files?.[0],type=form.elements.document_kind.value;
+   if(!file||file.type!=='image/webp'||file.size>5*1024*1024){status('Envie uma imagem WebP válida de até 5 MB.');return;}
+   const submit=form.querySelector('[type="submit"]');submit.disabled=true;
+   try{await api.uploadMedia('verification',type,file);form.reset();await load();status('Documento enviado para análise.');}
+   catch(error){status(error.message||'Falha ao enviar documento.');}
+   finally{submit.disabled=false;}
  });
  $('mysqlServiceForm').addEventListener('submit',async e=>{
    e.preventDefault();const form=e.currentTarget,fields=form.elements;
