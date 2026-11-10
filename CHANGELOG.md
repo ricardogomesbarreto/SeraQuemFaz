@@ -1,3 +1,15 @@
+# v3.11.1 — Correção de foto duplicada e clareza de publicação
+
+- A foto do perfil na barra lateral utiliza apenas um contêiner circular; eliminado o avatar aninhado que desenhava duas bordas.
+- Corrigido o estado de publicação exibido ao prestador: “Análise não solicitada”, “Aguardando análise”, “Aprovado”, “Revisão necessária” ou “Suspenso”, conforme registro real.
+- Incluído aviso e atalho para solicitar verificação cadastral no resumo do prestador.
+- Perfis que o próprio prestador pode visualizar por ser o titular são identificados como **prévia privada** quando ainda não podem ser exibidos aos clientes.
+- Estado vazio do catálogo diferencia a ausência de profissionais aprovados da inexistência de cadastros, preservando a privacidade dos registros em análise.
+- Preservadas as políticas RLS e os requisitos de aprovação administrativa, sem publicar profissionais automaticamente.
+- Acrescentados testes regressivos e pacote atualizado. Nenhuma migração de banco é necessária.
+
+**Atenção:** para aparecer no catálogo, cada prestador precisa enviar a solicitação no painel e receber aprovação administrativa. A aprovação depende da análise da equipe; nenhum cadastro foi aprovado automaticamente.
+
 # v3.11.0 — Painéis por páginas e catálogo mais claro
 
 - Cliente e prestador usam o mesmo shell de painel com **telas independentes**, navegação lateral, cabeçalho compacto e URL de seção em `painel.html?pagina=<perfil>/<tela>`. Apenas o conteúdo ativo é apresentado.
