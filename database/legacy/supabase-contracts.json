@@ -1,0 +1,922 @@
+{
+  "source": "Supabase PostgreSQL public schema",
+  "date": "2026-11-10",
+  "rpc": [
+    {
+      "signature": "sqf_billing_permits_publication(uuid)",
+      "result": "boolean",
+      "privileged": true
+    },
+    {
+      "signature": "sqf_category_available(text)",
+      "result": "boolean",
+      "privileged": false
+    },
+    {
+      "signature": "sqf_check_category()",
+      "result": "trigger",
+      "privileged": false
+    },
+    {
+      "signature": "sqf_confirm_engagement_guard()",
+      "result": "trigger",
+      "privileged": false
+    },
+    {
+      "signature": "sqf_coverage_changes_recheck()",
+      "result": "trigger",
+      "privileged": true
+    },
+    {
+      "signature": "sqf_create_request(uuid,uuid,text,date)",
+      "result": "uuid",
+      "privileged": true
+    },
+    {
+      "signature": "sqf_dashboard_request_summary()",
+      "result": "TABLE(active_count bigint, quote_count bigint, ongoing_count bigint, completed_count bigint)",
+      "privileged": false
+    },
+    {
+      "signature": "sqf_email_confirmed(uuid)",
+      "result": "boolean",
+      "privileged": true
+    },
+    {
+      "signature": "sqf_guard_provider_approval()",
+      "result": "trigger",
+      "privileged": true
+    },
+    {
+      "signature": "sqf_is_request_participant(uuid)",
+      "result": "boolean",
+      "privileged": true
+    },
+    {
+      "signature": "sqf_manage_appointment(uuid,text,timestamp with time zone,integer)",
+      "result": "text",
+      "privileged": true
+    },
+    {
+      "signature": "sqf_mark_request_read(uuid)",
+      "result": "void",
+      "privileged": true
+    },
+    {
+      "signature": "sqf_message_rate_guard()",
+      "result": "trigger",
+      "privileged": true
+    },
+    {
+      "signature": "sqf_my_engagement(uuid)",
+      "result": "jsonb",
+      "privileged": true
+    },
+    {
+      "signature": "sqf_my_performance()",
+      "result": "TABLE(views_authenticated bigint, requests_total bigint, quotes_sent bigint, requests_completed bigint)",
+      "privileged": true
+    },
+    {
+      "signature": "sqf_notify_appointment()",
+      "result": "trigger",
+      "privileged": true
+    },
+    {
+      "signature": "sqf_notify_message()",
+      "result": "trigger",
+      "privileged": true
+    },
+    {
+      "signature": "sqf_notify_request()",
+      "result": "trigger",
+      "privileged": true
+    },
+    {
+      "signature": "sqf_provider_completed_count(uuid)",
+      "result": "integer",
+      "privileged": true
+    },
+    {
+      "signature": "sqf_provider_public(uuid)",
+      "result": "boolean",
+      "privileged": true
+    },
+    {
+      "signature": "sqf_public_review_responses(uuid[])",
+      "result": "TABLE(review_id uuid, message text, created_at timestamp with time zone)",
+      "privileged": true
+    },
+    {
+      "signature": "sqf_public_reviews(uuid[])",
+      "result": "TABLE(id uuid, provider_id uuid, rating smallint, comment text, created_at timestamp with time zone)",
+      "privileged": true
+    },
+    {
+      "signature": "sqf_queue_notification_email()",
+      "result": "trigger",
+      "privileged": true
+    },
+    {
+      "signature": "sqf_recheck_provider()",
+      "result": "trigger",
+      "privileged": true
+    },
+    {
+      "signature": "sqf_register_profile_view(uuid)",
+      "result": "boolean",
+      "privileged": true
+    },
+    {
+      "signature": "sqf_request_action(uuid,text)",
+      "result": "text",
+      "privileged": true
+    },
+    {
+      "signature": "sqf_request_asset_allowed(text,boolean)",
+      "result": "boolean",
+      "privileged": true
+    },
+    {
+      "signature": "sqf_request_orphan_cleanup_allowed(text)",
+      "result": "boolean",
+      "privileged": true
+    },
+    {
+      "signature": "sqf_request_unread_counts()",
+      "result": "TABLE(request_id uuid, unread_count bigint)",
+      "privileged": true
+    },
+    {
+      "signature": "sqf_request_verification()",
+      "result": "void",
+      "privileged": true
+    },
+    {
+      "signature": "sqf_require_staff(boolean)",
+      "result": "text",
+      "privileged": true
+    },
+    {
+      "signature": "sqf_review_guard()",
+      "result": "trigger",
+      "privileged": true
+    },
+    {
+      "signature": "sqf_send_quote(uuid,integer,text)",
+      "result": "text",
+      "privileged": true
+    },
+    {
+      "signature": "sqf_set_portfolio_cover(uuid)",
+      "result": "boolean",
+      "privileged": true
+    },
+    {
+      "signature": "sqf_staff_billing_overview()",
+      "result": "jsonb",
+      "privileged": true
+    },
+    {
+      "signature": "sqf_staff_can_read_docs()",
+      "result": "boolean",
+      "privileged": true
+    },
+    {
+      "signature": "sqf_staff_check_portrait(uuid,boolean,text)",
+      "result": "jsonb",
+      "privileged": true
+    },
+    {
+      "signature": "sqf_staff_dashboard_metrics()",
+      "result": "TABLE(providers_total bigint, providers_visible bigint, requests_total bigint, requests_completed bigint, reviews_pending bigint, tickets_open bigint)",
+      "privileged": true
+    },
+    {
+      "signature": "sqf_staff_decide(text,uuid,text,text)",
+      "result": "jsonb",
+      "privileged": true
+    },
+    {
+      "signature": "sqf_staff_overview()",
+      "result": "jsonb",
+      "privileged": true
+    },
+    {
+      "signature": "sqf_staff_provider_portrait(uuid)",
+      "result": "jsonb",
+      "privileged": true
+    },
+    {
+      "signature": "sqf_staff_provider_professional_details(uuid)",
+      "result": "jsonb",
+      "privileged": true
+    },
+    {
+      "signature": "sqf_staff_queue(text,integer)",
+      "result": "jsonb",
+      "privileged": true
+    },
+    {
+      "signature": "sqf_staff_request_risk_overview()",
+      "result": "jsonb",
+      "privileged": true
+    },
+    {
+      "signature": "sqf_staff_review_case_decide(text,uuid,text,text)",
+      "result": "jsonb",
+      "privileged": true
+    },
+    {
+      "signature": "sqf_staff_review_cases(text,integer)",
+      "result": "jsonb",
+      "privileged": true
+    },
+    {
+      "signature": "sqf_staff_review_document(uuid,boolean,text)",
+      "result": "jsonb",
+      "privileged": true
+    },
+    {
+      "signature": "sqf_staff_support_action(uuid,text)",
+      "result": "void",
+      "privileged": true
+    },
+    {
+      "signature": "sqf_staff_support_queue()",
+      "result": "TABLE(ticket_id uuid, topic text, message text, status text, created_at timestamp with time zone)",
+      "privileged": true
+    },
+    {
+      "signature": "sqf_staff_verification_documents(uuid)",
+      "result": "jsonb",
+      "privileged": true
+    },
+    {
+      "signature": "sqf_staff_whoami()",
+      "result": "jsonb",
+      "privileged": true
+    },
+    {
+      "signature": "sqf_submit_review_dispute(uuid,text,text)",
+      "result": "uuid",
+      "privileged": true
+    },
+    {
+      "signature": "sqf_submit_review_response(uuid,text)",
+      "result": "void",
+      "privileged": true
+    },
+    {
+      "signature": "sqf_support_rate_guard()",
+      "result": "trigger",
+      "privileged": true
+    },
+    {
+      "signature": "sqf_sync_new_auth_profile()",
+      "result": "trigger",
+      "privileged": true
+    },
+    {
+      "signature": "sqf_touch_updated_at()",
+      "result": "trigger",
+      "privileged": false
+    },
+    {
+      "signature": "sqf_user_created()",
+      "result": "trigger",
+      "privileged": true
+    },
+    {
+      "signature": "sqf_validate_service_category()",
+      "result": "trigger",
+      "privileged": false
+    }
+  ],
+  "policies": [
+    {
+      "tablename": "categories",
+      "policyname": "authenticated_read_active_categories",
+      "cmd": "SELECT",
+      "roles": "{authenticated}",
+      "qual": "((status)::text = 'active'::text)",
+      "with_check": null
+    },
+    {
+      "tablename": "categories",
+      "policyname": "public_read_categories",
+      "cmd": "SELECT",
+      "roles": "{anon}",
+      "qual": "true",
+      "with_check": null
+    },
+    {
+      "tablename": "places",
+      "policyname": "sqf_explicit_private",
+      "cmd": "ALL",
+      "roles": "{anon,authenticated}",
+      "qual": "false",
+      "with_check": "false"
+    },
+    {
+      "tablename": "portfolio_photos",
+      "policyname": "sqf_portfolio_approval_guard",
+      "cmd": "SELECT",
+      "roles": "{anon,authenticated}",
+      "qual": "((provider_id = ( SELECT auth.uid() AS uid)) OR sqf_provider_public(provider_id))",
+      "with_check": null
+    },
+    {
+      "tablename": "portfolio_photos",
+      "policyname": "sqf_portfolio_delete",
+      "cmd": "DELETE",
+      "roles": "{authenticated}",
+      "qual": "(provider_id = ( SELECT auth.uid() AS uid))",
+      "with_check": null
+    },
+    {
+      "tablename": "portfolio_photos",
+      "policyname": "sqf_portfolio_insert",
+      "cmd": "INSERT",
+      "roles": "{authenticated}",
+      "qual": null,
+      "with_check": "((provider_id = ( SELECT auth.uid() AS uid)) AND (EXISTS ( SELECT 1\n   FROM profiles\n  WHERE ((profiles.id = ( SELECT auth.uid() AS uid)) AND (profiles.account_type = 'prestador'::text)))))"
+    },
+    {
+      "tablename": "portfolio_photos",
+      "policyname": "sqf_portfolio_read",
+      "cmd": "SELECT",
+      "roles": "{anon,authenticated}",
+      "qual": "((provider_id = ( SELECT auth.uid() AS uid)) OR sqf_provider_public(provider_id))",
+      "with_check": null
+    },
+    {
+      "tablename": "privacy_requests",
+      "policyname": "sqf_privacy_new",
+      "cmd": "INSERT",
+      "roles": "{authenticated}",
+      "qual": null,
+      "with_check": "(user_id = ( SELECT auth.uid() AS uid))"
+    },
+    {
+      "tablename": "privacy_requests",
+      "policyname": "sqf_privacy_own",
+      "cmd": "SELECT",
+      "roles": "{authenticated}",
+      "qual": "(user_id = ( SELECT auth.uid() AS uid))",
+      "with_check": null
+    },
+    {
+      "tablename": "profiles",
+      "policyname": "sqf_profiles_approval_guard",
+      "cmd": "SELECT",
+      "roles": "{anon,authenticated}",
+      "qual": "((id = ( SELECT auth.uid() AS uid)) OR sqf_provider_public(id))",
+      "with_check": null
+    },
+    {
+      "tablename": "profiles",
+      "policyname": "sqf_profiles_modify",
+      "cmd": "UPDATE",
+      "roles": "{authenticated}",
+      "qual": "(id = ( SELECT auth.uid() AS uid))",
+      "with_check": "(id = ( SELECT auth.uid() AS uid))"
+    },
+    {
+      "tablename": "profiles",
+      "policyname": "sqf_profiles_select",
+      "cmd": "SELECT",
+      "roles": "{anon,authenticated}",
+      "qual": "((id = ( SELECT auth.uid() AS uid)) OR sqf_provider_public(id))",
+      "with_check": null
+    },
+    {
+      "tablename": "provider_professional_details",
+      "policyname": "sqf_details_insert",
+      "cmd": "INSERT",
+      "roles": "{authenticated}",
+      "qual": null,
+      "with_check": "((provider_id = ( SELECT auth.uid() AS uid)) AND (EXISTS ( SELECT 1\n   FROM profiles\n  WHERE ((profiles.id = provider_professional_details.provider_id) AND (profiles.account_type = 'prestador'::text)))))"
+    },
+    {
+      "tablename": "provider_professional_details",
+      "policyname": "sqf_details_read",
+      "cmd": "SELECT",
+      "roles": "{anon,authenticated}",
+      "qual": "((provider_id = ( SELECT auth.uid() AS uid)) OR sqf_provider_public(provider_id))",
+      "with_check": null
+    },
+    {
+      "tablename": "provider_professional_details",
+      "policyname": "sqf_details_update",
+      "cmd": "UPDATE",
+      "roles": "{authenticated}",
+      "qual": "(provider_id = ( SELECT auth.uid() AS uid))",
+      "with_check": "(provider_id = ( SELECT auth.uid() AS uid))"
+    },
+    {
+      "tablename": "provider_services",
+      "policyname": "sqf_provider_services_delete",
+      "cmd": "DELETE",
+      "roles": "{authenticated}",
+      "qual": "(provider_id = ( SELECT auth.uid() AS uid))",
+      "with_check": null
+    },
+    {
+      "tablename": "provider_services",
+      "policyname": "sqf_provider_services_insert",
+      "cmd": "INSERT",
+      "roles": "{authenticated}",
+      "qual": null,
+      "with_check": "((provider_id = ( SELECT auth.uid() AS uid)) AND (EXISTS ( SELECT 1\n   FROM profiles\n  WHERE ((profiles.id = ( SELECT auth.uid() AS uid)) AND (profiles.account_type = 'prestador'::text)))))"
+    },
+    {
+      "tablename": "provider_services",
+      "policyname": "sqf_provider_services_read",
+      "cmd": "SELECT",
+      "roles": "{anon,authenticated}",
+      "qual": "((provider_id = ( SELECT auth.uid() AS uid)) OR ((is_active = true) AND sqf_provider_public(provider_id)))",
+      "with_check": null
+    },
+    {
+      "tablename": "provider_services",
+      "policyname": "sqf_provider_services_update",
+      "cmd": "UPDATE",
+      "roles": "{authenticated}",
+      "qual": "(provider_id = ( SELECT auth.uid() AS uid))",
+      "with_check": "(provider_id = ( SELECT auth.uid() AS uid))"
+    },
+    {
+      "tablename": "provider_verifications",
+      "policyname": "sqf_verification_owner",
+      "cmd": "SELECT",
+      "roles": "{authenticated}",
+      "qual": "(provider_id = ( SELECT auth.uid() AS uid))",
+      "with_check": null
+    },
+    {
+      "tablename": "providers",
+      "policyname": "sqf_explicit_private",
+      "cmd": "ALL",
+      "roles": "{anon,authenticated}",
+      "qual": "false",
+      "with_check": "false"
+    },
+    {
+      "tablename": "reviews",
+      "policyname": "sqf_review_owner_guard",
+      "cmd": "SELECT",
+      "roles": "{authenticated}",
+      "qual": "((reviewer_id = ( SELECT auth.uid() AS uid)) OR (provider_id = ( SELECT auth.uid() AS uid)))",
+      "with_check": null
+    },
+    {
+      "tablename": "reviews",
+      "policyname": "sqf_reviews_new",
+      "cmd": "INSERT",
+      "roles": "{authenticated}",
+      "qual": null,
+      "with_check": "((reviewer_id = ( SELECT auth.uid() AS uid)) AND (moderation_status = 'pending'::text) AND (reviewer_id <> provider_id) AND sqf_email_confirmed(reviewer_id) AND sqf_provider_public(provider_id) AND (EXISTS ( SELECT 1\n   FROM service_engagements e\n  WHERE ((e.id = reviews.engagement_id) AND (e.provider_id = e.provider_id) AND (e.client_id = reviews.reviewer_id) AND (e.status = 'confirmed'::text)))))"
+    },
+    {
+      "tablename": "reviews",
+      "policyname": "sqf_reviews_own",
+      "cmd": "SELECT",
+      "roles": "{authenticated}",
+      "qual": "(reviewer_id = ( SELECT auth.uid() AS uid))",
+      "with_check": null
+    },
+    {
+      "tablename": "safety_reports",
+      "policyname": "sqf_safety_new",
+      "cmd": "INSERT",
+      "roles": "{authenticated}",
+      "qual": null,
+      "with_check": "((reporter_id = ( SELECT auth.uid() AS uid)) AND (reporter_id <> provider_id) AND sqf_email_confirmed(reporter_id) AND sqf_provider_public(provider_id))"
+    },
+    {
+      "tablename": "safety_reports",
+      "policyname": "sqf_safety_own",
+      "cmd": "SELECT",
+      "roles": "{authenticated}",
+      "qual": "(reporter_id = ( SELECT auth.uid() AS uid))",
+      "with_check": null
+    },
+    {
+      "tablename": "service_engagements",
+      "policyname": "sqf_engagement_confirm",
+      "cmd": "UPDATE",
+      "roles": "{authenticated}",
+      "qual": "((provider_id = ( SELECT auth.uid() AS uid)) AND (status = 'requested'::text) AND sqf_provider_public(provider_id))",
+      "with_check": "((provider_id = ( SELECT auth.uid() AS uid)) AND (status = 'confirmed'::text))"
+    },
+    {
+      "tablename": "service_engagements",
+      "policyname": "sqf_engagement_new",
+      "cmd": "INSERT",
+      "roles": "{authenticated}",
+      "qual": null,
+      "with_check": "((client_id = ( SELECT auth.uid() AS uid)) AND (client_id <> provider_id) AND sqf_email_confirmed(client_id) AND sqf_provider_public(provider_id) AND (EXISTS ( SELECT 1\n   FROM profiles\n  WHERE ((profiles.id = service_engagements.client_id) AND (profiles.account_type = 'cliente'::text)))))"
+    },
+    {
+      "tablename": "service_engagements",
+      "policyname": "sqf_engagement_view",
+      "cmd": "SELECT",
+      "roles": "{authenticated}",
+      "qual": "((client_id = ( SELECT auth.uid() AS uid)) OR (provider_id = ( SELECT auth.uid() AS uid)))",
+      "with_check": null
+    },
+    {
+      "tablename": "services",
+      "policyname": "sqf_explicit_private",
+      "cmd": "ALL",
+      "roles": "{anon,authenticated}",
+      "qual": "false",
+      "with_check": "false"
+    },
+    {
+      "tablename": "sqf_account_settings",
+      "policyname": "sqf_account_delete_guard",
+      "cmd": "DELETE",
+      "roles": "{authenticated}",
+      "qual": "(user_id = ( SELECT auth.uid() AS uid))",
+      "with_check": null
+    },
+    {
+      "tablename": "sqf_account_settings",
+      "policyname": "sqf_account_insert_guard",
+      "cmd": "INSERT",
+      "roles": "{authenticated}",
+      "qual": null,
+      "with_check": "(user_id = ( SELECT auth.uid() AS uid))"
+    },
+    {
+      "tablename": "sqf_account_settings",
+      "policyname": "sqf_account_own_delete",
+      "cmd": "DELETE",
+      "roles": "{authenticated}",
+      "qual": "(user_id = ( SELECT auth.uid() AS uid))",
+      "with_check": null
+    },
+    {
+      "tablename": "sqf_account_settings",
+      "policyname": "sqf_account_own_insert",
+      "cmd": "INSERT",
+      "roles": "{authenticated}",
+      "qual": null,
+      "with_check": "(user_id = ( SELECT auth.uid() AS uid))"
+    },
+    {
+      "tablename": "sqf_account_settings",
+      "policyname": "sqf_account_own_select",
+      "cmd": "SELECT",
+      "roles": "{authenticated}",
+      "qual": "(user_id = ( SELECT auth.uid() AS uid))",
+      "with_check": null
+    },
+    {
+      "tablename": "sqf_account_settings",
+      "policyname": "sqf_account_own_update",
+      "cmd": "UPDATE",
+      "roles": "{authenticated}",
+      "qual": "(user_id = ( SELECT auth.uid() AS uid))",
+      "with_check": "(user_id = ( SELECT auth.uid() AS uid))"
+    },
+    {
+      "tablename": "sqf_account_settings",
+      "policyname": "sqf_account_read_guard",
+      "cmd": "SELECT",
+      "roles": "{authenticated}",
+      "qual": "(user_id = ( SELECT auth.uid() AS uid))",
+      "with_check": null
+    },
+    {
+      "tablename": "sqf_account_settings",
+      "policyname": "sqf_account_update_guard",
+      "cmd": "UPDATE",
+      "roles": "{authenticated}",
+      "qual": "(user_id = ( SELECT auth.uid() AS uid))",
+      "with_check": "(user_id = ( SELECT auth.uid() AS uid))"
+    },
+    {
+      "tablename": "sqf_admin_members",
+      "policyname": "sqf_explicit_private",
+      "cmd": "ALL",
+      "roles": "{anon,authenticated}",
+      "qual": "false",
+      "with_check": "false"
+    },
+    {
+      "tablename": "sqf_appointments",
+      "policyname": "sqf_appointments_participants_select",
+      "cmd": "SELECT",
+      "roles": "{authenticated}",
+      "qual": "((client_id = ( SELECT auth.uid() AS uid)) OR (provider_id = ( SELECT auth.uid() AS uid)))",
+      "with_check": null
+    },
+    {
+      "tablename": "sqf_billing_invoices",
+      "policyname": "sqf_explicit_private",
+      "cmd": "ALL",
+      "roles": "{anon,authenticated}",
+      "qual": "false",
+      "with_check": "false"
+    },
+    {
+      "tablename": "sqf_billing_settings",
+      "policyname": "sqf_explicit_private",
+      "cmd": "ALL",
+      "roles": "{anon,authenticated}",
+      "qual": "false",
+      "with_check": "false"
+    },
+    {
+      "tablename": "sqf_billing_subscriptions",
+      "policyname": "sqf_explicit_private",
+      "cmd": "ALL",
+      "roles": "{anon,authenticated}",
+      "qual": "false",
+      "with_check": "false"
+    },
+    {
+      "tablename": "sqf_client_category_favorites",
+      "policyname": "sqf_category_favorites_owner_add",
+      "cmd": "INSERT",
+      "roles": "{authenticated}",
+      "qual": null,
+      "with_check": "((client_id = ( SELECT auth.uid() AS uid)) AND (EXISTS ( SELECT 1\n   FROM profiles p\n  WHERE ((p.id = ( SELECT auth.uid() AS uid)) AND (p.account_type = 'cliente'::text)))) AND (EXISTS ( SELECT 1\n   FROM categories c\n  WHERE ((c.id = sqf_client_category_favorites.category_id) AND ((c.status)::text = 'active'::text)))))"
+    },
+    {
+      "tablename": "sqf_client_category_favorites",
+      "policyname": "sqf_category_favorites_owner_delete",
+      "cmd": "DELETE",
+      "roles": "{authenticated}",
+      "qual": "(client_id = ( SELECT auth.uid() AS uid))",
+      "with_check": null
+    },
+    {
+      "tablename": "sqf_client_category_favorites",
+      "policyname": "sqf_category_favorites_owner_read",
+      "cmd": "SELECT",
+      "roles": "{authenticated}",
+      "qual": "(client_id = ( SELECT auth.uid() AS uid))",
+      "with_check": null
+    },
+    {
+      "tablename": "sqf_client_favorites",
+      "policyname": "sqf_favorites_add",
+      "cmd": "INSERT",
+      "roles": "{authenticated}",
+      "qual": null,
+      "with_check": "((client_id = ( SELECT auth.uid() AS uid)) AND (client_id <> provider_id) AND (EXISTS ( SELECT 1\n   FROM profiles\n  WHERE ((profiles.id = ( SELECT auth.uid() AS uid)) AND (profiles.account_type = 'cliente'::text)))) AND sqf_provider_public(provider_id))"
+    },
+    {
+      "tablename": "sqf_client_favorites",
+      "policyname": "sqf_favorites_delete",
+      "cmd": "DELETE",
+      "roles": "{authenticated}",
+      "qual": "(client_id = ( SELECT auth.uid() AS uid))",
+      "with_check": null
+    },
+    {
+      "tablename": "sqf_client_favorites",
+      "policyname": "sqf_favorites_read",
+      "cmd": "SELECT",
+      "roles": "{authenticated}",
+      "qual": "(client_id = ( SELECT auth.uid() AS uid))",
+      "with_check": null
+    },
+    {
+      "tablename": "sqf_ibge_municipalities",
+      "policyname": "sqf_ibge_read",
+      "cmd": "SELECT",
+      "roles": "{anon,authenticated}",
+      "qual": "true",
+      "with_check": null
+    },
+    {
+      "tablename": "sqf_notification_preferences",
+      "policyname": "sqf_notification_preferences_owner_insert",
+      "cmd": "INSERT",
+      "roles": "{authenticated}",
+      "qual": null,
+      "with_check": "(user_id = ( SELECT auth.uid() AS uid))"
+    },
+    {
+      "tablename": "sqf_notification_preferences",
+      "policyname": "sqf_notification_preferences_owner_select",
+      "cmd": "SELECT",
+      "roles": "{authenticated}",
+      "qual": "(user_id = ( SELECT auth.uid() AS uid))",
+      "with_check": null
+    },
+    {
+      "tablename": "sqf_notification_preferences",
+      "policyname": "sqf_notification_preferences_owner_update",
+      "cmd": "UPDATE",
+      "roles": "{authenticated}",
+      "qual": "(user_id = ( SELECT auth.uid() AS uid))",
+      "with_check": "(user_id = ( SELECT auth.uid() AS uid))"
+    },
+    {
+      "tablename": "sqf_notifications",
+      "policyname": "sqf_notifications_owner_read",
+      "cmd": "SELECT",
+      "roles": "{authenticated}",
+      "qual": "(recipient_id = ( SELECT auth.uid() AS uid))",
+      "with_check": null
+    },
+    {
+      "tablename": "sqf_notifications",
+      "policyname": "sqf_notifications_owner_update",
+      "cmd": "UPDATE",
+      "roles": "{authenticated}",
+      "qual": "(recipient_id = ( SELECT auth.uid() AS uid))",
+      "with_check": "((recipient_id = ( SELECT auth.uid() AS uid)) AND (read_at IS NOT NULL))"
+    },
+    {
+      "tablename": "sqf_portrait_checks",
+      "policyname": "sqf_explicit_private",
+      "cmd": "ALL",
+      "roles": "{anon,authenticated}",
+      "qual": "false",
+      "with_check": "false"
+    },
+    {
+      "tablename": "sqf_provider_coverage",
+      "policyname": "sqf_coverage_delete",
+      "cmd": "DELETE",
+      "roles": "{authenticated}",
+      "qual": "(provider_id = ( SELECT auth.uid() AS uid))",
+      "with_check": null
+    },
+    {
+      "tablename": "sqf_provider_coverage",
+      "policyname": "sqf_coverage_insert",
+      "cmd": "INSERT",
+      "roles": "{authenticated}",
+      "qual": null,
+      "with_check": "((provider_id = ( SELECT auth.uid() AS uid)) AND (EXISTS ( SELECT 1\n   FROM profiles\n  WHERE ((profiles.id = ( SELECT auth.uid() AS uid)) AND (profiles.account_type = 'prestador'::text)))) AND (( SELECT count(*) AS count\n   FROM sqf_provider_coverage sqf_provider_coverage_1\n  WHERE (sqf_provider_coverage_1.provider_id = ( SELECT auth.uid() AS uid))) < 30))"
+    },
+    {
+      "tablename": "sqf_provider_coverage",
+      "policyname": "sqf_coverage_read",
+      "cmd": "SELECT",
+      "roles": "{anon,authenticated}",
+      "qual": "((provider_id = ( SELECT auth.uid() AS uid)) OR sqf_provider_public(provider_id))",
+      "with_check": null
+    },
+    {
+      "tablename": "sqf_request_attachments",
+      "policyname": "sqf_attachment_add",
+      "cmd": "INSERT",
+      "roles": "{authenticated}",
+      "qual": null,
+      "with_check": "((uploaded_by = ( SELECT auth.uid() AS uid)) AND sqf_is_request_participant(request_id) AND (EXISTS ( SELECT 1\n   FROM sqf_service_requests r\n  WHERE ((r.id = sqf_request_attachments.request_id) AND (r.status <> ALL (ARRAY['completed'::text, 'declined'::text, 'canceled'::text]))))))"
+    },
+    {
+      "tablename": "sqf_request_attachments",
+      "policyname": "sqf_attachment_owner",
+      "cmd": "SELECT",
+      "roles": "{authenticated}",
+      "qual": "sqf_is_request_participant(request_id)",
+      "with_check": null
+    },
+    {
+      "tablename": "sqf_request_events",
+      "policyname": "sqf_events_owner",
+      "cmd": "SELECT",
+      "roles": "{authenticated}",
+      "qual": "sqf_is_request_participant(request_id)",
+      "with_check": null
+    },
+    {
+      "tablename": "sqf_request_messages",
+      "policyname": "sqf_message_owner",
+      "cmd": "SELECT",
+      "roles": "{authenticated}",
+      "qual": "sqf_is_request_participant(request_id)",
+      "with_check": null
+    },
+    {
+      "tablename": "sqf_request_messages",
+      "policyname": "sqf_message_send",
+      "cmd": "INSERT",
+      "roles": "{authenticated}",
+      "qual": null,
+      "with_check": "((sender_id = ( SELECT auth.uid() AS uid)) AND sqf_is_request_participant(request_id) AND (EXISTS ( SELECT 1\n   FROM sqf_service_requests r\n  WHERE ((r.id = sqf_request_messages.request_id) AND (r.status <> ALL (ARRAY['completed'::text, 'declined'::text, 'canceled'::text]))))))"
+    },
+    {
+      "tablename": "sqf_request_read_receipts",
+      "policyname": "sqf_read_receipt_owner",
+      "cmd": "SELECT",
+      "roles": "{authenticated}",
+      "qual": "((user_id = ( SELECT auth.uid() AS uid)) AND sqf_is_request_participant(request_id))",
+      "with_check": null
+    },
+    {
+      "tablename": "sqf_review_disputes",
+      "policyname": "sqf_disputes_owner",
+      "cmd": "SELECT",
+      "roles": "{authenticated}",
+      "qual": "(provider_id = ( SELECT auth.uid() AS uid))",
+      "with_check": null
+    },
+    {
+      "tablename": "sqf_review_responses",
+      "policyname": "sqf_responses_owner",
+      "cmd": "SELECT",
+      "roles": "{authenticated}",
+      "qual": "(provider_id = ( SELECT auth.uid() AS uid))",
+      "with_check": null
+    },
+    {
+      "tablename": "sqf_service_requests",
+      "policyname": "sqf_request_owner",
+      "cmd": "SELECT",
+      "roles": "{authenticated}",
+      "qual": "((client_id = ( SELECT auth.uid() AS uid)) OR (provider_id = ( SELECT auth.uid() AS uid)))",
+      "with_check": null
+    },
+    {
+      "tablename": "sqf_staff_decision_log",
+      "policyname": "sqf_explicit_private",
+      "cmd": "ALL",
+      "roles": "{anon,authenticated}",
+      "qual": "false",
+      "with_check": "false"
+    },
+    {
+      "tablename": "sqf_support_tickets",
+      "policyname": "sqf_support_owner_insert",
+      "cmd": "INSERT",
+      "roles": "{authenticated}",
+      "qual": null,
+      "with_check": "(user_id = ( SELECT auth.uid() AS uid))"
+    },
+    {
+      "tablename": "sqf_support_tickets",
+      "policyname": "sqf_support_owner_read",
+      "cmd": "SELECT",
+      "roles": "{authenticated}",
+      "qual": "(user_id = ( SELECT auth.uid() AS uid))",
+      "with_check": null
+    },
+    {
+      "tablename": "sqf_verification_documents",
+      "policyname": "sqf_documents_owner_delete",
+      "cmd": "DELETE",
+      "roles": "{authenticated}",
+      "qual": "((provider_id = ( SELECT auth.uid() AS uid)) AND (status = 'rejected'::text))",
+      "with_check": null
+    },
+    {
+      "tablename": "sqf_verification_documents",
+      "policyname": "sqf_documents_owner_read",
+      "cmd": "SELECT",
+      "roles": "{authenticated}",
+      "qual": "(provider_id = ( SELECT auth.uid() AS uid))",
+      "with_check": null
+    },
+    {
+      "tablename": "sqf_verification_documents",
+      "policyname": "sqf_documents_owner_upload",
+      "cmd": "INSERT",
+      "roles": "{authenticated}",
+      "qual": null,
+      "with_check": "((provider_id = ( SELECT auth.uid() AS uid)) AND (EXISTS ( SELECT 1\n   FROM profiles\n  WHERE ((profiles.id = sqf_verification_documents.provider_id) AND (profiles.account_type = 'prestador'::text)))))"
+    },
+    {
+      "tablename": "user_profiles",
+      "policyname": "Users can insert own profile",
+      "cmd": "INSERT",
+      "roles": "{authenticated}",
+      "qual": null,
+      "with_check": "(user_id = ( SELECT auth.uid() AS uid))"
+    },
+    {
+      "tablename": "user_profiles",
+      "policyname": "Users can read own profile",
+      "cmd": "SELECT",
+      "roles": "{authenticated}",
+      "qual": "(user_id = ( SELECT auth.uid() AS uid))",
+      "with_check": null
+    },
+    {
+      "tablename": "user_profiles",
+      "policyname": "Users can update own profile",
+      "cmd": "UPDATE",
+      "roles": "{authenticated}",
+      "qual": "(user_id = ( SELECT auth.uid() AS uid))",
+      "with_check": "(user_id = ( SELECT auth.uid() AS uid))"
+    },
+    {
+      "tablename": "users",
+      "policyname": "sqf_explicit_private",
+      "cmd": "ALL",
+      "roles": "{anon,authenticated}",
+      "qual": "false",
+      "with_check": "false"
+    }
+  ]
+}
