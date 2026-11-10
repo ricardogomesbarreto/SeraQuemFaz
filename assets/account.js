@@ -671,9 +671,25 @@
       $('providerEditor').hidden=false;
       $('providerOverview').hidden=false;
       $('reloadCategories')?.addEventListener('click',()=>void reloadActiveCategories());
-      await reloadActiveCategories();
-      await loadServices();
-      await Promise.all([loadPhotos(),loadOwnReviews(),loadVerification(),loadPendingEngagements(),loadProfessionalExtras()]);
+      // Falhas parciais em portfólio, avaliações ou serviços não devem impedir
+      // o prestador de usar as demais páginas do seu painel.
+      const loadTasks=[
+        ['categorias',reloadActiveCategories],
+        ['serviços',loadServices]
+      ];
+      for(const [label,loader] of loadTasks){
+        try{await loader();}
+        catch(error){
+          console.warn('Carregamento parcial do painel ('+label+'): '+(error?.message||'indisponível'));
+          announce('serviceMessage','Uma parte do perfil não carregou. Use Recarregar categorias ou atualize a página.',true);
+        }
+      }
+      const sections=await Promise.allSettled([
+        loadPhotos(),loadOwnReviews(),loadVerification(),loadPendingEngagements(),loadProfessionalExtras()
+      ]);
+      if(sections.some(result=>result.status==='rejected')){
+        announce('accountStatus','Perfil disponível. Alguns módulos não carregaram; atualize a página para tentar novamente.');
+      }
       $('portfolioServiceFilter')?.addEventListener('change',()=>loadPhotos().catch(e=>announce('galleryMessage',e.message,true)));
       const extrasForm=$('professionalDetailsForm');
       const refreshExtrasPreview=()=>{
@@ -741,7 +757,11 @@
       $('profileSettings').querySelector('h2').textContent='Editar meu perfil';
       const cityLabel=$('profileCity')?.closest('[data-city-picker]')?.querySelector('.city-picker-label');
       if(cityLabel)cityLabel.textContent='Minha cidade';
-      await window.SQFClientDashboard.init(client,user);
+      try{await window.SQFClientDashboard.init(client,user);}
+      catch(error){
+        console.warn('Módulo de atividades indisponível:',error?.message||'erro');
+        status.textContent='Perfil disponível. As atividades não carregaram; tente atualizar a página.';
+      }
     }
     $('avatarFile').addEventListener('change',()=>{
       clearTimeout(portraitDebounce);
