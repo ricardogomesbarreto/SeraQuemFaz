@@ -20,7 +20,7 @@
   if(!['accepted','in_progress','awaiting_confirmation'].includes(request.status))return;
   const section=el('section','sqf-agenda-editor');
   section.append(el('h4','','Agendar atendimento'),el('p','muted',
-   'O horário fica confirmado somente quando a outra parte aceitar. Nenhuma reserva ou cobrança é feita automaticamente.'));
+   'O horário fica confirmado somente quando a outra parte aceitar. Propostas não reservam horários. A confirmação será bloqueada se houver outro atendimento confirmado no mesmo intervalo; não há cobrança automática.'));
   let appointment;
   try{
    const {data,error}=await client.from('sqf_appointments')
@@ -43,7 +43,10 @@
    const {error}=await client.rpc('sqf_manage_appointment',{
     p_request:request.id,p_action:action,p_starts_at:date,p_duration_minutes:duration
    });
-   if(error)throw error;
+   if(error){
+    if(error.code==='23P01')throw new Error('Horário indisponível: existe outro atendimento confirmado neste intervalo. Escolha outro horário.');
+    throw error;
+   }
    scope.dispatchEvent(new Event('sqf:appointment-updated'));
    await onSaved();
   };

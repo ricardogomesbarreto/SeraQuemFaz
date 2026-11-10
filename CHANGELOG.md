@@ -1,3 +1,10 @@
+# v3.13.1 — Agenda transacional e segurança
+
+- Restrições de exclusão GiST impedem sobreposição de horários confirmados do mesmo prestador ou cliente, inclusive sob concorrência.
+- Propostas não reservam horário; confirmação conflitante mantém a proposta e retorna mensagem sem expor dados de terceiros. Horários consecutivos e cancelamento são permitidos.
+- CI PostgreSQL 16 isolado testa duas sessões concorrentes, conflito do cliente, adjacência, cancelamento e autorização. Node 22/24 preservados.
+- Migração `20261110_20_appointment_no_overlap.sql`; não altera RLS, aprovação de prestadores, Mercado Pago ou hospedagem.
+
 # v3.13.0 — Agenda, portfólio e indicadores operacionais
 
 - Agenda: filtros de próximos horários, histórico, situação e data; aviso de sobreposição entre horários carregados, sem bloqueio transacional no servidor.

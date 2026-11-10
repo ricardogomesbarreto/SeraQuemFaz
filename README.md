@@ -1,4 +1,4 @@
-# SERÁ QUEM FAZ? — v3.13.0
+# SERÁ QUEM FAZ? — v3.13.1
 
 <p align="center">
   <img src="assets/brand/logo-horizontal.png" alt="Logomarca do Será Quem Faz?" width="380">
@@ -8,7 +8,7 @@
   <img src="https://img.shields.io/badge/Frontend-HTML%2FCSS%2FJS-e34f26" alt="Frontend HTML, CSS e JavaScript">
   <img src="https://img.shields.io/badge/Banco-PostgreSQL-4169e1?logo=postgresql&logoColor=white" alt="Banco PostgreSQL">
   <img src="https://img.shields.io/badge/Backend-Supabase-3ecf8e?logo=supabase&logoColor=white" alt="Backend Supabase">
-  <a href="https://github.com/ricardogomesbarreto/SeraQuemFaz/releases"><img src="https://img.shields.io/badge/vers%C3%A3o-v3.13.0-8b3a45" alt="Versão v3.13.0"></a>
+  <a href="https://github.com/ricardogomesbarreto/SeraQuemFaz/releases"><img src="https://img.shields.io/badge/vers%C3%A3o-v3.13.1-8b3a45" alt="Versão v3.13.1"></a>
   <a href="https://github.com/ricardogomesbarreto/SeraQuemFaz/actions/workflows/ci.yml"><img src="https://github.com/ricardogomesbarreto/SeraQuemFaz/actions/workflows/ci.yml/badge.svg?branch=main" alt="Status da integração contínua"></a>
 </p>
 
@@ -16,7 +16,14 @@
 
 O **Será Quem Faz?** conecta quem precisa contratar um serviço a profissionais da sua região. O catálogo com sidebar permite pesquisar por município e categoria, consultar perfis e solicitar orçamentos. Clientes e prestadores conversam pelo painel e acompanham cada atendimento até a conclusão. O projeto começou em Santa Inês (MA) e usa o cadastro nacional de municípios do IBGE.
 
-## Última versão · v3.13.0
+## Última versão · v3.13.1
+
+- Restrições de exclusão GiST impedem sobreposição de horários confirmados do mesmo prestador ou cliente, inclusive sob concorrência.
+- Propostas não reservam horário; confirmação conflitante mantém a proposta e retorna mensagem sem expor dados de terceiros. Horários consecutivos e cancelamento são permitidos.
+- CI PostgreSQL 16 isolado testa duas sessões concorrentes, conflito do cliente, adjacência, cancelamento e autorização. Node 22/24 preservados.
+- Migração `20261110_20_appointment_no_overlap.sql`; não altera RLS, aprovação de prestadores, Mercado Pago ou hospedagem.
+
+### Versão anterior · v3.13.0
 
 - Agenda: filtros de próximos horários, histórico, situação e data; aviso de sobreposição entre horários carregados, sem bloqueio transacional no servidor.
 - Portfólio: agrupamento por serviço, capas primeiro, filtro exclusivo de capas e contador real.
