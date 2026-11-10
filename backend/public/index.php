@@ -5,6 +5,7 @@ require_once __DIR__.'/../src/Auth.php';
 require_once __DIR__.'/../src/Agenda.php';
 require_once __DIR__.'/../src/Services.php';
 require_once __DIR__.'/../src/Moderation.php';
+require_once __DIR__.'/../src/PrivateMedia.php';
 
 header('Content-Type: application/json; charset=utf-8');
 header('Cache-Control: no-store');
@@ -40,8 +41,27 @@ try {
     if($method==='GET'&&$route==='reviews/public')respond(['data'=>sqfPublicReviews($db,(string)($_GET['id']??''))]);
     if($method==='GET'&&$route==='provider')respond(['data'=>sqfPublicProvider($db,(string)($_GET['id']??''))]);
     if($method==='GET'&&$route==='catalog')respond(['data'=>sqfCatalog($db,(string)($_GET['city']??''))]);
+    if($method==='GET'&&$route==='media/read'){
+      $actor=sqfSessionUser($db,$_SESSION);
+      if(!$actor)respond(['error'=>'Autenticação necessária'],401);
+      $kind=(string)($_GET['kind']??'');$id=(string)($_GET['id']??'');
+      $staff=(int)($_SESSION['staff_mfa_until']??0)>time();
+      $path=sqfPrivateImagePath($db,$actor,$kind,$id,$staff);
+      header('Content-Type: image/webp');header('Content-Disposition: inline; filename="arquivo.webp"');
+      header('X-Frame-Options: DENY');header('Content-Length: '.filesize($path));
+      readfile($path);exit;
+    }
     if($method!=='POST')respond(['error'=>'Rota indisponível'],404);
     if(!hash_equals($_SESSION['csrf'],(string)($_SERVER['HTTP_X_CSRF_TOKEN']??'')))respond(['error'=>'CSRF inválido'],403);
+    if($route==='media/upload'){
+      $actor=sqfSessionUser($db,$_SESSION);
+      if(!$actor)respond(['error'=>'Autenticação necessária'],401);
+      $file=$_FILES['file']??null;
+      if(!is_array($file)||($file['error']??UPLOAD_ERR_NO_FILE)!==UPLOAD_ERR_OK||!is_string($file['tmp_name']??null))throw new DomainException('Arquivo não recebido');
+      $bytes=sqfImagePayload($file['tmp_name'],(int)$file['size']);
+      $id=sqfSavePrivateImage($db,$actor,(string)($_POST['kind']??''),(string)($_POST['context']??''),$bytes,(string)($_POST['caption']??''));
+      respond(['data'=>['id'=>$id]],201);
+    }
     if(!str_starts_with(strtolower($_SERVER['CONTENT_TYPE']??''),'application/json'))respond(['error'=>'Formato inválido'],415);
     $raw=file_get_contents('php://input',false,null,0,65537);
     if(strlen($raw)>65536)respond(['error'=>'Requisição muito grande'],413);
