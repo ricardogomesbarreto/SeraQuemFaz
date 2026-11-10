@@ -28,7 +28,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Install PHP PDO driver
-        run: sudo apt-get update && sudo apt-get install -y php-cli php-mysql php-mbstring
+        run: sudo apt-get update && sudo apt-get install -y php-cli php-mysql php-mbstring php-gd
       - name: Install schema
         run: docker exec -i ${{ job.services.database.id }} sh -c 'mysql -uroot -p"$MYSQL_ROOT_PASSWORD" sqf_test' < database/mysql/migrations/001_schema.sql
       - name: Install authentication migration
@@ -40,12 +40,15 @@ jobs:
           SQF_DB_DSN: mysql:host=127.0.0.1;port=3306;dbname=sqf_test;charset=utf8mb4
           SQF_DB_USER: root
           SQF_DB_PASSWORD: sqf-ci-only
+          SQF_PRIVATE_MEDIA_ROOT: /tmp/sqf-private-media
         run: |
           php -l backend/src/Agenda.php
           php -l backend/src/Database.php
           php -l backend/src/Marketplace.php
           php -l backend/src/Services.php
           php -l backend/src/Moderation.php
+          php -l backend/src/PrivateMedia.php
+          php -l database/tests/private-media-integration.php
           php -l database/tests/agenda-integration.php
           php -l backend/src/Auth.php
           php -l backend/public/index.php
@@ -53,6 +56,8 @@ jobs:
           php database/seed/import-public.php
           php database/tests/agenda-integration.php
           php database/tests/auth-integration.php
+          mkdir -m 700 -p /tmp/sqf-private-media
+          php database/tests/private-media-integration.php
 
           SQF_ALLOW_INSECURE_LOCAL=1 php -S 127.0.0.1:8080 -t backend/public >/tmp/sqf-http.log 2>&1 &
           trap 'kill $! 2>/dev/null || true; cat /tmp/sqf-http.log' EXIT
