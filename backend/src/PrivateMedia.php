@@ -15,10 +15,10 @@ function sqfImagePayload(string $tmp,int $size):string {
     if($size<=0||$size>5*1024*1024||!is_uploaded_file($tmp))throw new DomainException('Imagem inválida (máximo 5 MB)');
     if(!extension_loaded('gd')||!function_exists('imagecreatefromwebp'))throw new RuntimeException('Extensão GD/WebP indisponível');
     $mime=(new finfo(FILEINFO_MIME_TYPE))->file($tmp);
-    if($mime!=='image/webp')throw new DomainException('Envie imagem WebP');
+    if(!in_array($mime,['image/webp','image/jpeg','image/png'],true))throw new DomainException('Envie imagem WebP, JPEG ou PNG');
     $info=@getimagesize($tmp);
     if(!$info||$info[0]<1||$info[1]<1||$info[0]>4000||$info[1]>4000)throw new DomainException('Dimensões inválidas');
-    $image=@imagecreatefromwebp($tmp);
+    $image=match($mime){'image/webp'=>@imagecreatefromwebp($tmp),'image/jpeg'=>@imagecreatefromjpeg($tmp),'image/png'=>@imagecreatefrompng($tmp)};
     if(!$image)throw new DomainException('Imagem corrompida');
     try{
         ob_start();$ok=imagewebp($image,null,85);$bytes=ob_get_clean();
