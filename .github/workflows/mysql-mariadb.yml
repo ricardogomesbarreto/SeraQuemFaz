@@ -6,6 +6,19 @@ on:
 permissions:
   contents: read
 jobs:
+  repository-audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node database/audit/inventory.mjs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: migration-inventory
+          path: dist/audit/migration-inventory.json
+      - run: npm run verify
   database:
     runs-on: ubuntu-latest
     strategy:
