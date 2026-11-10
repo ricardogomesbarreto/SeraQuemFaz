@@ -8,6 +8,7 @@ require_once __DIR__.'/../src/Moderation.php';
 require_once __DIR__.'/../src/PrivateMedia.php';
 require_once __DIR__.'/../src/Category.php';
 require_once __DIR__.'/../src/Professional.php';
+require_once __DIR__.'/../src/AccountCases.php';
 
 header('Content-Type: application/json; charset=utf-8');
 header('Cache-Control: no-store');
@@ -111,6 +112,10 @@ try {
     if(str_starts_with($route,'staff/')){
       sqfRequireStaff($db,$actor);
       if((int)($_SESSION['staff_mfa_until']??0)<=time())respond(['error'=>'MFA administrativo obrigatório'],403);
+      if($route==='staff/providers')respond(['data'=>sqfStaffProviders($db,$actor)]);
+      if($route==='staff/provider/decide'){sqfStaffProviderDecide($db,$actor,required($body,'id'),required($body,'status'),required($body,'note'));respond(['ok'=>true]);}
+      if($route==='staff/cases')respond(['data'=>sqfStaffCases($db,$actor)]);
+      if($route==='staff/case/decide'){sqfStaffCaseDecide($db,$actor,required($body,'kind'),required($body,'id'),required($body,'status'),required($body,'note'));respond(['ok'=>true]);}
       if($route==='staff/documents')respond(['data'=>sqfStaffDocuments($db,$actor)]);
       if($route==='staff/document/decide'){sqfStaffDocumentDecide($db,$actor,required($body,'id'),required($body,'status'),required($body,'note'));respond(['ok'=>true]);}
       if($route==='staff/review-cases')respond(['data'=>sqfStaffReviewCases($db,$actor)]);
@@ -127,6 +132,9 @@ try {
     if($route==='media/list')respond(['data'=>sqfListPrivateMedia($db,$actor,required($body,'kind'),isset($body['request_id'])?required($body,'request_id'):null)]);
     if($route==='favorites/categories')respond(['data'=>sqfFavoriteCategories($db,$actor)]);
     if($route==='favorite/category'){if(!isset($body['saved'])||!is_bool($body['saved']))throw new DomainException('Estado inválido');sqfFavoriteCategory($db,$actor,required($body,'category_id'),$body['saved']);respond(['ok'=>true]);}
+    if($route==='verification')respond(['data'=>sqfVerificationStatus($db,$actor)]);
+    if($route==='cases')respond(['data'=>sqfOwnCases($db,$actor)]);
+    if($route==='case/create')respond(['data'=>sqfCreateCase($db,$actor,required($body,'kind'),required($body,'type'),required($body,'message'))]);
     if($route==='professional')respond(['data'=>sqfProfessionalDetails($db,$actor)]);
     if($route==='professional/save'){sqfSaveProfessionalDetails($db,$actor,$body);respond(['ok'=>true]);}
     if($route==='portfolio/manage'){sqfManagePortfolio($db,$actor,required($body,'id'),required($body,'action'));respond(['ok'=>true]);}
