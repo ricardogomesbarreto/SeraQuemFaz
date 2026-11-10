@@ -1,4 +1,4 @@
-# SERÁ QUEM FAZ? — v3.10.0
+# SERÁ QUEM FAZ? — v3.11.0
 
 <p align="center">
   <img src="assets/brand/logo-horizontal.png" alt="Logomarca do Será Quem Faz?" width="380">
@@ -8,7 +8,7 @@
   <img src="https://img.shields.io/badge/Frontend-HTML%2FCSS%2FJS-e34f26" alt="Frontend HTML, CSS e JavaScript">
   <img src="https://img.shields.io/badge/Banco-PostgreSQL-4169e1?logo=postgresql&logoColor=white" alt="Banco PostgreSQL">
   <img src="https://img.shields.io/badge/Backend-Supabase-3ecf8e?logo=supabase&logoColor=white" alt="Backend Supabase">
-  <a href="https://github.com/ricardogomesbarreto/SeraQuemFaz/releases"><img src="https://img.shields.io/badge/vers%C3%A3o-v3.10.0-8b3a45" alt="Versão v3.10.0"></a>
+  <a href="https://github.com/ricardogomesbarreto/SeraQuemFaz/releases"><img src="https://img.shields.io/badge/vers%C3%A3o-v3.11.0-8b3a45" alt="Versão v3.11.0"></a>
   <a href="https://github.com/ricardogomesbarreto/SeraQuemFaz/actions/workflows/ci.yml"><img src="https://github.com/ricardogomesbarreto/SeraQuemFaz/actions/workflows/ci.yml/badge.svg?branch=main" alt="Status da integração contínua"></a>
 </p>
 
@@ -16,19 +16,15 @@
 
 O **Será Quem Faz?** conecta quem precisa contratar um serviço a profissionais da sua região. O catálogo com sidebar permite pesquisar por município e categoria, consultar perfis e solicitar orçamentos. Clientes e prestadores conversam pelo painel e acompanham cada atendimento até a conclusão. O projeto começou em Santa Inês (MA) e usa o cadastro nacional de municípios do IBGE.
 
-## Última versão · v3.10.0
+## Última versão · v3.11.0
 
-- **Correções da v3.9.19 preservadas:** categorias ativas disponíveis para clientes e prestadores autenticados, recarga de categorias e mensagens de erro no cadastro.\n- **Perfil profissional reorganizado:** menu lateral azul-marinho, resumo, foto, serviços, portfólio, verificação, pagamentos e navegação responsiva, seguindo o padrão visual da conta de cliente.
-- **Mensagens e orçamentos:** conversa em balões, atualização manual, comparação informativa de propostas reais recebidas e navegação para cada solicitação.
-- **Agenda bilateral:** datas e horários propostos após aceite do orçamento, confirmados ou recusados pela outra parte. Nenhum agendamento ou pagamento é automático.
-- **Notificações privadas:** avisos gerados por mudanças de solicitações, mensagens e agenda, com leitura individual.
-- **E-mails:** preferência opt-in e função de envio seguro preparadas, **desativadas até configurar e homologar o serviço de e-mail**. Sem prometer entrega enquanto desligado.
-- **Portfólio e catálogo:** vínculo de imagens com serviços, filtros por trabalhos, ordenação por avaliações públicas e serviços reais.
-- **Desempenho e administração:** indicadores verdadeiros de solicitações, orçamentos, conclusão e visualizações autenticadas; relatório administrativo protegido por MFA.
-- **Suporte:** central de ajuda, registro e acompanhamento de chamados e triagem administrativa restrita.
-- **PWA:** instalação em HTTPS e cache exclusivamente para páginas públicas; conteúdo privado sempre exige conexão.
-
-**Estado da implantação (09/11/2026):** as migrações de marketplace, endurecimento dos gatilhos, auditoria de suporte e índices de relações foram aplicadas ao projeto Supabase conectado. As versões SQL correspondentes estão em `supabase/migrations/20261109_14...17`. Confirmados RLS, ausência de leitura anônima e permissões restritas das funções novas. Em outros ambientes, aplicar migrations somente após backup e validação. **Ainda faltam testes ponta a ponta com contas reais**, configuração de e-mail e homologação da experiência no navegador. A função de e-mails não foi implantada. Consulte [homologação v3.10.0](docs/operacao/HOMOLOGACAO-v3.10.0.md).
+- **Painéis separados por telas** para cliente e prestador: sidebar unificada, informações específicas por perfil e navegação `painel.html?pagina=cliente/atividades` ou `painel.html?pagina=prestador/servicos`, preservando a sessão sem rolagem interminável.
+- **Perfil de prestador:** serviços com disponibilidade/estimativas de preço, portfólio por serviço com capa, agenda e indicadores em telas específicas.
+- **Perfil de cliente:** resumo, edição, atividades, favoritos (profissionais e categorias), agenda e configurações com alteração de senha.
+- **Landing e catálogo:** busca protagonista, jornadas por perfil, informações de confiança, mais filtros e mensagens para ausência de resultados.
+- **Privacidade:** categorias favoritas têm RLS própria; buscas recentes só ficam na sessão desta aba. Não há métricas fictícias.
+- **Banco:** atualização aditiva `supabase/migrations/20261109_18_paineis_servicos_portfolio.sql`. A capa é controlada por RPC autorizada; serviços inativos não são expostos no catálogo.
+- **Qualidade:** testes e CI Node 22/24. Ver [homologação da interface v3.11.0](docs/operacao/HOMOLOGACAO-PAINEIS-v3.11.0.md).
 
 [Histórico de versões](CHANGELOG.md)
 
