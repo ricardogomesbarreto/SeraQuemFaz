@@ -20,6 +20,10 @@ x=await call('login',{email:'auth-fixture@example.invalid',password:'new-fixture
 assert.equal((await call('session')).result.user_id,x.result.user_id);
 const me=x.result.user_id;
 assert.equal((await call('profile',{})).result.data.id,me);
+assert.equal((await call('staff/reviews',{})).status,400);
+assert.equal((await call('staff/mfa',{code:'123456'})).status,400);
+assert.equal((await call('review/create',{request_id:'00000000-0000-4000-8000-000000000011',rating:5,comment:'Tentativa de avaliação indevida'})).status,400);
+assert.deepEqual((await call('reviews',{})).result.data,[]);
 assert.equal((await call('profile/update',{full_name:'Perfil de teste',bio:'Bio de teste',city_ibge:'2111300'})).status,200);
 assert.equal((await call('profile',{})).result.data.full_name,'Perfil de teste');
 assert.equal((await call('profile/update',{full_name:'Perfil de teste',bio:'',city_ibge:'0000000'})).status,400);
