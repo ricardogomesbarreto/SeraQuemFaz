@@ -38,9 +38,10 @@ function sqfToggleService(PDO $db,string $actor,string $id,bool $active):void {
 }
 function sqfPublicProvider(PDO $db,string $provider):?array {
     if(!preg_match('/^[a-f0-9-]{36}$/iD',$provider))throw new DomainException('Identificador inválido');
-    $sql='SELECT p.id,p.full_name,p.city,p.city_ibge,p.bio FROM profiles p JOIN provider_verifications v ON v.provider_id=p.id WHERE p.id=? AND '.sqfPublicPredicate();
+    $sql='SELECT p.id,p.full_name,p.city,p.city_ibge,p.bio,CASE WHEN p.avatar_path IS NULL THEN 0 ELSE 1 END AS has_avatar FROM profiles p JOIN provider_verifications v ON v.provider_id=p.id WHERE p.id=? AND '.sqfPublicPredicate();
     $row=sqfQuery($db,$sql,[$provider])->fetch(PDO::FETCH_ASSOC);
     if(!$row)return null;
     $row['services']=sqfQuery($db,'SELECT id,category_id,service_title,description,price_min_cents,price_max_cents FROM provider_services WHERE provider_id=? AND is_active=1 ORDER BY service_title,id LIMIT 100',[$provider])->fetchAll(PDO::FETCH_ASSOC);
+    $row['portfolio']=sqfQuery($db,'SELECT ph.id,ph.caption,ph.service_id,ph.is_cover FROM portfolio_photos ph JOIN provider_services s ON s.id=ph.service_id AND s.provider_id=ph.provider_id AND s.is_active=1 WHERE ph.provider_id=? ORDER BY ph.is_cover DESC,ph.created_at DESC LIMIT 50',[$provider])->fetchAll(PDO::FETCH_ASSOC);
     return $row;
 }
