@@ -1368,6 +1368,9 @@ body{min-width:320px}
 .sqf-routed-dashboard .sqf-route-modules>.dashboard-card,.sqf-routed-dashboard .sqf-route-modules>.sqf-provider-module,.sqf-routed-dashboard .sqf-route-modules>.client-dashboard{margin:0!important;max-width:none!important;min-width:0}
 .sqf-routed-dashboard .sqf-route-modules>.dashboard-card{padding:clamp(16px,2.3vw,25px);border-radius:16px}
 .sqf-routed-dashboard .sqf-route-modules>.sqf-provider-module{padding:clamp(17px,2.3vw,26px);background:#fff;border:1px solid #e0e8ee;border-radius:17px;box-shadow:0 8px 26px #1239500e}
+.sqf-routed-dashboard .sqf-route-modules>.trust-workflow{margin:0;padding:clamp(18px,2.4vw,26px);background:#fff;border:1px solid #dce8f0;border-radius:17px;box-shadow:0 8px 26px #1239500e}
+.sqf-routed-dashboard .sqf-route-modules>.trust-workflow h2{color:#133c59;font-size:1.33rem;margin:4px 0 10px}
+.sqf-routed-dashboard .sqf-route-modules>.trust-workflow .trust-note{color:#5e7587;line-height:1.65}
 .sqf-routed-dashboard .sqf-route-modules>.sqf-provider-module h2{font-size:1.35rem;margin:5px 0}
 .sqf-routed-dashboard .sqf-route-modules .client-dashboard-grid{display:block;columns:unset}
 .sqf-routed-dashboard .sqf-route-modules .client-dashboard-grid>div{display:contents}
