@@ -101,3 +101,17 @@ A CI MySQL/MariaDB executa `database/tests/integrity.php` antes e depois da suí
 `backend/src/Professional.php` implementa leitura e atualização dos detalhes profissionais pelo titular prestador: título, especialidades, experiência, modalidade, cobertura, dias/período de atendimento, política de orçamento e endereço HTTPS. O perfil público elegível recebe detalhes profissionais; o painel candidato permite edição de serviços existentes e seleção/exclusão de fotos do portfólio. A escolha de capa é transacional e exclusiva por prestador; a exclusão revoga acesso pelos metadados antes de remover o arquivo gerado. A limpeza de arquivos legados e eventual falha de unlink exige procedimento operacional de reconciliação. A raiz de mídia também é validada contra o document root real.
 
 Testes PHP de autorização, validação e capa/exclusão, e Chromium de edição de serviço e dados profissionais foram acrescentados. A CI #241 aprovou a etapa anterior; a nova suíte deve passar nos dois engines antes de declarar homologação. A Hostinger permanece fora do escopo até 100% de conversão e aceite.
+
+## Auditoria do repositório e gate de publicação
+
+Inventário da revisão: árvore Git completa da branch de migração, 343 entradas antes das alterações desta etapa. A CI #261 aprovou MySQL 8.0 e MariaDB 10.11. O script `database/audit/inventory.mjs` gera inventário de referências Supabase/PostgreSQL/MySQL, separando código de execução, validação e legado. A CI de migração executa também `npm run verify` e publica o inventário. O resultado é triagem textual, não prova de ausência de dependências. A CI #280 encontrou dois testes de contrato da página de categoria; a apresentação passou a carregar separadamente da lista de prestadores e o roteamento preserva os dois modos.
+
+`backend/src/AccountCases.php` e a API implementam verificação cadastral, fila de prestadores, decisões auditadas e solicitações privadas de suporte/LGPD. O cadastro cria verificação pendente; a migration 004 preenche lacunas nas instalações candidatas sem alterar decisões. Aprovação exige identidade aceita; suspensão remove visibilidade pública. A fila de suporte/privacidade exige administrador e MFA; pedidos pertencem ao titular. Resolução de solicitação não executa automaticamente exclusão, correção ou exportação de dados. O painel e a administração candidatos foram integrados. Novos testes ainda devem ser aprovados integralmente.
+
+### Pendências verificadas
+
+- Paridade de `painel.html`, `prestador.html`, `admin.html`: navegação e módulos ainda carregam Supabase; candidatos MySQL não equivalem a todas as funcionalidades.
+- `assets/account-security.js`, `marketplace-hub.js`, `admin-finance.js` e relatórios: segurança da conta, preferências, indicadores, notificações e financeiro ainda usam contratos legados.
+- Faturamento/assinaturas, conciliação e e-mail: workflows legados e Edge Functions Supabase não foram substituídos; não ativar checkout ou serviços reais.
+- Migração de identidades/dados/arquivos reais, reconciliação, testes de restauração e rollback, LGPD operacional e revisão de segurança.
+- CI PostgreSQL e fontes legadas permanecem por compatibilidade durante homologação. Não removê-las antes do corte e validação de paridade; nenhum deploy na Hostinger até 100% de conversão.
