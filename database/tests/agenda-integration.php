@@ -31,3 +31,28 @@ sqfAgenda($db,$u[1],$second,'cancel');
 check(sqfAgenda($db,$u[0],$first,'confirm')==='confirmed' && $read()['pending_starts_at']===null,'reschedule accepted after conflict cleared');
 check(str_starts_with($read()['starts_at'],substr($new,0,10)),'new reservation persisted');
 try {execq($db,'UPDATE sqf_appointments SET duration_minutes=10 WHERE request_id=?',[$first]);throw new RuntimeException('invalid duration accepted');} catch(PDOException $e){check(true,'database check rejects invalid duration');}
+
+require __DIR__.'/../../backend/src/Marketplace.php';
+execq($db,'UPDATE sqf_auth_users SET email_confirmed_at=UTC_TIMESTAMP(6) WHERE id=?',[$u[0]]);
+execq($db,'UPDATE profiles SET city_ibge=?,is_public=1 WHERE id=?',['2111300',$u[1]]);
+execq($db,'INSERT INTO sqf_billing_settings(singleton,require_paid_subscription,checkout_enabled) VALUES (1,0,0)',[]);
+execq($db,"INSERT INTO provider_verifications(provider_id,status) VALUES (?,'pending')",[$u[1]]);
+check(count(sqfCatalog($db,'2111300'))===0,'unapproved provider hidden');
+execq($db,"UPDATE provider_verifications SET status='approved' WHERE provider_id=?",[$u[1]]);
+check(count(sqfCatalog($db,'2111300'))===1,'approved provider visible');
+check(!sqfProviderPublic($db,$u[0]),'client never public');
+$service2='00000000-0000-4000-8000-000000000020';
+execq($db,'INSERT INTO provider_services(id,provider_id,category_id,service_title) VALUES (?,?,?,?)',[$service2,$u[1],'fixture','Segundo serviço']);
+$id=sqfCreateRequest($db,$u[0],$u[1],$service2,'Solicitação fictícia para testar contratação completa');
+check(strlen($id)===36,'create request with UUID');
+reject(fn()=>sqfCreateRequest($db,$u[0],$u[1],$service2,'Solicitação duplicada para testar contratação'),'duplicate rejected');
+reject(fn()=>sqfSendQuote($db,$u[0],$id,1500,'Condições de teste'),'client cannot quote');
+check(sqfSendQuote($db,$u[1],$id,1500,'Condições de teste')==='quoted','provider sends quote');
+reject(fn()=>sqfRequestAction($db,$u[2],$id,'accept'),'third party cannot accept');
+check(sqfRequestAction($db,$u[0],$id,'accept')==='accepted','client accepts quote');
+check(sqfRequestAction($db,$u[1],$id,'start')==='in_progress','provider starts');
+check(sqfRequestAction($db,$u[1],$id,'finish')==='awaiting_confirmation','provider finishes');
+check(sqfRequestAction($db,$u[0],$id,'confirm')==='completed','client completes');
+check((int)sqfQuery($db,'SELECT COUNT(*) FROM sqf_request_events WHERE request_id=?',[$id])->fetchColumn()===6,'request audit history persists');
+execq($db,"UPDATE provider_verifications SET status='suspended' WHERE provider_id=?",[$u[1]]);
+check(count(sqfCatalog($db,'2111300'))===0,'suspended provider hidden');
