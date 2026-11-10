@@ -18,6 +18,8 @@ jobs:
         env:
           MYSQL_ROOT_PASSWORD: sqf-ci-only
           MYSQL_DATABASE: sqf_test
+          MYSQL_USER: sqf_ci
+          MYSQL_PASSWORD: sqf-ci-user-only
         ports:
           - 3306:3306
         options: >-
@@ -33,17 +35,23 @@ jobs:
         run: |
           npm install --no-save --package-lock=false playwright@1.56.1
           npx playwright install --with-deps chromium
-      - name: Install schema
-        run: docker exec -i ${{ job.services.database.id }} sh -c 'mysql -uroot -p"$MYSQL_ROOT_PASSWORD" sqf_test' < database/mysql/migrations/001_schema.sql
-      - name: Install authentication migration
-        run: docker exec -i ${{ job.services.database.id }} sh -c 'mysql -uroot -p"$MYSQL_ROOT_PASSWORD" sqf_test' < database/mysql/migrations/002_auth.sql
-      - name: Install staff MFA migration
-        run: docker exec -i ${{ job.services.database.id }} sh -c 'mysql -uroot -p"$MYSQL_ROOT_PASSWORD" sqf_test' < database/mysql/migrations/003_staff_mfa.sql
+      - name: Generate Hostinger SQL package
+        run: |
+          node database/hostinger/build-install.mjs
+          (cd dist/hostinger && sha256sum -c SHA256SUMS)
+      - name: Import consolidated Hostinger installer with database-scoped user
+        run: docker exec -i ${{ job.services.database.id }} sh -c 'mysql -usqf_ci -p"$MYSQL_PASSWORD" sqf_test' < dist/hostinger/01-instalar-banco.sql
+      - name: Store Hostinger SQL installer
+        uses: actions/upload-artifact@v4
+        with:
+          name: hostinger-sql-${{ matrix.image == 'mysql:8.0' && 'mysql' || 'mariadb' }}
+          path: dist/hostinger/
+          retention-days: 14
       - name: Lint and integration
         env:
           SQF_DB_DSN: mysql:host=127.0.0.1;port=3306;dbname=sqf_test;charset=utf8mb4
-          SQF_DB_USER: root
-          SQF_DB_PASSWORD: sqf-ci-only
+          SQF_DB_USER: sqf_ci
+          SQF_DB_PASSWORD: sqf-ci-user-only
           SQF_PRIVATE_MEDIA_ROOT: /tmp/sqf-private-media
         run: |
           php -l backend/src/Agenda.php
