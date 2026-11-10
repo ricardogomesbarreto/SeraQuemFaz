@@ -102,6 +102,7 @@ jobs:
           mkdir -m 700 "$PWD/dist/mysql-candidate/sqf-private/media"
           SQF_PRIVATE_MEDIA_ROOT="$PWD/dist/mysql-candidate/sqf-private/media" php -r 'require "dist/mysql-candidate/sqf-private/backend/src/PrivateMedia.php"; echo sqfMediaRoot().PHP_EOL;'
           rmdir "$PWD/dist/mysql-candidate/sqf-private/media"
+          printf '<?php // CI inherits disposable configuration from environment.\n' > "$PWD/dist/mysql-candidate/sqf-private/config.php"
           SQF_ALLOW_INSECURE_LOCAL=1 php -S 127.0.0.1:8080 -t "$STAGING_ROOT" database/tests/browser-router.php >/tmp/sqf-http.log 2>&1 &
           trap 'kill $! 2>/dev/null || true; cat /tmp/sqf-http.log' EXIT
           for i in $(seq 1 20); do curl -fsS 'http://127.0.0.1:8080/index.php?route=session' >/dev/null && break; sleep 1; done
@@ -127,7 +128,7 @@ jobs:
           docker exec -i ${{ job.services.database.id }} sh -c 'mysql -uroot -p"$MYSQL_ROOT_PASSWORD" sqf_restore' < /tmp/sqf-ci-backup.sql
           SQF_RESTORE_DSN='mysql:host=127.0.0.1;port=3306;dbname=sqf_restore;charset=utf8mb4' php database/tests/restore-check.php
           SQF_DB_DSN='mysql:host=127.0.0.1;port=3306;dbname=sqf_restore;charset=utf8mb4' php database/tests/integrity.php
-          rm -f /tmp/sqf-ci-backup.sql
+          rm -f /tmp/sqf-ci-backup.sql "$PWD/dist/mysql-candidate/sqf-private/config.php"
 
       - name: Store isolated candidate package
         uses: actions/upload-artifact@v4
