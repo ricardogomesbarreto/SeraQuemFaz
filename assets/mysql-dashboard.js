@@ -84,6 +84,8 @@
        item.append(link);target.append(item);
      }
    }
+   const professionalSection=$('mysqlProfessionalSection');professionalSection.hidden=profile.account_type!=='prestador';
+   if(!professionalSection.hidden){const data=(await api.professional()).data,form=$('mysqlProfessionalForm');for(const key of ['professional_title','specialties','experience_years','service_mode','coverage_area','work_period','quote_policy','professional_website'])if(data[key]!=null)form.elements[key].value=data[key];const days=typeof data.workdays==='string'?JSON.parse(data.workdays):data.workdays||[];for(const input of form.querySelectorAll('[name=workdays]'))input.checked=days.includes(input.value);}
    const portfolioSection=$('mysqlPortfolioSection');portfolioSection.hidden=profile.account_type!=='prestador';
    const serviceSection=$('mysqlServiceSection');
    serviceSection.hidden=profile.account_type!=='prestador';
@@ -96,13 +98,13 @@
      const portfolioSelect=$('mysqlPortfolioForm').elements.service_id;portfolioSelect.replaceChildren();
      for(const service of services.data){const option=el('option',service.service_title);option.value=service.id;portfolioSelect.append(option);}
      const portfolio=(await api.mediaList('portfolio')).data;const portfolioRoot=$('mysqlPortfolio');empty(portfolioRoot,portfolio,'Nenhuma foto no portfólio.');
-     for(const item of portfolio){const box=el('figure');box.append(image('portfolio',item.id,item.caption||'Foto do portfólio'),el('figcaption',item.caption||'Trabalho realizado'));portfolioRoot.append(box);}
+     for(const item of portfolio){const box=el('figure');box.append(image('portfolio',item.id,item.caption||'Foto do portfólio'),el('figcaption',item.caption||'Trabalho realizado'));box.append(button(Number(item.is_cover)===1?'Capa atual':'Definir capa',async()=>{await api.managePortfolio({id:item.id,action:'cover'});await load();}),button('Excluir foto',async()=>{if(confirm('Excluir esta foto do portfólio?')){await api.managePortfolio({id:item.id,action:'delete'});await load();}}));portfolioRoot.append(box);}
      const target=$('mysqlServices');empty(target,services.data,'Nenhum serviço cadastrado.');
      for(const service of services.data){
        const card=wrap(service.service_title);
        const active=Number(service.is_active)===1;
        card.append(el('p',(active?'Ativo':'Inativo')+' · '+(service.description||'Sem descrição')));
-       card.append(button(active?'Desativar serviço':'Ativar serviço',async()=>{
+       card.append(button('Editar serviço',async()=>{const f=$('mysqlServiceForm');for(const key of ['id','category_id','service_title','description','price_min_cents','price_max_cents'])f.elements[key].value=service[key]??'';f.querySelector('[type=submit]').textContent='Salvar alterações';$('mysqlServiceCancel').hidden=false;f.scrollIntoView({block:'start'});}),button(active?'Desativar serviço':'Ativar serviço',async()=>{
          await api.toggleService({id:service.id,is_active:!active});
          await load();
        }));
@@ -170,15 +172,17 @@
    catch(error){status(error.message||'Falha ao enviar documento.');}
    finally{submit.disabled=false;}
  });
+ $('mysqlProfessionalForm').addEventListener('submit',async e=>{e.preventDefault();const f=new FormData(e.currentTarget);const data=Object.fromEntries(f);data.workdays=f.getAll('workdays');data.experience_years=data.experience_years===''?null:Number(data.experience_years);try{await api.saveProfessional(data);await load();status('Informações profissionais salvas.');}catch(error){status(error.message);}});
+ $('mysqlServiceCancel').addEventListener('click',()=>{const f=$('mysqlServiceForm');f.reset();f.elements.id.value='';f.querySelector('[type=submit]').textContent='Cadastrar serviço';$('mysqlServiceCancel').hidden=true;});
  $('mysqlServiceForm').addEventListener('submit',async e=>{
    e.preventDefault();const form=e.currentTarget,fields=form.elements;
    const minimum=fields.price_min_cents.value,maximum=fields.price_max_cents.value;
    if((minimum==='')!==(maximum==='')){status('Informe os dois preços ou deixe ambos em branco.');return;}
-   const request={category_id:fields.category_id.value,service_title:fields.service_title.value,
+   const request={...(fields.id.value?{id:fields.id.value}:{}),category_id:fields.category_id.value,service_title:fields.service_title.value,
      description:fields.description.value,price_min_cents:minimum===''?null:Number(minimum),
      price_max_cents:maximum===''?null:Number(maximum)};
    const submit=form.querySelector('[type="submit"]');submit.disabled=true;
-   try{await api.saveService(request);form.reset();await load();status('Serviço cadastrado.');}
+   try{await api.saveService(request);$('mysqlServiceCancel').click();await load();status('Serviço salvo.');}
    catch(error){status(error.message||'Falha ao cadastrar serviço.');}
    finally{submit.disabled=false;}
  });
