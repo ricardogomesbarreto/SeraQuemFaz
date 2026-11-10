@@ -19,6 +19,19 @@
      const actions=provider?{requested:['decline'],quoted:['decline'],accepted:['start'],in_progress:['finish']}:{requested:['cancel'],quoted:['accept','cancel'],accepted:['cancel'],awaiting_confirmation:['confirm']};
      const names={accept:'Aceitar',decline:'Recusar',cancel:'Cancelar',start:'Iniciar',finish:'Finalizar',confirm:'Confirmar conclusão'};
      for(const action of actions[r.status]||[])card.append(button(names[action],async()=>{await api.requestAction({request_id:r.id,action});await load();}));
+     if(!provider&&r.status==='completed'){
+       const form=el('form'),rating=el('select'),comment=el('textarea');
+       rating.setAttribute('aria-label','Nota da avaliação');
+       for(let i=1;i<=5;i++){const option=el('option',i+' estrela(s)');option.value=String(i);rating.append(option);}
+       comment.required=true;comment.minLength=15;comment.maxLength=1500;comment.placeholder='Conte como foi o atendimento';
+       const submit=el('button','Enviar avaliação');submit.type='submit';submit.className='button button-primary';
+       form.append(rating,comment,submit);
+       form.addEventListener('submit',async e=>{e.preventDefault();submit.disabled=true;try{
+         await api.createReview({request_id:r.id,rating:Number(rating.value),comment:comment.value});
+         status('Avaliação enviada para moderação.');form.remove();
+       }catch(error){status(error.message);}finally{submit.disabled=false;}});
+       card.append(form);
+     }
      const messages=el('div');card.append(button('Abrir conversa',async()=>{const result=await api.messages(r.id);messages.replaceChildren();for(const m of result.data.slice().reverse())messages.append(el('p',(m.sender_id===user?'Você: ':'Outra parte: ')+m.body));}),messages);
      if(['requested','quoted','accepted','in_progress','awaiting_confirmation'].includes(r.status)){const input=el('textarea');input.placeholder='Mensagem privada';input.maxLength=2000;card.append(input,button('Enviar mensagem',async()=>{await api.sendMessage({request_id:r.id,body:input.value});input.value='';status('Mensagem enviada.');}));}
      if(['accepted','in_progress','awaiting_confirmation'].includes(r.status)){const dt=el('input');dt.type='datetime-local';const dur=el('input');dur.type='number';dur.min='30';dur.max='480';dur.value='60';card.append(dt,dur,button('Propor horário',async()=>{if(!dt.value)throw new Error('Informe a data');await api.appointment({request_id:r.id,action:'propose',starts_at:new Date(dt.value).toISOString(),duration_minutes:Number(dur.value)});await load();}));}
@@ -67,7 +80,8 @@
        card.append(el('p',provider.city||''),el('p',provider.bio||''));
        const details=el('div');
        card.append(button('Ver serviços',async()=>{
-         const result=await api.provider(provider.id);details.replaceChildren();
+         const [result,reviews]=await Promise.all([api.provider(provider.id),api.publicReviews(provider.id)]);details.replaceChildren();
+         if(reviews.data.length){details.append(el('h4','Avaliações publicadas'));for(const review of reviews.data)details.append(el('p',review.rating+'/5 — '+review.comment));}
          if(!result.data?.services?.length){details.append(el('p','Nenhum serviço ativo.'));return;}
          const form=el('form'),list=el('select');
          list.required=true;
