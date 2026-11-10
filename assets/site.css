@@ -1405,7 +1405,8 @@ body{min-width:320px}
  .sqf-routed-dashboard .sqf-unified-sidebar .sqf-client-side-nav{grid-template-columns:repeat(3,minmax(0,1fr))!important;max-height:none}
  .sqf-routed-dashboard .sqf-unified-sidebar .sqf-client-side-nav a{min-height:41px;padding:9px 8px!important;font-size:.72rem!important;gap:6px}
  .sqf-routed-dashboard .sqf-unified-sidebar .sqf-client-side-nav a span{width:14px}
- .sqf-routed-dashboard .sqf-unified-sidebar .sqf-sidebar-exit{display:none}
+ .sqf-routed-dashboard .sqf-unified-sidebar .sqf-sidebar-exit{display:block;border-top:1px solid #ffffff30;padding-top:9px}
+ .sqf-routed-dashboard .sqf-unified-sidebar .sqf-sidebar-exit #logoutButton{min-height:40px;padding:9px}
  .sqf-routed-dashboard .sqf-unified-sidebar .sqf-sidebar-help{display:none}
 }
 @media(max-width:480px){
