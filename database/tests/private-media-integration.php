@@ -92,3 +92,14 @@ verify(count(sqfOwnCases($db,$client)['support'])===1,'own support case visible'
 verify(count(sqfOwnCases($db,$provider)['support'])===0,'support cases isolated');
 forbid(fn()=>sqfStaffCases($db,$client),'client cannot access admin cases');
 forbid(fn()=>sqfStaffProviderDecide($db,$client,$provider,'suspended','Decisão de teste sem autorização'),'client cannot moderate provider');
+
+sqfQuery($db,'UPDATE sqf_admin_members SET active=1 WHERE user_id=?',[$stranger]);
+forbid(fn()=>sqfStaffProviderDecide($db,$stranger,$identity['id'],'approved','Identidade ainda não foi analisada.'),'unverified provider cannot be approved');
+sqfStaffProviderDecide($db,$stranger,$provider,'suspended','Suspensão em ambiente descartável de teste.');
+verify(!sqfProviderPublic($db,$provider),'suspended provider hidden from marketplace');
+sqfStaffProviderDecide($db,$stranger,$provider,'approved','Restabelecimento em ambiente descartável de teste.');
+verify(sqfProviderPublic($db,$provider),'approved provider restored to marketplace');
+$privacyCase=sqfCreateCase($db,$client,'privacy','access','Solicitação de acesso a dados de teste.');
+verify(count(sqfOwnCases($db,$client)['privacy'])===1,'privacy case recorded');
+forbid(fn()=>sqfStaffCases($db,$stranger),'moderator cannot read privacy cases');
+sqfQuery($db,'UPDATE sqf_admin_members SET active=0 WHERE user_id=?',[$stranger]);
