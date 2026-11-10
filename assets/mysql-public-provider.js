@@ -11,6 +11,7 @@
    $('publicProviderName').textContent=provider.full_name;
    $('publicProviderCity').textContent=provider.city||'';
    $('publicProviderBio').textContent=provider.bio||'';
+   const details=provider.professional;if(details){const root=$('publicProviderBio').parentElement;for(const [label,value] of [['Título',details.professional_title],['Especialidades',details.specialties],['Experiência',details.experience_years==null?'':details.experience_years+' anos'],['Modalidade',({presencial:'Presencial',remoto:'Remoto',hibrido:'Híbrida'})[details.service_mode]],['Área de atendimento',details.coverage_area]])if(value)root.append(ui.make('p','',label+': '+value));}
    if(Number(provider.has_avatar)===1){const img=ui.safeImg(api.mediaUrl('avatar',id),'Foto do profissional');img.width=120;img.height=120;img.style.objectFit='cover';img.style.borderRadius='50%';$('publicProviderAvatar').append(img);}
    $('publicProviderRating').append(ui.ratingLine(reviews));
    const form=$('publicProviderQuote');
