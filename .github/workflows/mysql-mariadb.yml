@@ -86,6 +86,8 @@ jobs:
           php -l database/tests/private-media-integration.php
           php -l database/tests/agenda-integration.php
           php -l backend/src/Auth.php
+          php -l backend/src/Mail.php
+          php database/tests/mail-unit.php
           php -l backend/public/index.php
           php -l database/seed/import-public.php
           php database/seed/import-public.php

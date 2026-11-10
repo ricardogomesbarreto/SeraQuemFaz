@@ -1,6 +1,7 @@
 <?php
 declare(strict_types=1);
 require_once __DIR__.'/Marketplace.php';
+require_once __DIR__.'/Mail.php';
 
 /** Single worker per database; retry bounded. A successful transport followed by a
  * process crash can repeat delivery; not an exactly-once guarantee. */
@@ -34,5 +35,5 @@ function sqfNotificationMail(string $email,string $id):bool {
     $from=getenv('SQF_MAIL_FROM');$site=getenv('SQF_SITE_URL');
     if(!$from||!filter_var($from,FILTER_VALIDATE_EMAIL)||!$site||!filter_var($site,FILTER_VALIDATE_URL)||parse_url($site,PHP_URL_SCHEME)!=='https'||parse_url($site,PHP_URL_USER)!==null||parse_url($site,PHP_URL_PASS)!==null||parse_url($site,PHP_URL_QUERY)!==null||parse_url($site,PHP_URL_FRAGMENT)!==null)throw new RuntimeException('Configuração de e-mail indisponível');
     // No request description, documents, payment details or private messages in email.
-    return mail($email,'Nova atualização — Será Quem Faz?',"Você possui uma atualização na plataforma.\n\nAcesse sua conta: ".rtrim($site,'/')."/painel.html\n\nNão compartilhe senhas ou códigos por e-mail.",['From'=>$from,'Content-Type'=>'text/plain; charset=UTF-8']);
+    return sqfSmtpSend($email,'Nova atualização — Será Quem Faz?',"Você possui uma atualização na plataforma.\n\nAcesse sua conta: ".rtrim($site,'/')."/painel.html\n\nNão compartilhe senhas ou códigos por e-mail.");
 }

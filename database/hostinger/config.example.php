@@ -20,3 +20,8 @@ putenv('SQF_SITE_URL=');
 
 // Enable only after staging validation; private CLI cron.
 putenv('SQF_MAINTENANCE_ENABLED=0');
+
+// Hostinger domain mailbox; keep disabled until an authorized delivery test.
+putenv('SQF_SMTP_ENABLED=0');
+putenv('SQF_SMTP_USER=');
+putenv('SQF_SMTP_PASSWORD=');

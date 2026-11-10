@@ -13,6 +13,7 @@ require_once __DIR__.'/../src/AccountSecurity.php';
 require_once __DIR__.'/../src/Billing.php';
 require_once __DIR__.'/../src/MercadoPago.php';
 require_once __DIR__.'/../src/Engagement.php';
+require_once __DIR__.'/../src/Mail.php';
 
 header('Content-Type: application/json; charset=utf-8');
 header('Cache-Control: no-store');
@@ -28,12 +29,7 @@ function number(array $body,string $key):int {
     if(!isset($body[$key])||!is_int($body[$key]))throw new DomainException('Campo inválido: '.$key);
     return $body[$key];
 }
-function deliver(string $email,string $token,string $purpose):void {
-    $from=getenv('SQF_MAIL_FROM');
-    if(!$from||!filter_var($from,FILTER_VALIDATE_EMAIL))throw new RuntimeException('Envio de e-mail não configurado');
-    // A real mail transport must be configured and verified before production.
-    if(!mail($email,'Código de segurança — Será Quem Faz?', 'Código de '.($purpose==='verify'?'confirmação':'recuperação').": ".$token."\nVálido por 30 minutos.",['From'=>$from,'Content-Type'=>'text/plain; charset=UTF-8']))throw new RuntimeException('Envio indisponível');
-}
+
 try {
     $local=getenv('SQF_ALLOW_INSECURE_LOCAL')==='1'&&in_array($_SERVER['REMOTE_ADDR']??'',['127.0.0.1','::1'],true);
     if(($_SERVER['HTTPS']??'')!=='on'&&!$local)respond(['error'=>'HTTPS obrigatório'],403);
@@ -102,8 +98,8 @@ try {
       }
       switch($route){
         case 'register':
-          if(!getenv('SQF_MAIL_FROM'))throw new RuntimeException('Envio de e-mail não configurado');
-          try{$result=sqfRegister($db,$email,required($body,'password'),required($body,'name'),required($body,'account_type'),isset($body['city_ibge'])?required($body,'city_ibge'):null);deliver($email,$result['token'],'verify');}
+          sqfMailConfig();
+          try{$result=sqfRegister($db,$email,required($body,'password'),required($body,'name'),required($body,'account_type'),isset($body['city_ibge'])?required($body,'city_ibge'):null);sqfAuthMail($email,$result['token'],'verify');}
           catch(PDOException $e){if($e->getCode()!=='23000')throw $e;}
           respond(['message'=>'Se a conta estiver disponível, confira o e-mail para confirmar.'],202);
         case 'login':
@@ -112,10 +108,10 @@ try {
           respond(['user_id'=>$identity['id'],'csrf'=>$_SESSION['csrf']]);
         case 'request-reset':
         case 'resend-verification':
-          if(!getenv('SQF_MAIL_FROM'))throw new RuntimeException('Envio de e-mail não configurado');
+          sqfMailConfig();
           $purpose=$route==='request-reset'?'reset':'verify';
           $token=sqfRequestAuthToken($db,$email,$purpose);
-          if($token!==null)try{deliver($email,$token,$purpose);}catch(Throwable $e){error_log('SQF mail delivery failed');}
+          if($token!==null)try{sqfAuthMail($email,$token,$purpose);}catch(Throwable $e){error_log('SQF mail delivery failed');}
           respond(['message'=>'Se houver conta elegível, confira o e-mail.'],202);
         case 'verify':sqfConsumeToken($db,required($body,'token'),'verify');respond(['ok'=>true]);
         case 'reset':sqfConsumeToken($db,required($body,'token'),'reset',required($body,'password'));respond(['ok'=>true]);
