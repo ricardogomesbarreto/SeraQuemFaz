@@ -1,6 +1,9 @@
 -- Candidate schema generated from public PostgreSQL catalog metadata (no user records).
 -- MySQL 8.0.16+ / MariaDB 10.6+. UTC database sessions required.
 SET time_zone = '+00:00';
+-- MySQL disallows referential actions on columns used in CHECK constraints.
+-- Affected foreign keys use default RESTRICT; explicit transactional deletion is required.
+
 CREATE TABLE `sqf_auth_users` (`id` CHAR(36) CHARACTER SET ascii COLLATE ascii_bin NOT NULL PRIMARY KEY, `email` VARCHAR(254) NOT NULL UNIQUE, `password_hash` VARCHAR(255) NULL, `email_confirmed_at` DATETIME(6) NULL, `created_at` DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
 
 CREATE TABLE `categories` (
@@ -594,10 +597,10 @@ CREATE TABLE `users` (
   `updated_at` TEXT NULL,
   CONSTRAINT `Users_pkey` PRIMARY KEY (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
-ALTER TABLE `portfolio_photos` ADD CONSTRAINT `portfolio_photos_provider_id_fkey` FOREIGN KEY (provider_id) REFERENCES profiles(id) ON DELETE CASCADE;
-ALTER TABLE `portfolio_photos` ADD CONSTRAINT `sqf_portfolio_service_owner_fk` FOREIGN KEY (service_id, provider_id) REFERENCES provider_services(id, provider_id) ON DELETE RESTRICT;
+ALTER TABLE `portfolio_photos` ADD CONSTRAINT `portfolio_photos_provider_id_fkey` FOREIGN KEY (provider_id) REFERENCES profiles(id);
+ALTER TABLE `portfolio_photos` ADD CONSTRAINT `sqf_portfolio_service_owner_fk` FOREIGN KEY (service_id, provider_id) REFERENCES provider_services(id, provider_id);
 ALTER TABLE `privacy_requests` ADD CONSTRAINT `privacy_requests_user_id_fkey` FOREIGN KEY (user_id) REFERENCES profiles(id) ON DELETE CASCADE;
-ALTER TABLE `profiles` ADD CONSTRAINT `profiles_id_fkey` FOREIGN KEY (id) REFERENCES sqf_auth_users(id) ON DELETE CASCADE;
+ALTER TABLE `profiles` ADD CONSTRAINT `profiles_id_fkey` FOREIGN KEY (id) REFERENCES sqf_auth_users(id);
 ALTER TABLE `profiles` ADD CONSTRAINT `sqf_profile_valid_city_ibge` FOREIGN KEY (city_ibge) REFERENCES sqf_ibge_municipalities(code);
 ALTER TABLE `provider_professional_details` ADD CONSTRAINT `provider_professional_details_provider_id_fkey` FOREIGN KEY (provider_id) REFERENCES profiles(id) ON DELETE CASCADE;
 ALTER TABLE `provider_services` ADD CONSTRAINT `provider_services_provider_id_fkey` FOREIGN KEY (provider_id) REFERENCES profiles(id) ON DELETE CASCADE;
@@ -605,25 +608,25 @@ ALTER TABLE `provider_verifications` ADD CONSTRAINT `provider_verifications_prov
 ALTER TABLE `provider_verifications` ADD CONSTRAINT `provider_verifications_reviewed_by_fkey` FOREIGN KEY (reviewed_by) REFERENCES sqf_auth_users(id);
 ALTER TABLE `providers` ADD CONSTRAINT `fk_providers_user` FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
 ALTER TABLE `reviews` ADD CONSTRAINT `reviews_engagement_id_fkey` FOREIGN KEY (engagement_id) REFERENCES service_engagements(id);
-ALTER TABLE `reviews` ADD CONSTRAINT `reviews_provider_id_fkey` FOREIGN KEY (provider_id) REFERENCES profiles(id) ON DELETE CASCADE;
-ALTER TABLE `reviews` ADD CONSTRAINT `reviews_reviewer_id_fkey` FOREIGN KEY (reviewer_id) REFERENCES profiles(id) ON DELETE CASCADE;
+ALTER TABLE `reviews` ADD CONSTRAINT `reviews_provider_id_fkey` FOREIGN KEY (provider_id) REFERENCES profiles(id);
+ALTER TABLE `reviews` ADD CONSTRAINT `reviews_reviewer_id_fkey` FOREIGN KEY (reviewer_id) REFERENCES profiles(id);
 ALTER TABLE `safety_reports` ADD CONSTRAINT `safety_reports_provider_id_fkey` FOREIGN KEY (provider_id) REFERENCES profiles(id) ON DELETE CASCADE;
 ALTER TABLE `safety_reports` ADD CONSTRAINT `safety_reports_reporter_id_fkey` FOREIGN KEY (reporter_id) REFERENCES profiles(id) ON DELETE CASCADE;
-ALTER TABLE `service_engagements` ADD CONSTRAINT `service_engagements_client_id_fkey` FOREIGN KEY (client_id) REFERENCES profiles(id) ON DELETE CASCADE;
-ALTER TABLE `service_engagements` ADD CONSTRAINT `service_engagements_provider_id_fkey` FOREIGN KEY (provider_id) REFERENCES profiles(id) ON DELETE CASCADE;
+ALTER TABLE `service_engagements` ADD CONSTRAINT `service_engagements_client_id_fkey` FOREIGN KEY (client_id) REFERENCES profiles(id);
+ALTER TABLE `service_engagements` ADD CONSTRAINT `service_engagements_provider_id_fkey` FOREIGN KEY (provider_id) REFERENCES profiles(id);
 ALTER TABLE `services` ADD CONSTRAINT `services_category_id_fkey` FOREIGN KEY (category_id) REFERENCES categories(id);
-ALTER TABLE `sqf_account_settings` ADD CONSTRAINT `sqf_account_settings_user_id_fkey` FOREIGN KEY (user_id) REFERENCES sqf_auth_users(id) ON DELETE CASCADE;
+ALTER TABLE `sqf_account_settings` ADD CONSTRAINT `sqf_account_settings_user_id_fkey` FOREIGN KEY (user_id) REFERENCES sqf_auth_users(id);
 ALTER TABLE `sqf_admin_members` ADD CONSTRAINT `sqf_admin_members_user_id_fkey` FOREIGN KEY (user_id) REFERENCES sqf_auth_users(id) ON DELETE CASCADE;
-ALTER TABLE `sqf_appointments` ADD CONSTRAINT `sqf_appointments_client_id_fkey` FOREIGN KEY (client_id) REFERENCES sqf_auth_users(id) ON DELETE CASCADE;
+ALTER TABLE `sqf_appointments` ADD CONSTRAINT `sqf_appointments_client_id_fkey` FOREIGN KEY (client_id) REFERENCES sqf_auth_users(id);
 ALTER TABLE `sqf_appointments` ADD CONSTRAINT `sqf_appointments_proposed_by_fkey` FOREIGN KEY (proposed_by) REFERENCES sqf_auth_users(id);
-ALTER TABLE `sqf_appointments` ADD CONSTRAINT `sqf_appointments_provider_id_fkey` FOREIGN KEY (provider_id) REFERENCES sqf_auth_users(id) ON DELETE CASCADE;
+ALTER TABLE `sqf_appointments` ADD CONSTRAINT `sqf_appointments_provider_id_fkey` FOREIGN KEY (provider_id) REFERENCES sqf_auth_users(id);
 ALTER TABLE `sqf_appointments` ADD CONSTRAINT `sqf_appointments_request_id_fkey` FOREIGN KEY (request_id) REFERENCES sqf_service_requests(id) ON DELETE CASCADE;
 ALTER TABLE `sqf_billing_invoices` ADD CONSTRAINT `sqf_billing_invoices_subscription_id_fkey` FOREIGN KEY (subscription_id) REFERENCES sqf_billing_subscriptions(id) ON DELETE CASCADE;
 ALTER TABLE `sqf_billing_subscriptions` ADD CONSTRAINT `sqf_billing_subscriptions_user_id_fkey` FOREIGN KEY (user_id) REFERENCES profiles(id) ON DELETE CASCADE;
 ALTER TABLE `sqf_client_category_favorites` ADD CONSTRAINT `sqf_client_category_favorites_category_id_fkey` FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE CASCADE;
 ALTER TABLE `sqf_client_category_favorites` ADD CONSTRAINT `sqf_client_category_favorites_client_id_fkey` FOREIGN KEY (client_id) REFERENCES sqf_auth_users(id) ON DELETE CASCADE;
-ALTER TABLE `sqf_client_favorites` ADD CONSTRAINT `sqf_client_favorites_client_id_fkey` FOREIGN KEY (client_id) REFERENCES profiles(id) ON DELETE CASCADE;
-ALTER TABLE `sqf_client_favorites` ADD CONSTRAINT `sqf_client_favorites_provider_id_fkey` FOREIGN KEY (provider_id) REFERENCES profiles(id) ON DELETE CASCADE;
+ALTER TABLE `sqf_client_favorites` ADD CONSTRAINT `sqf_client_favorites_client_id_fkey` FOREIGN KEY (client_id) REFERENCES profiles(id);
+ALTER TABLE `sqf_client_favorites` ADD CONSTRAINT `sqf_client_favorites_provider_id_fkey` FOREIGN KEY (provider_id) REFERENCES profiles(id);
 ALTER TABLE `sqf_notification_outbox` ADD CONSTRAINT `sqf_notification_outbox_notification_id_fkey` FOREIGN KEY (notification_id) REFERENCES sqf_notifications(id) ON DELETE CASCADE;
 ALTER TABLE `sqf_notification_outbox` ADD CONSTRAINT `sqf_notification_outbox_recipient_id_fkey` FOREIGN KEY (recipient_id) REFERENCES sqf_auth_users(id) ON DELETE CASCADE;
 ALTER TABLE `sqf_notification_preferences` ADD CONSTRAINT `sqf_notification_preferences_user_id_fkey` FOREIGN KEY (user_id) REFERENCES sqf_auth_users(id) ON DELETE CASCADE;
@@ -635,7 +638,7 @@ ALTER TABLE `sqf_profile_views` ADD CONSTRAINT `sqf_profile_views_provider_id_fk
 ALTER TABLE `sqf_profile_views` ADD CONSTRAINT `sqf_profile_views_viewer_id_fkey` FOREIGN KEY (viewer_id) REFERENCES sqf_auth_users(id) ON DELETE CASCADE;
 ALTER TABLE `sqf_provider_coverage` ADD CONSTRAINT `sqf_provider_coverage_city_ibge_fkey` FOREIGN KEY (city_ibge) REFERENCES sqf_ibge_municipalities(code);
 ALTER TABLE `sqf_provider_coverage` ADD CONSTRAINT `sqf_provider_coverage_provider_id_fkey` FOREIGN KEY (provider_id) REFERENCES profiles(id) ON DELETE CASCADE;
-ALTER TABLE `sqf_request_attachments` ADD CONSTRAINT `sqf_request_attachments_request_id_fkey` FOREIGN KEY (request_id) REFERENCES sqf_service_requests(id) ON DELETE CASCADE;
+ALTER TABLE `sqf_request_attachments` ADD CONSTRAINT `sqf_request_attachments_request_id_fkey` FOREIGN KEY (request_id) REFERENCES sqf_service_requests(id);
 ALTER TABLE `sqf_request_attachments` ADD CONSTRAINT `sqf_request_attachments_uploaded_by_fkey` FOREIGN KEY (uploaded_by) REFERENCES profiles(id);
 ALTER TABLE `sqf_request_events` ADD CONSTRAINT `sqf_request_events_actor_id_fkey` FOREIGN KEY (actor_id) REFERENCES profiles(id);
 ALTER TABLE `sqf_request_events` ADD CONSTRAINT `sqf_request_events_request_id_fkey` FOREIGN KEY (request_id) REFERENCES sqf_service_requests(id) ON DELETE CASCADE;
@@ -648,13 +651,13 @@ ALTER TABLE `sqf_review_disputes` ADD CONSTRAINT `sqf_review_disputes_review_id_
 ALTER TABLE `sqf_review_responses` ADD CONSTRAINT `sqf_review_responses_provider_id_fkey` FOREIGN KEY (provider_id) REFERENCES profiles(id) ON DELETE CASCADE;
 ALTER TABLE `sqf_review_responses` ADD CONSTRAINT `sqf_review_responses_review_id_fkey` FOREIGN KEY (review_id) REFERENCES reviews(id) ON DELETE CASCADE;
 ALTER TABLE `sqf_service_requests` ADD CONSTRAINT `sqf_service_requests_city_ibge_fkey` FOREIGN KEY (city_ibge) REFERENCES sqf_ibge_municipalities(code);
-ALTER TABLE `sqf_service_requests` ADD CONSTRAINT `sqf_service_requests_client_id_fkey` FOREIGN KEY (client_id) REFERENCES profiles(id) ON DELETE CASCADE;
+ALTER TABLE `sqf_service_requests` ADD CONSTRAINT `sqf_service_requests_client_id_fkey` FOREIGN KEY (client_id) REFERENCES profiles(id);
 ALTER TABLE `sqf_service_requests` ADD CONSTRAINT `sqf_service_requests_engagement_id_fkey` FOREIGN KEY (engagement_id) REFERENCES service_engagements(id);
-ALTER TABLE `sqf_service_requests` ADD CONSTRAINT `sqf_service_requests_provider_id_fkey` FOREIGN KEY (provider_id) REFERENCES profiles(id) ON DELETE CASCADE;
+ALTER TABLE `sqf_service_requests` ADD CONSTRAINT `sqf_service_requests_provider_id_fkey` FOREIGN KEY (provider_id) REFERENCES profiles(id);
 ALTER TABLE `sqf_service_requests` ADD CONSTRAINT `sqf_service_requests_service_id_fkey` FOREIGN KEY (service_id) REFERENCES provider_services(id);
 ALTER TABLE `sqf_staff_decision_log` ADD CONSTRAINT `sqf_staff_decision_log_actor_id_fkey` FOREIGN KEY (actor_id) REFERENCES sqf_auth_users(id);
 ALTER TABLE `sqf_support_tickets` ADD CONSTRAINT `sqf_support_tickets_user_id_fkey` FOREIGN KEY (user_id) REFERENCES sqf_auth_users(id) ON DELETE CASCADE;
-ALTER TABLE `sqf_verification_documents` ADD CONSTRAINT `sqf_verification_documents_provider_id_fkey` FOREIGN KEY (provider_id) REFERENCES profiles(id) ON DELETE CASCADE;
+ALTER TABLE `sqf_verification_documents` ADD CONSTRAINT `sqf_verification_documents_provider_id_fkey` FOREIGN KEY (provider_id) REFERENCES profiles(id);
 ALTER TABLE `sqf_verification_documents` ADD CONSTRAINT `sqf_verification_documents_reviewed_by_fkey` FOREIGN KEY (reviewed_by) REFERENCES sqf_auth_users(id);
 ALTER TABLE `user_profiles` ADD CONSTRAINT `user_profiles_user_id_fkey` FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
 
