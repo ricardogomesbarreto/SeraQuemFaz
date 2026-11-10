@@ -226,7 +226,8 @@
     if(emptyMin&&emptyMax)return {price_min_cents:null,price_max_cents:null};
     const a=Number(min),b=Number(max);
     if(emptyMin||emptyMax||!Number.isFinite(a)||!Number.isFinite(b)||
-       a<0||b<a||b>1000000||Math.round(a*100)!==a*100||Math.round(b*100)!==b*100)
+       a<0||b<a||b>1000000||Math.abs(a*100-Math.round(a*100))>1e-6||
+       Math.abs(b*100-Math.round(b*100))>1e-6)
       throw new Error('Informe os dois valores em reais, com até duas casas decimais, ou deixe ambos vazios.');
     return {price_min_cents:Math.round(a*100),price_max_cents:Math.round(b*100)};
   };
@@ -464,7 +465,7 @@
   }
   async function loadPhotos() {
     const list=$('myGallery');list.replaceChildren();
-    const {data,error}=await client.from('portfolio_photos').select('id,storage_path,caption,service_id').eq('provider_id',user.id).order('created_at',{ascending:false});
+    const {data,error}=await client.from('portfolio_photos').select('id,storage_path,caption,service_id,is_cover').eq('provider_id',user.id).order('created_at',{ascending:false});
     if(error) throw error;
     currentPhotoCount=data?.length||0;
     if($('providerStatPhotos'))$('providerStatPhotos').textContent=String(currentPhotoCount);
@@ -478,6 +479,24 @@
       if(photo.caption)card.append(ui.make('figcaption','',photo.caption));
       const linked=providerServicesCache.find(s=>s.id===photo.service_id);
       card.append(ui.make('small','sqf-portfolio-category',linked?.service_title||'Trabalho geral'));
+      if(photo.is_cover)card.append(ui.make('span','sqf-portfolio-cover-badge','★ Foto de capa'));
+      else {
+        const cover=ui.make('button','button button-outline button-small','Definir como capa');
+        cover.type='button';
+        cover.addEventListener('click',async()=>{
+          cover.disabled=true;
+          try{
+            const {error:setError}=await client.rpc('sqf_set_portfolio_cover',{p_photo:photo.id});
+            if(setError)throw setError;
+            announce('galleryMessage','A fotografia de capa foi atualizada.');
+            await loadPhotos();await loadVerification();
+          }catch(error){
+            announce('galleryMessage','Não foi possível definir a capa. Verifique sua sessão.',true);
+            cover.disabled=false;
+          }
+        });
+        card.append(cover);
+      }
       const remove=ui.make('button','button button-outline button-small','Excluir foto');remove.type='button';
       remove.addEventListener('click',async()=>{
         if(!confirm('Excluir esta foto do portfólio público?'))return;
