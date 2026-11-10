@@ -4,7 +4,8 @@ const origin='http://127.0.0.1:8080';
 const browser=await chromium.launch({headless:true});
 try{
  const context=await browser.newContext();
- await context.route('**/*',r=>new URL(r.request().url()).origin===origin?r.continue():r.abort());
+ // Intercept only external requests; local navigation must use the real network/offline stack.
+ await context.route(url=>url.origin!==origin,r=>r.abort());
  const page=await context.newPage();
  await page.goto(origin+'/index.html',{waitUntil:'domcontentloaded'});
  await page.evaluate(()=>Promise.race([navigator.serviceWorker.ready,new Promise((_,reject)=>setTimeout(()=>reject(new Error('PWA registration timeout')),15000))]));
