@@ -31,12 +31,19 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y php-cli php-mysql php-mbstring
       - name: Install schema
         run: docker exec -i ${{ job.services.database.id }} sh -c 'mysql -uroot -p"$MYSQL_ROOT_PASSWORD" sqf_test' < database/mysql/migrations/001_schema.sql
+      - name: Install authentication migration
+        run: docker exec -i ${{ job.services.database.id }} sh -c 'mysql -uroot -p"$MYSQL_ROOT_PASSWORD" sqf_test' < database/mysql/migrations/002_auth.sql
       - name: Lint and integration
         env:
+          SQF_DB_DSN: mysql:host=127.0.0.1;port=3306;dbname=sqf_test;charset=utf8mb4
+          SQF_DB_USER: root
           SQF_DB_PASSWORD: sqf-ci-only
         run: |
           php -l backend/src/Agenda.php
           php -l backend/src/Database.php
           php -l backend/src/Marketplace.php
           php -l database/tests/agenda-integration.php
+          php -l backend/src/Auth.php
+          php -l backend/public/index.php
           php database/tests/agenda-integration.php
+          php database/tests/auth-integration.php
