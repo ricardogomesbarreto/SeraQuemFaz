@@ -29,3 +29,15 @@ verify(count(sqfListPrivateMedia($db,$provider,'attachment',$request))>=1,'reque
 forbid(fn()=>sqfListPrivateMedia($db,$stranger,'attachment',$request),'stranger cannot enumerate attachments');
 verify((int)sqfQuery($db,'SELECT COUNT(*) FROM sqf_verification_documents WHERE id=? AND provider_id=?',[$doc,$provider])->fetchColumn()===1,'private document metadata committed');
 verify((int)sqfQuery($db,'SELECT COUNT(*) FROM sqf_request_attachments WHERE id=? AND uploaded_by=?',[$attachment,$client])->fetchColumn()===1,'attachment metadata committed');
+
+forbid(fn()=>sqfStaffDocuments($db,$client),'ordinary client cannot read staff document queue');
+sqfQuery($db,'UPDATE sqf_admin_members SET active=1 WHERE user_id=?',[$stranger]);
+verify(count(sqfStaffDocuments($db,$stranger))>=1,'active moderator sees pending document metadata');
+$previous=sqfQuery($db,'SELECT status FROM provider_verifications WHERE provider_id=?',[$provider])->fetchColumn();
+sqfStaffDocumentDecide($db,$stranger,$doc,'accepted','Identidade analisada no ambiente de homologação');
+verify(sqfQuery($db,'SELECT status FROM sqf_verification_documents WHERE id=?',[$doc])->fetchColumn()==='accepted','moderator records document decision');
+verify(sqfQuery($db,'SELECT status FROM provider_verifications WHERE provider_id=?',[$provider])->fetchColumn()===$previous,'document acceptance never approves provider automatically');
+forbid(fn()=>sqfStaffDocumentDecide($db,$stranger,$doc,'rejected','Tentativa de alteração posterior da decisão'),'document decision cannot be overwritten');
+verify((int)sqfQuery($db,"SELECT COUNT(*) FROM sqf_staff_decision_log WHERE entity_type='verification_document' AND entity_id=?",[$doc])->fetchColumn()===1,'document moderation audit exists');
+sqfQuery($db,'UPDATE sqf_admin_members SET active=0 WHERE user_id=?',[$stranger]);
+forbid(fn()=>sqfStaffDocuments($db,$stranger),'revoked moderator blocked from queue');
