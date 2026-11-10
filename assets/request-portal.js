@@ -100,6 +100,9 @@
  }
  function drawList(){
    const control=$('sqfRequestFilter');
+   document.querySelectorAll('[data-request-filter]').forEach(button=>{
+     button.setAttribute('aria-pressed',String(button.dataset.requestFilter===control.value));
+   });
    const unreadOption=control.querySelector('option[value="unread"]');
    if(unreadOption)unreadOption.disabled=!unread;
    if(!unread&&control.value==='unread')control.value='all';
@@ -270,6 +273,14 @@
      ? 'Acompanhe suas solicitações, orçamentos e mensagens privadas com os prestadores.'
      : 'Responda solicitações, envie orçamentos e acompanhe atendimentos até a confirmação pelo cliente.';
    $('sqfRequestFilter').addEventListener('change',drawList);
+   document.querySelectorAll('[data-request-filter]').forEach(button=>{
+     button.addEventListener('click',()=>{
+       const control=$('sqfRequestFilter');
+       if(![...control.options].some(o=>o.value===button.dataset.requestFilter))return;
+       control.value=button.dataset.requestFilter;
+       drawList();
+     });
+   });
    $('sqfRequestSearch')?.addEventListener('input',drawList);
    $('sqfRequestRefresh').addEventListener('click',()=>load().catch(e=>say(e.message,true)));
    await load();
