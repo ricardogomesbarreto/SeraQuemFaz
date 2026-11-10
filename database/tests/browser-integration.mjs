@@ -74,6 +74,22 @@ try{
  assert.equal(await client.page.locator('.sqf-account-link').first().getAttribute('href'),'painel-mysql.html');
  await client.page.goto(origin+'/painel-mysql.html');await client.page.locator('#mysqlContent').waitFor({state:'visible'});
  console.log('PASS: public pages preserve authenticated MySQL navigation');
+ const categoryId=await provider.page.locator('#mysqlServiceForm select[name=category_id]').inputValue();
+ // Use category from the service created above (first active category).
+ await client.page.goto(origin+'/categoria.html?id='+encodeURIComponent(categoryId)+'&cidade=2111300');
+ await client.page.locator('#categoryContent').waitFor({state:'visible'});
+ await client.page.locator('#sqfSaveCategory').waitFor({state:'visible'});
+ await client.page.locator('#sqfSaveCategory').click();
+ await client.page.locator('#sqfSaveCategory[aria-pressed="true"]').waitFor();
+ await widthCheck(client.page,'category detail');
+ await client.page.locator('#providersList a.provider-card-link').first().click();
+ await client.page.waitForURL('**/prestador-mysql.html?*');
+ await client.page.locator('#publicProviderContent').waitFor({state:'visible'});
+ await widthCheck(client.page,'public provider');
+ await client.page.goto(origin+'/painel-mysql.html');await client.page.locator('#mysqlContent').waitFor({state:'visible'});
+ await client.page.locator('#mysqlFavorites').getByRole('button',{name:'Remover favorito'}).click();
+ await client.page.locator('#mysqlFavorites').getByText('Nenhuma categoria favorita.').waitFor();
+ console.log('PASS: category detail, public provider and private favorites UI');
  await client.page.locator('#mysqlLogout').click();await client.page.waitForURL('**/entrar.html');
  await client.page.goto(origin+'/painel-mysql.html');await client.page.waitForURL('**/entrar.html');
  console.log('PASS: logout prevents dashboard access');
