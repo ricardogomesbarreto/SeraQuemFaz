@@ -4,6 +4,7 @@ require_once __DIR__.'/../src/Database.php';
 require_once __DIR__.'/../src/Auth.php';
 require_once __DIR__.'/../src/Agenda.php';
 require_once __DIR__.'/../src/Services.php';
+require_once __DIR__.'/../src/Moderation.php';
 
 header('Content-Type: application/json; charset=utf-8');
 header('Cache-Control: no-store');
@@ -36,6 +37,7 @@ try {
     $route=trim((string)($_GET['route']??''),'/');
     if($method==='GET'&&$route==='session')respond(['user_id'=>sqfSessionUser($db,$_SESSION),'csrf'=>$_SESSION['csrf']]);
     if($method==='GET'&&$route==='categories')respond(['data'=>sqfQuery($db,"SELECT id,name,description,image_url,status,created_at FROM categories WHERE status='active' ORDER BY name,id")->fetchAll(PDO::FETCH_ASSOC)]);
+    if($method==='GET'&&$route==='reviews/public')respond(['data'=>sqfPublicReviews($db,(string)($_GET['id']??''))]);
     if($method==='GET'&&$route==='provider')respond(['data'=>sqfPublicProvider($db,(string)($_GET['id']??''))]);
     if($method==='GET'&&$route==='catalog')respond(['data'=>sqfCatalog($db,(string)($_GET['city']??''))]);
     if($method!=='POST')respond(['error'=>'Rota indisponível'],404);
@@ -74,6 +76,23 @@ try {
     }
     $actor=sqfSessionUser($db,$_SESSION);
     if(!$actor)respond(['error'=>'Autenticação necessária'],401);
+    if($route==='staff/mfa'){
+      sqfRequireStaff($db,$actor);
+      sqfAuthLimit($db,'staff-mfa:'.$actor,5,300);
+      $secrets=json_decode(getenv('SQF_STAFF_TOTP_SECRETS')?:'{}',true,32,JSON_THROW_ON_ERROR);
+      sqfStaffMfa($db,$actor,required($body,'code'),(string)($secrets[$actor]??''),time());
+      session_regenerate_id(true);$_SESSION['staff_mfa_until']=time()+600;
+      respond(['ok'=>true]);
+    }
+    if(str_starts_with($route,'staff/')){
+      sqfRequireStaff($db,$actor);
+      if((int)($_SESSION['staff_mfa_until']??0)<=time())respond(['error'=>'MFA administrativo obrigatório'],403);
+      if($route==='staff/reviews')respond(['data'=>sqfStaffQueue($db,$actor)]);
+      if($route==='staff/review/decide'){sqfReviewModerate($db,$actor,required($body,'id'),required($body,'status'),required($body,'note'));respond(['ok'=>true]);}
+      respond(['error'=>'Rota administrativa indisponível'],404);
+    }
+    if($route==='reviews')respond(['data'=>sqfOwnReviews($db,$actor)]);
+    if($route==='review/create')respond(['data'=>sqfReviewCreate($db,$actor,required($body,'request_id'),number($body,'rating'),required($body,'comment'))]);
     if($route==='services')respond(['data'=>sqfOwnServices($db,$actor)]);
     if($route==='service/save'){
       $id=isset($body['id'])?required($body,'id'):null;
