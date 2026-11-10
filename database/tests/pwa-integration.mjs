@@ -22,13 +22,13 @@ try{
  const page=await context.newPage();
  await page.goto(origin+'/index.html',{waitUntil:'domcontentloaded'});
  await page.evaluate(()=>Promise.race([navigator.serviceWorker.ready,new Promise((_,reject)=>setTimeout(()=>reject(new Error('PWA registration timeout')),15000))]));
- const paths=await page.evaluate(async()=>{const c=await caches.open('sqf-public-v3.14.0-rc.11');return (await c.keys()).map(r=>new URL(r.url).pathname).sort();});
+ const paths=await page.evaluate(async()=>{const c=await caches.open('sqf-public-v3.14.0-rc.13');return (await c.keys()).map(r=>new URL(r.url).pathname).sort();});
  assert.deepEqual(paths,['/assets/brand/icone-192.png','/assets/brand/icone-512.png','/assets/brand/logo-horizontal.png','/offline.html']);
  await page.waitForFunction(()=>Boolean(navigator.serviceWorker.controller));
  offline=true;
  await page.goto(origin+'/painel.html',{waitUntil:'domcontentloaded'});
  await page.getByRole('heading',{name:'Você está sem conexão'}).waitFor();
- const cached=await page.evaluate(async()=>{const c=await caches.open('sqf-public-v3.14.0-rc.11');return (await c.keys()).map(r=>new URL(r.url).pathname).sort();});
+ const cached=await page.evaluate(async()=>{const c=await caches.open('sqf-public-v3.14.0-rc.13');return (await c.keys()).map(r=>new URL(r.url).pathname).sort();});
  assert.deepEqual(cached,paths);
  console.log('PASS: installed PWA caches only static brand and generic offline page; private panel not cached');
 }finally{if(browser)await browser.close();proxy.closeAllConnections();await new Promise(resolve=>proxy.close(resolve));}
