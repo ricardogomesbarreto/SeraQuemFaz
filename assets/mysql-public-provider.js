@@ -25,6 +25,13 @@
    for(const review of reviews){const card=ui.make('article','card');card.append(ui.make('h3','',review.rating+'/5'),ui.make('p','',review.comment));if(review.response)card.append(ui.make('p','','Resposta: '+review.response));$('publicProviderReviews').append(card);}
    if(!reviews.length)$('publicProviderReviews').textContent='Nenhuma avaliação publicada.';
    const own=s.user_id?(await api.profile()).data:null;
+   if(own){try{await api.recordView(id);}catch{/* Metrics must not prevent profile display. */}}
+   if(own?.account_type==='cliente'){
+     const saved=(await api.favoriteProviders()).data.some(x=>x.id===id);
+     let isSaved=saved;const favorite=ui.make('button','button button-outline',saved?'Remover dos favoritos':'Salvar profissional');favorite.type='button';
+     favorite.addEventListener('click',async()=>{favorite.disabled=true;try{await api.favoriteProvider({provider_id:id,saved:!isSaved});isSaved=!isSaved;favorite.textContent=isSaved?'Remover dos favoritos':'Salvar profissional';}catch(e){status(e.message);}finally{favorite.disabled=false;}});
+     form.parentElement.insertBefore(favorite,form);
+   }
    form.hidden=own?.account_type!=='cliente'||!provider.services.length;
    $('publicProviderQuoteNotice').textContent=form.hidden?'Entre como cliente para solicitar um orçamento.':'Envie sua solicitação sem divulgar telefone.';
    form.addEventListener('submit',async e=>{e.preventDefault();const submit=form.querySelector('button');submit.disabled=true;try{await api.createRequest({provider_id:id,service_id:form.elements.service_id.value,description:form.elements.description.value,desired_date:form.elements.date.value||undefined});status('Solicitação enviada.');form.reset();}catch(error){status(error.message);}finally{submit.disabled=false;}});

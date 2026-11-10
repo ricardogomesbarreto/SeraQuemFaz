@@ -8,5 +8,5 @@ if(in_array($path,['/index.php','/api/index.php'],true)){
     if(is_file($entry))require $entry;else require __DIR__.'/../../backend/public/index.php';
     return true;
 }
-if($path==='/'||preg_match('~^/[a-zA-Z0-9_-]+[.]html$~D',$path)||str_starts_with($path,'/assets/'))return false;
+if(in_array($path,['/service-worker.js','/manifest.webmanifest'],true)||$path==='/'||preg_match('~^/[a-zA-Z0-9_-]+[.]html$~D',$path)||str_starts_with($path,'/assets/'))return false;
 http_response_code(404);return true;

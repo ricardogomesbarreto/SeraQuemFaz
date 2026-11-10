@@ -10,7 +10,6 @@ for(const page of pages){
  let html=await readFile(join(root,page),'utf8');
  html=html.replace(/<script\b[^>]*src=["'][^"']*(?:supabase-js|supabase-config\.js|account-compat\.js)[^"']*["'][^>]*>\s*<\/script>/gi,'');
  if(/src=["']assets\/auth-navigation\.js/.test(html)&&!html.includes('assets/backend-mode.js'))html=html.replace(/(<script\b[^>]*src=["']assets\/auth-navigation\.js["'][^>]*>)/i,'<script defer src="assets/backend-mode.js"></script><script defer src="assets/mysql-api-client.js"></script>$1');
- html=html.replace(/<link\b[^>]*rel=["']manifest["'][^>]*>/gi,'');
  for(const m of html.matchAll(/<script\b[^>]*src=["']assets\/([^"']+\.js)["']/g))scripts.add(m[1]);
  if(/<script\b[^>]*src=["'][^"']*supabase/i.test(html))throw Error('Legacy SDK: '+page);
  await writeFile(join(pub,page),html);
@@ -21,8 +20,7 @@ for(const entry of await readdir(join(root,'assets'),{withFileTypes:true})){
  if(entry.isDirectory()||/\.(?:css|json|png|webp|jpg|jpeg|svg|ico)$/i.test(entry.name)||scripts.has(entry.name))await cp(join(root,'assets',entry.name),join(pub,'assets',entry.name),{recursive:true});
 }
 await writeFile(join(pub,'assets/backend-mode.js'),"'use strict';\nwindow.SQFDataMode = 'mysql';\n");
-const site=await readFile(join(pub,'assets/site.js'),'utf8');
-await writeFile(join(pub,'assets/site.js'),site.replace("if(typeof navigator!=='undefined'","if(window.SQFDataMode!=='mysql'&&typeof navigator!=='undefined'"));
+for(const p of ['manifest.webmanifest','service-worker.js','offline.html'])await cp(join(root,p),join(pub,p));
 await cp(join(root,'backend/src'),join(priv,'backend/src'),{recursive:true});
 await cp(join(root,'backend/bin'),join(priv,'backend/bin'),{recursive:true});
 await mkdir(join(priv,'backend/public'),{recursive:true});

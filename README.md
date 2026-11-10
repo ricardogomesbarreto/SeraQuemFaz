@@ -1,4 +1,4 @@
-# SERÁ QUEM FAZ? — v3.14.0-rc.7
+# SERÁ QUEM FAZ? — v3.14.0-rc.8
 
 <p align="center"><img src="assets/brand/logo-horizontal.png" alt="Será Quem Faz?" width="380"></p>
 <p align="center"><strong>Encontre profissionais da sua cidade. Organize serviços, propostas e atendimentos em um só lugar.</strong></p>
@@ -17,7 +17,7 @@ O Será Quem Faz? conecta clientes a prestadores de serviços locais. Pesquisa p
 
 HTML, CSS e JavaScript; API PHP 8.1+; PDO MySQL; MySQL 8.0 ou MariaDB 10.11, InnoDB e UTC. Identidades e sessões próprias, RBAC administrativo com MFA, mídia privada fora da raiz web e fila de notificações. Mercado Pago com checkout desativado durante homologação. Destino futuro: Hostinger Unlimited (não Premium). PHP permanece por reaproveitar o backend homologado; Node.js é suportado pelo plano, mas uma reescrita não é necessária. Node 22+ é usado no build e nos testes, não como runtime obrigatório.
 
-## v3.14.0-rc.7
+## v3.14.0-rc.8
 
 Candidato exclusivo MySQL/MariaDB. Distribuição isolada, instalação SQL consolidada, testes PHP/HTTP/Chromium, integridade e restauração de banco descartável. O código histórico foi preservado no histórico Git; não faz parte do caminho de instalação atual.
 
@@ -47,3 +47,7 @@ Não é release comercial. Nenhuma implantação na Hostinger Unlimited antes de
 ## Preparação para o Unlimited
 
 O pacote inclui perfil de hospedagem, regras de cache restritas a imagens públicas e diagnóstico CLI privado `php sqf-private/backend/bin/hostinger-preflight.php`. Confira os limites contratados no hPanel, configure HTTPS/CDN apenas para recursos públicos, backups diários, cron privado e transporte de e-mail após homologação. O diagnóstico não autoriza produção.
+
+## Recursos recuperados na RC.8
+
+PWA instalável com fallback offline genérico e cache exclusivo de imagens estáticas; favoritos de profissionais; comparação de propostas abertas; indicadores de visualizações autenticadas, solicitações, propostas e atendimentos. Todos os dados e permissões são consultados pela API PHP/MySQL/MariaDB. Node.js permanece disponível para build, CI e aplicações complementares, sem duplicar o backend. Novos testes precisam confirmar a homologação.

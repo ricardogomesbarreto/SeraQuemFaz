@@ -80,6 +80,7 @@ jobs:
           php -l backend/bin/hostinger-preflight.php
           php -l backend/bin/maintenance.php
           php -l backend/src/Maintenance.php
+          php -l backend/src/Engagement.php
           php -l backend/src/Moderation.php
           php -l backend/src/PrivateMedia.php
           php -l database/tests/private-media-integration.php
@@ -102,7 +103,8 @@ jobs:
           STAGING_ROOT="$PWD/dist/mysql-candidate/public_html"
           test ! -e "$STAGING_ROOT/assets/supabase-config.js"
           test ! -e "$STAGING_ROOT/assets/account.js"
-          test ! -e "$STAGING_ROOT/service-worker.js"
+          test -f "$STAGING_ROOT/service-worker.js"
+          test -f "$STAGING_ROOT/manifest.webmanifest"
           test -f "$STAGING_ROOT/api/index.php"
           test -f "$STAGING_ROOT/.htaccess"
           test -f "$PWD/dist/mysql-candidate/unlimited-profile.json"

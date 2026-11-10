@@ -12,6 +12,7 @@ require_once __DIR__.'/../src/AccountCases.php';
 require_once __DIR__.'/../src/AccountSecurity.php';
 require_once __DIR__.'/../src/Billing.php';
 require_once __DIR__.'/../src/MercadoPago.php';
+require_once __DIR__.'/../src/Engagement.php';
 
 header('Content-Type: application/json; charset=utf-8');
 header('Cache-Control: no-store');
@@ -152,6 +153,11 @@ try {
     if($route==='reviews')respond(['data'=>sqfOwnReviews($db,$actor)]);
     if($route==='review/create')respond(['data'=>sqfReviewCreate($db,$actor,required($body,'request_id'),number($body,'rating'),required($body,'comment'))]);
     if($route==='media/list')respond(['data'=>sqfListPrivateMedia($db,$actor,required($body,'kind'),isset($body['request_id'])?required($body,'request_id'):null)]);
+    if($route==='favorites/providers')respond(['data'=>sqfClientFavorites($db,$actor)]);
+    if($route==='favorite/provider'){if(!isset($body['saved'])||!is_bool($body['saved']))throw new DomainException('Estado inválido');sqfSetFavorite($db,$actor,required($body,'provider_id'),$body['saved']);respond(['ok'=>true]);}
+    if($route==='profile/view'){sqfRecordView($db,$actor,required($body,'provider_id'));respond(['ok'=>true]);}
+    if($route==='performance')respond(['data'=>sqfProviderMetrics($db,$actor)]);
+    if($route==='quotes/compare')respond(['data'=>sqfCompareQuotes($db,$actor)]);
     if($route==='favorites/categories')respond(['data'=>sqfFavoriteCategories($db,$actor)]);
     if($route==='favorite/category'){if(!isset($body['saved'])||!is_bool($body['saved']))throw new DomainException('Estado inválido');sqfFavoriteCategory($db,$actor,required($body,'category_id'),$body['saved']);respond(['ok'=>true]);}
     if($route==='billing')respond(['data'=>sqfOwnBilling($db,$actor)]);

@@ -76,6 +76,18 @@
    }
    const favSection=$('mysqlFavoriteSection');favSection.hidden=profile.account_type!=='cliente';
    if(!favSection.hidden){const items=(await api.favoriteCategories()).data,root=$('mysqlFavorites');empty(root,items,'Nenhuma categoria favorita.');for(const item of items){const card=wrap(item.name);const link=el('a','Pesquisar categoria');link.href='categorias.html?q='+encodeURIComponent(item.name)+(profile.city_ibge?'&cidade='+encodeURIComponent(profile.city_ibge):'');card.append(link,button('Remover favorito',async()=>{await api.favoriteCategory({category_id:item.id,saved:false});await load();}));root.append(card);}}
+   const client=profile.account_type==='cliente';
+   $('mysqlProviderFavoritesSection').hidden=!client;$('mysqlQuoteCompareSection').hidden=!client;$('mysqlMetricsSection').hidden=client;
+   if(client){
+     const [fav,quotes]=await Promise.all([api.favoriteProviders(),api.compareQuotes()]);
+     const root=$('mysqlProviderFavorites');empty(root,fav.data,'Nenhum profissional favorito.');
+     for(const item of fav.data){const card=wrap(item.full_name),link=el('a','Ver perfil');link.href='prestador-mysql.html?id='+encodeURIComponent(item.id);card.append(el('p',item.city),link,button('Remover profissional',async()=>{await api.favoriteProvider({provider_id:item.id,saved:false});await load();}));root.append(card);}
+     const comp=$('mysqlQuoteCompare');empty(comp,quotes.data,'Nenhuma proposta em aberto.');
+     for(const item of quotes.data){const card=wrap(item.full_name);card.append(el('p',item.description),el('p',new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(Number(item.quote_cents)/100)),el('p',item.quote_terms||'Sem condições adicionais'));const link=el('a','Consultar solicitações');link.href='#requests';card.append(link);comp.append(card);}
+   }else{
+     const m=(await api.performance()).data,root=$('mysqlMetrics');root.replaceChildren();
+     for(const [label,value] of [['Visualizações autenticadas',m.views_authenticated],['Solicitações recebidas',m.requests_total],['Propostas enviadas',m.quotes_sent],['Atendimentos concluídos',m.requests_completed]])root.append(el('p',label+': '+value));
+   }
    const discoverySection=$('mysqlDiscoverySection');
    discoverySection.hidden=profile.account_type!=='cliente';
    if(!discoverySection.hidden&&profile.city_ibge&&!$('mysqlDiscoveryForm').elements.city.value)$('mysqlDiscoveryForm').elements.city.value=profile.city_ibge;
