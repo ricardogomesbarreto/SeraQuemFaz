@@ -56,3 +56,16 @@ A página atual de produção permanece no modo Supabase. O painel MySQL é apen
 ## Moderação e MFA administrativo (homologação)
 
 Aplique também `mysql/migrations/003_staff_mfa.sql`. `backend/src/Moderation.php` implementa avaliação vinculada a atendimento concluído, respostas, contestações e decisões auditadas. A página `admin-mysql.html` exige papel ativo, sessão válida e MFA TOTP recente (10 minutos), com limitação de tentativas e bloqueio de reutilização. Provisionamento de funcionários deve ser feito por operador autorizado, fora da aplicação, após validação da identidade; não existe conta administrativa padrão. Configure `SQF_STAFF_TOTP_SECRETS` exclusivamente no servidor como objeto JSON `{<uuid>: <segredo hexadecimal aleatório de pelo menos 20 bytes>}`; associe o mesmo segredo, convertido em Base32, ao autenticador da pessoa por canal seguro. Não versionar segredos nem dados de usuários. A configuração e rotação reais, MFA ponta a ponta no navegador, verificação de documentos e aprovação de profissionais permanecem gates antes da produção. Não habilitar aprovação automática.
+
+## Armazenamento privado MySQL/MariaDB (candidato)
+
+- `backend/src/PrivateMedia.php`: anexo de solicitação e documento de verificação com WebP validado, decodificado e recodificado por GD (máximo 5 MB, 4.000 × 4.000 px).
+- `backend/public/index.php?route=media/upload`: POST multipart autenticado com token CSRF; campos `kind` (`verification` ou `attachment`), `context` (tipo de documento ou UUID de solicitação), `file` e legenda opcional.
+- `media/list`: POST JSON autenticado com `kind` e, para anexos, `request_id`. Retorna metadados limitados à titularidade ou participantes.
+- `media/read`: GET autenticado com `kind` e `id`; não entrega caminhos físicos ou URLs públicas. Documentos de verificação são acessíveis ao proprietário ou equipe autenticada com MFA administrativo recente; anexos apenas aos participantes da solicitação.
+- `SQF_PRIVATE_MEDIA_ROOT` deve apontar para pasta privada existente, gravável, **fora da árvore do repositório e do document root**; recomendar diretório exclusivo com proprietário do processo PHP, permissões 0700/0600. Nunca fazer commit dos arquivos de usuários. Backups criptografados, retenção LGPD e migração/varredura de mídia legada continuam pendentes.
+- `database/tests/private-media-integration.php`: teste de isolamento e integridade no MySQL e MariaDB. Não substitui teste de navegador, avaliação de segurança de uploads, privacidade e restauração real.
+
+### Estado desta etapa
+
+A tela candidata `painel-mysql.html` permite ao prestador enviar e consultar seus próprios documentos de verificação. Não existe aprovação automática de documentos. Ainda falta a interface administrativa de análise dos documentos, portfólio público, anexos no fluxo principal de mensagens e migração dos arquivos do Storage Supabase.
