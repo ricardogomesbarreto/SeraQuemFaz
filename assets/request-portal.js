@@ -42,7 +42,20 @@
      ['Em atendimento',totals.ongoing_count],
      ['Concluídas',totals.completed_count]
    ]:[];
-   if(unread)items.push(['Mensagens não lidas',Array.from(unread.values()).reduce((a,b)=>a+b,0)]);
+   const unreadTotal=unread?Array.from(unread.values()).reduce((a,b)=>a+b,0):null;
+   if(unread)items.push(['Mensagens não lidas',unreadTotal]);
+   if(role==='prestador'){
+     const stats={
+       providerRequestsOpen:totals?.active_count,
+       providerQuotesSent:totals?.quote_count,
+       providerRequestsOngoing:totals?.ongoing_count,
+       providerUnreadMessages:unreadTotal
+     };
+     for(const [id,value] of Object.entries(stats)){
+       const node=$(id);
+       if(node)node.textContent=Number.isFinite(Number(value))&&value!==null&&value!==undefined?String(value):'—';
+     }
+   }
    if(!totals)el.append(create('p','muted','O resumo geral está temporariamente indisponível.'));
    for(const [label,count] of items){
      const block=create('div','sqf-request-stat');block.append(create('strong','',count),create('span','',label));el.append(block);
@@ -95,11 +108,16 @@
  }
  function matches(item,filter){
    return filter==='all'||(filter==='unread'&&(unread?.get(item.id)||0)>0)||(filter==='open'&&!['completed','declined','canceled'].includes(item.status))||
-     (filter==='quoted'&&item.status==='quoted')||(filter==='completed'&&item.status==='completed')||
+     (filter==='quoted'&&item.status==='quoted')||
+     (filter==='active'&&['accepted','in_progress','awaiting_confirmation'].includes(item.status))||
+     (filter==='completed'&&item.status==='completed')||
      (filter==='closed'&&['declined','canceled'].includes(item.status));
  }
  function drawList(){
    const control=$('sqfRequestFilter');
+   document.querySelectorAll('[data-request-filter]').forEach(button=>{
+     button.setAttribute('aria-pressed',String(button.dataset.requestFilter===control.value));
+   });
    const unreadOption=control.querySelector('option[value="unread"]');
    if(unreadOption)unreadOption.disabled=!unread;
    if(!unread&&control.value==='unread')control.value='all';
@@ -270,6 +288,14 @@
      ? 'Acompanhe suas solicitações, orçamentos e mensagens privadas com os prestadores.'
      : 'Responda solicitações, envie orçamentos e acompanhe atendimentos até a confirmação pelo cliente.';
    $('sqfRequestFilter').addEventListener('change',drawList);
+   document.querySelectorAll('[data-request-filter]').forEach(button=>{
+     button.addEventListener('click',()=>{
+       const control=$('sqfRequestFilter');
+       if(![...control.options].some(o=>o.value===button.dataset.requestFilter))return;
+       control.value=button.dataset.requestFilter;
+       drawList();
+     });
+   });
    $('sqfRequestSearch')?.addEventListener('input',drawList);
    $('sqfRequestRefresh').addEventListener('click',()=>load().catch(e=>say(e.message,true)));
    await load();

@@ -46,8 +46,8 @@
       void client.rpc('sqf_register_profile_view',{p_provider:providerId}).then(()=>{},()=>{});
     }
     const [{data: services,error: se},{data: photos,error: fe},{data: reviews,error: re}] = await Promise.all([
-      client.from('provider_services').select('id,category_id,service_title,description').eq('provider_id',providerId).order('service_title'),
-      client.from('portfolio_photos').select('id,storage_path,caption,service_id').eq('provider_id',providerId).order('created_at',{ascending:false}),
+      client.from('provider_services').select('id,category_id,service_title,description,price_min_cents,price_max_cents,is_active').eq('provider_id',providerId).eq('is_active',true).order('service_title'),
+      client.from('portfolio_photos').select('id,storage_path,caption,service_id,is_cover').eq('provider_id',providerId).order('is_cover',{ascending:false}).order('created_at',{ascending:false}),
       client.rpc('sqf_public_reviews',{p_provider_ids:[providerId]})
     ]);
     if (se || fe || re) throw se || fe || re;
@@ -134,7 +134,14 @@
       const tile=ui.make('article','service-detail-item');tile.append(ui.make('h3','',service.service_title));
       const category=categories.find(c=>String(c.id)===service.category_id);
       if(category){const link=ui.make('a','category-detail-link',category.name);link.href=`categoria.html?id=${encodeURIComponent(service.category_id)}`;tile.append(link);}
-      if(service.description)tile.append(ui.make('p','muted',service.description));serviceBox.append(tile);
+      if(service.description)tile.append(ui.make('p','muted',service.description));
+      if(service.price_min_cents!==null && service.price_max_cents!==null){
+        const format=x=>new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(Number(x)/100);
+        tile.append(ui.make('p','sqf-price-note',
+          'Estimativa declarada: '+format(service.price_min_cents)+' a '+format(service.price_max_cents)));
+        tile.append(ui.make('small','muted','Valor orientativo; confirme o orçamento diretamente com o profissional.'));
+      }
+      serviceBox.append(tile);
     }
     const gallery=$('providerGallery');
     const portfolioFilter=$('sqfPublicPortfolioService');
@@ -144,14 +151,17 @@
         const option=ui.make('option','',service.service_title);option.value=service.id;portfolioFilter.append(option);
       }
     }
-    if(!photos?.length)ui.state(gallery,'Sem fotos publicadas','O prestador ainda não adicionou imagens do trabalho.');
-    for(const photo of photos || []){
+    const visiblePhotos=(photos||[]).filter(photo=>!photo.service_id||
+      (services||[]).some(service=>service.id===photo.service_id));
+    if(!visiblePhotos.length)ui.state(gallery,'Sem fotos publicadas','O prestador ainda não adicionou trabalhos visíveis.');
+    for(const photo of visiblePhotos){
       const uri=ui.publicUrl(client,'sqf-portfolios',photo.storage_path);if(!uri)continue;
       const figure=ui.make('figure','portfolio-photo');
       const full=ui.make('a','portfolio-full-link');full.href=uri;full.target='_blank';full.rel='noopener noreferrer';
       full.setAttribute('aria-label',`Abrir foto: ${photo.caption || 'trabalho publicado'}`);
       full.append(ui.safeImg(uri,photo.caption || `Trabalho de ${profile.full_name}`));figure.append(full);
       if(photo.caption)figure.append(ui.make('figcaption','',photo.caption));
+      if(photo.is_cover)figure.append(ui.make('span','sqf-portfolio-cover-badge','★ Foto de capa'));
       const linked=(services||[]).find(service=>service.id===photo.service_id);
       if(linked)figure.append(ui.make('small','sqf-portfolio-category',linked.service_title));
       figure.dataset.serviceId=photo.service_id||'';

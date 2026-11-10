@@ -218,12 +218,25 @@
       if(retry)retry.disabled=false;
     }
   }
+  // Preços exibidos são estimativas declaradas, nunca cobranças ou orçamento final.
+  const brl=amount=>new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'})
+    .format(Number(amount)/100);
+  const centsFor=(min,max)=>{
+    const emptyMin=min.trim()==='',emptyMax=max.trim()==='';
+    if(emptyMin&&emptyMax)return {price_min_cents:null,price_max_cents:null};
+    const a=Number(min),b=Number(max);
+    if(emptyMin||emptyMax||!Number.isFinite(a)||!Number.isFinite(b)||
+       a<0||b<a||b>1000000||Math.abs(a*100-Math.round(a*100))>1e-6||
+       Math.abs(b*100-Math.round(b*100))>1e-6)
+      throw new Error('Informe os dois valores em reais, com até duas casas decimais, ou deixe ambos vazios.');
+    return {price_min_cents:Math.round(a*100),price_max_cents:Math.round(b*100)};
+  };
   async function loadServices() {
     const list = $('myServices');list.replaceChildren();
-    const {data,error}=await client.from('provider_services').select('id,category_id,service_title,description').eq('provider_id',user.id).order('service_title');
+    const {data,error}=await client.from('provider_services').select('id,category_id,service_title,description,price_min_cents,price_max_cents,is_active').eq('provider_id',user.id).order('service_title');
     if(error) throw error;
     providerServicesCache=data||[];
-    currentServiceCount=data?.length||0;updateReadiness();
+    currentServiceCount=(data||[]).filter(service=>service.is_active).length;updateReadiness();
     for(const id of ['portfolioService','portfolioServiceFilter']){
       const select=$(id);if(!select)continue;
       const previous=select.value;
@@ -237,13 +250,18 @@
       }
       if([...select.options].some(o=>o.value===previous))select.value=previous;
     }
-    if($('providerStatServices'))$('providerStatServices').textContent=String(currentServiceCount);
+    if($('providerStatServices'))$('providerStatServices').textContent=String(data?.length||0);
     if(!data?.length) {ui.state(list,'Nenhum serviço cadastrado','Adicione uma categoria e descreva a sua atividade.'); return data || [];}
     for(const service of data){
       const item=ui.make('div','editable-row'); const text=ui.make('div');
       text.append(ui.make('strong','',service.service_title));
       const cat=categories.find(c=>String(c.id)===service.category_id);
       text.append(ui.make('p','muted', `${cat?.name || 'Categoria'}${service.description ? ` · ${service.description}` : ''}`));
+      text.append(ui.make('span','sqf-service-state'+(service.is_active?'':' is-inactive'),
+        service.is_active?'Disponível para publicação':'Serviço pausado'));
+      if(service.price_min_cents!==null && service.price_max_cents!==null)
+        text.append(ui.make('p','sqf-price-note',
+          'Estimativa declarada: '+brl(service.price_min_cents)+' a '+brl(service.price_max_cents)));
       const del=ui.make('button','button button-outline button-small','Remover');del.type='button';del.setAttribute('aria-label',`Remover serviço ${service.service_title}`);
       del.addEventListener('click', async()=>{
         if(!confirm('Remover este serviço do seu perfil?')) return;
@@ -274,6 +292,18 @@
       const editDescLabel=ui.make('label','','Descrição (opcional)');
       const editDesc=ui.make('textarea');editDesc.value=service.description||'';
       editDesc.rows=3;editDesc.maxLength=500;editDescLabel.append(editDesc);
+      const prices=ui.make('div','sqf-inline-prices');
+      const priceMinLabel=ui.make('label','','Mínimo estimado (R$)');
+      const priceMin=ui.make('input');priceMin.type='number';priceMin.min='0';priceMin.max='1000000';priceMin.step='0.01';
+      priceMin.value=service.price_min_cents===null?'':String(service.price_min_cents/100);
+      priceMinLabel.append(priceMin);
+      const priceMaxLabel=ui.make('label','','Máximo estimado (R$)');
+      const priceMax=ui.make('input');priceMax.type='number';priceMax.min='0';priceMax.max='1000000';priceMax.step='0.01';
+      priceMax.value=service.price_max_cents===null?'':String(service.price_max_cents/100);
+      priceMaxLabel.append(priceMax);prices.append(priceMinLabel,priceMaxLabel);
+      const isActiveLabel=ui.make('label','sqf-service-toggle');
+      const isActive=ui.make('input');isActive.type='checkbox';isActive.checked=Boolean(service.is_active);
+      isActiveLabel.append(isActive,document.createTextNode(' Serviço disponível no catálogo'));
       const save=ui.make('button','button button-primary button-small','Salvar edição');save.type='submit';
       const cancel=ui.make('button','button button-outline button-small','Cancelar');cancel.type='button';
       const editMsg=ui.make('p','form-feedback');editMsg.setAttribute('role','status');
@@ -288,20 +318,23 @@
         }
         save.disabled=true;
         try{
+          const money=centsFor(priceMin.value,priceMax.value);
           const {error:saveError}=await client.from('provider_services')
-            .update({category_id:categoryId,service_title:title,description})
+            .update({category_id:categoryId,service_title:title,description,
+              ...money,is_active:isActive.checked})
             .eq('id',service.id).eq('provider_id',user.id);
           if(saveError)throw saveError;
           announce('serviceMessage','Serviço atualizado. Uma nova análise cadastral poderá ser necessária.');
           await loadServices();await loadVerification();
-        }catch{
-          editMsg.textContent='Não foi possível editar. Verifique se a categoria está ativa e se o serviço já existe.';
+        }catch(error){
+          editMsg.textContent=error?.message?.startsWith('Informe os dois valores')
+            ?error.message:'Não foi possível editar. Verifique a categoria e a faixa de preço.';
           save.disabled=false;
         }
       });
       const editActions=ui.make('div','service-row-actions');editActions.append(edit,del);
       const formActions=ui.make('div','service-row-actions');formActions.append(save,cancel);
-      editForm.append(editCatLabel,editTitleLabel,editDescLabel,formActions,editMsg);
+      editForm.append(editCatLabel,editTitleLabel,editDescLabel,prices,isActiveLabel,formActions,editMsg);
       item.append(text,editActions,editForm);list.append(item);
     }
     return data;
@@ -432,7 +465,7 @@
   }
   async function loadPhotos() {
     const list=$('myGallery');list.replaceChildren();
-    const {data,error}=await client.from('portfolio_photos').select('id,storage_path,caption,service_id').eq('provider_id',user.id).order('created_at',{ascending:false});
+    const {data,error}=await client.from('portfolio_photos').select('id,storage_path,caption,service_id,is_cover').eq('provider_id',user.id).order('created_at',{ascending:false});
     if(error) throw error;
     currentPhotoCount=data?.length||0;
     if($('providerStatPhotos'))$('providerStatPhotos').textContent=String(currentPhotoCount);
@@ -446,6 +479,24 @@
       if(photo.caption)card.append(ui.make('figcaption','',photo.caption));
       const linked=providerServicesCache.find(s=>s.id===photo.service_id);
       card.append(ui.make('small','sqf-portfolio-category',linked?.service_title||'Trabalho geral'));
+      if(photo.is_cover)card.append(ui.make('span','sqf-portfolio-cover-badge','★ Foto de capa'));
+      else {
+        const cover=ui.make('button','button button-outline button-small','Definir como capa');
+        cover.type='button';
+        cover.addEventListener('click',async()=>{
+          cover.disabled=true;
+          try{
+            const {error:setError}=await client.rpc('sqf_set_portfolio_cover',{p_photo:photo.id});
+            if(setError)throw setError;
+            announce('galleryMessage','A fotografia de capa foi atualizada.');
+            await loadPhotos();await loadVerification();
+          }catch(error){
+            announce('galleryMessage','Não foi possível definir a capa. Verifique sua sessão.',true);
+            cover.disabled=false;
+          }
+        });
+        card.append(cover);
+      }
       const remove=ui.make('button','button button-outline button-small','Excluir foto');remove.type='button';
       remove.addEventListener('click',async()=>{
         if(!confirm('Excluir esta foto do portfólio público?'))return;
@@ -552,7 +603,9 @@
     $('accountToolbar').hidden=false;
     $('accountName').textContent=profile.full_name;
     $('accountEmail').textContent=user.email || 'Não informado';
+    $('accountCity').textContent=profile.city||'Não informada';
     $('accountType').textContent=profile.account_type==='prestador'?'Prestador de serviços':'Cliente';
+    $('accountTypeSubtitle').textContent=profile.account_type==='prestador'?'Perfil de prestador de serviço':'Perfil de cliente';
     $('profileFullName').value=profile.full_name;
     const cityPicker = $('profileCity')?.closest('[data-city-picker]')?.__cityPicker;
     if (profile.city_ibge) await cityPicker?.setId(profile.city_ibge);
@@ -568,11 +621,13 @@
     }
     const providerAccount=profile.account_type==='prestador';
     $('dashboardKicker').textContent=providerAccount?'PAINEL PROFISSIONAL':'MINHA CONTA · CLIENTE';
-    $('dashboardHeading').textContent=providerAccount?'Central do prestador':'Central do cliente';
+    $('dashboardHeading').textContent=providerAccount?'Meu espaço profissional':'Minha conta';
     $('dashboardIntroText').textContent=providerAccount
       ? 'Organize seus dados profissionais, formas de atendimento, serviços, portfólio e verificação.'
       : 'Acompanhe seus atendimentos confirmados, avaliações, favoritos e solicitações com privacidade.';
     $('accountCatalogShortcut').hidden=providerAccount;
+    $('accountExploreLink').textContent=providerAccount?'Ver catálogo de serviços ↗':'Explorar serviços ↗';
+    $('accountFavoriteLink').hidden=providerAccount;
     $('accountFavoritesShortcut').hidden=providerAccount;
     $('accountServicesShortcut').hidden=!providerAccount;
     $('accountPortfolioShortcut').hidden=!providerAccount;
@@ -608,7 +663,7 @@
         const element=$(id);if(element)mainColumn.append(element);
       }
       $('providerLogoutSlot').append($('logoutButton'));
-      $('clientAccountBadge').textContent='Conta profissional';
+      $('clientAccountBadge').textContent='Perfil de prestador de serviço';
       $('clientAccountBadge').hidden=false;
       $('profileSettings').querySelector('h2').textContent='Editar meu perfil profissional';
       syncProviderSidebar();
@@ -616,9 +671,24 @@
       $('providerEditor').hidden=false;
       $('providerOverview').hidden=false;
       $('reloadCategories')?.addEventListener('click',()=>void reloadActiveCategories());
-      await reloadActiveCategories();
-      await loadServices();
-      await Promise.all([loadPhotos(),loadOwnReviews(),loadVerification(),loadPendingEngagements(),loadProfessionalExtras()]);
+      // Falhas parciais em portfólio, avaliações ou serviços não devem impedir
+      // o prestador de usar as demais páginas do seu painel.
+      try{await reloadActiveCategories();}
+      catch(error){
+        console.warn('Carregamento parcial das categorias:',error?.message||'indisponível');
+        announce('serviceMessage','Categorias não disponíveis. Use Recarregar categorias.',true);
+      }
+      try{await loadServices();}
+      catch(error){
+        console.warn('Carregamento parcial dos serviços:',error?.message||'indisponível');
+        announce('serviceMessage','Serviços não disponíveis. Atualize a página para tentar novamente.',true);
+      }
+      const sections=await Promise.allSettled([
+        loadPhotos(),loadOwnReviews(),loadVerification(),loadPendingEngagements(),loadProfessionalExtras()
+      ]);
+      if(sections.some(result=>result.status==='rejected')){
+        announce('accountStatus','Perfil disponível. Alguns módulos não carregaram; atualize a página para tentar novamente.');
+      }
       $('portfolioServiceFilter')?.addEventListener('change',()=>loadPhotos().catch(e=>announce('galleryMessage',e.message,true)));
       const extrasForm=$('professionalDetailsForm');
       const refreshExtrasPreview=()=>{
@@ -686,7 +756,11 @@
       $('profileSettings').querySelector('h2').textContent='Editar meu perfil';
       const cityLabel=$('profileCity')?.closest('[data-city-picker]')?.querySelector('.city-picker-label');
       if(cityLabel)cityLabel.textContent='Minha cidade';
-      await window.SQFClientDashboard.init(client,user);
+      try{await window.SQFClientDashboard.init(client,user);}
+      catch(error){
+        console.warn('Módulo de atividades indisponível:',error?.message||'erro');
+        status.textContent='Perfil disponível. As atividades não carregaram; tente atualizar a página.';
+      }
     }
     $('avatarFile').addEventListener('change',()=>{
       clearTimeout(portraitDebounce);
@@ -748,7 +822,7 @@
       if(fullName.length<2 || fullName.length>120 || city.length>100 || bio.length>1500){announce('profileMessage','Confira os tamanhos dos campos.',true);return;}
       if(publish){
         if(!profile.avatar_path && !$('avatarFile').files[0]){announce('profileMessage','Para publicar, adicione sua foto de perfil.',true);return;}
-        const {data:services,error}=await client.from('provider_services').select('id').eq('provider_id',user.id).limit(1);
+        const {data:services,error}=await client.from('provider_services')    .select('id').eq('provider_id',user.id).eq('is_active',true).limit(1);
         if(error) {announce('profileMessage','Não foi possível validar os serviços cadastrados.',true);return;}
         if(!services?.length || bio.length<40){announce('profileMessage','Para solicitar publicação, cadastre pelo menos um serviço e uma apresentação de 40 caracteres.',true);return;}
       }
@@ -768,7 +842,9 @@
           if(removeError)console.warn('Avatar antigo não removido:',removeError.message);
         }
         $('accountName').textContent=updated.full_name;
+        $('accountCity').textContent=updated.city||'Não informada';
         await renderOwnAvatar();
+        syncProviderSidebar();syncClientSidebar();
         void window.SQFAccountNavigation?.refresh();
         $('avatarFile').value='';
         $('portraitDeclaration').checked=false;
@@ -791,12 +867,18 @@
       const categoryId=$('newServiceCategory').value;
       const title=$('newServiceTitle').value.trim();
       const description=$('newServiceDescription').value.trim();
+      let money;
+      try{money=centsFor($('newServicePriceMin').value,$('newServicePriceMax').value);}
+      catch(error){announce('serviceMessage',error.message,true);return;}
       if(!ui.validId(categoryId)||title.length<3||title.length>100||description.length>500){announce('serviceMessage','Escolha uma categoria válida e informe um título de 3 a 100 caracteres.',true);return;}
       const btn=$('addServiceBtn');btn.disabled=true;
       try{
-        const {error}=await client.from('provider_services').insert({provider_id:user.id,category_id:categoryId,service_title:title,description});
+        const {error}=await client.from('provider_services').insert({provider_id:user.id,category_id:categoryId,service_title:title,description,
+          ...money,is_active:$('newServiceActive').checked});
         if(error)throw error;
         $('newServiceTitle').value='';$('newServiceDescription').value='';
+        $('newServicePriceMin').value='';$('newServicePriceMax').value='';
+        $('newServiceActive').checked=true;
         announce('serviceMessage','Serviço adicionado. A aprovação anterior pode precisar de nova análise.');await loadServices();await loadVerification();
       }catch(error){console.warn(error?.message);announce('serviceMessage','Não foi possível adicionar. Verifique se o serviço já existe.',true);}
       finally{btn.disabled=false;}
@@ -819,5 +901,10 @@
       }catch(error){if(path)await client.storage.from('sqf-portfolios').remove([path]);console.warn(error?.message);announce('galleryMessage',error?.message?.includes('Escolha uma imagem')?error.message:'Não foi possível enviar a foto.',true);}
       finally{button.disabled=false;}
     });
+    // O roteador só pode realocar módulos após a montagem da conta, da
+    // barra lateral e dos formulários autenticados.
+    window.dispatchEvent(new CustomEvent('sqf:account-ready',{
+      detail:{role:profile.account_type}
+    }));
   }catch(error){status.textContent=ui.message(error);}
 })();
