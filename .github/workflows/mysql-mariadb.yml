@@ -58,6 +58,7 @@ jobs:
           php -l backend/src/Database.php
           php -l backend/src/Marketplace.php
           php -l backend/src/Services.php
+          php -l backend/src/Category.php
           php -l backend/src/Moderation.php
           php -l backend/src/PrivateMedia.php
           php -l database/tests/private-media-integration.php
@@ -84,6 +85,9 @@ jobs:
           node --check assets/auth.js
           node --check assets/auth-navigation.js
           node --check assets/mysql-dashboard.js
+          node --check assets/category-detail.js
+          node --check assets/client-category-favorites.js
+          node --check assets/mysql-public-provider.js
           node --check assets/mysql-admin.js
           node database/tests/http-integration.mjs
           node database/tests/browser-integration.mjs
