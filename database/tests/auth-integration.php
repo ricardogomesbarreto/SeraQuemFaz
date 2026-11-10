@@ -29,7 +29,3 @@ sqfAuthLimit($db,'fixture-test-limit',2,900);sqfAuthLimit($db,'fixture-test-limi
 deny(fn()=>sqfAuthLimit($db,'fixture-test-limit',2,900),'rate limit enforced');
 deny(fn()=>sqfRegister($db,'other@example.invalid','short','Fixture','cliente'),'weak password rejected');
 
-// Isolated CI identity, never a production bootstrap account.
-$staff='00000000-0000-4000-8000-000000000099';
-sqfQuery($db,'INSERT INTO sqf_auth_users(id,email,password_hash,email_confirmed_at) VALUES (?,?,?,UTC_TIMESTAMP(6))',[$staff,'staff-fixture@example.invalid',sqfPassword('staff-fixture-password-12345')]);
-sqfQuery($db,"INSERT INTO sqf_admin_members(user_id,role,active) VALUES (?,'moderator',1)",[$staff]);
