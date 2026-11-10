@@ -2,9 +2,23 @@
 (async()=>{
  const api=window.SQFMySQL,status=document.getElementById('staffStatus'),form=document.getElementById('staffMfa'),queue=document.getElementById('staffQueue');
  const el=(tag,text)=>{const n=document.createElement(tag);if(text!==undefined)n.textContent=text;return n;};
+ const navigation=document.getElementById('staffNavigation');
+ function updateNavigation(){
+   navigation.replaceChildren();
+   const sections=queue.querySelectorAll('h2');
+   const links=el('ul');
+   for(const [index,heading] of Array.from(sections).entries()){
+     if(heading.textContent.startsWith('Avaliação '))continue;
+     heading.id='staff-section-'+index;
+     const item=el('li'),link=el('a',heading.textContent);link.href='#'+heading.id;item.append(link);links.append(item);
+   }
+   navigation.append(links);navigation.hidden=false;
+ }
  async function load(){
+   navigation.hidden=true;
    const result=await api.staffReviews();queue.replaceChildren();
    try{const m=(await api.staffMetrics()).data,card=el('article');card.className='card';card.append(el('h2','Indicadores da plataforma'));const labels={clients:'Clientes',providers:'Prestadores',published_providers:'Prestadores publicados',requests:'Solicitações',completed:'Atendimentos concluídos',pending_verifications:'Verificações pendentes'};for(const [k,label] of Object.entries(labels))card.append(el('p',label+': '+m[k]));const exportBtn=el('button','Baixar indicadores CSV');exportBtn.type='button';exportBtn.className='button button-outline';exportBtn.addEventListener('click',()=>{const csv='Indicador;Quantidade\n'+Object.entries(labels).map(([k,label])=>label+';'+Number(m[k])).join('\n');const url=URL.createObjectURL(new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'}));const a=el('a');a.href=url;a.download='indicadores-sqf.csv';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);});card.append(exportBtn);queue.append(card);}catch(error){if(!/Somente administradores/.test(error.message))throw error; /* Moderators retain their authorized queues. */}
+   queue.append(el('h2','Avaliações pendentes'));
    if(!result.data.length)queue.append(el('p','Nenhuma avaliação pendente.'));
    for(const r of result.data){
      const card=el('article');card.className='card';card.append(el('h2','Avaliação '+r.rating+'/5'),el('p',r.comment));
@@ -79,7 +93,7 @@
        }
      }
    }catch(error){if(!/Somente administradores/.test(error.message))throw error;}
-   form.hidden=true;status.textContent='Fila de moderação carregada.';
+   updateNavigation();form.hidden=true;status.textContent='Fila de moderação carregada.';
  }
  form.addEventListener('submit',async event=>{event.preventDefault();const submit=form.querySelector('button');submit.disabled=true;try{await api.staffMfa(form.elements.code.value);form.reset();await load();}catch(e){status.textContent=e.message;}finally{submit.disabled=false;}});
  try{
