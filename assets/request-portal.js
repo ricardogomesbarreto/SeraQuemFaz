@@ -95,7 +95,9 @@
  }
  function matches(item,filter){
    return filter==='all'||(filter==='unread'&&(unread?.get(item.id)||0)>0)||(filter==='open'&&!['completed','declined','canceled'].includes(item.status))||
-     (filter==='quoted'&&item.status==='quoted')||(filter==='completed'&&item.status==='completed')||
+     (filter==='quoted'&&item.status==='quoted')||
+     (filter==='active'&&['accepted','in_progress','awaiting_confirmation'].includes(item.status))||
+     (filter==='completed'&&item.status==='completed')||
      (filter==='closed'&&['declined','canceled'].includes(item.status));
  }
  function drawList(){
