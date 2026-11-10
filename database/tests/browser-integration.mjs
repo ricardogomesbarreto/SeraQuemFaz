@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import {createHmac} from 'node:crypto';
 import { chromium } from 'playwright';
 const origin='http://127.0.0.1:8080';
 const browser=await chromium.launch({headless:true});
@@ -139,6 +140,26 @@ try{
    assert.equal(await actor.page.locator('#staffQueue').locator('article').count(),0);
    await widthCheck(actor.page,label+' denied admin page');
  }
+ const staff=await makePage();
+ await login(staff.page,'fixture2@example.invalid','browser-staff-12345');
+ await staff.page.goto(origin+'/admin-mysql.html');
+ await staff.page.locator('#staffMfa').waitFor({state:'visible'});
+ assert.equal(await staff.page.locator('#staffQueue article').count(),0);
+ const counter=Buffer.alloc(8);counter.writeBigUInt64BE(BigInt(Math.floor(Date.now()/30000)));
+ const digest=createHmac('sha1',Buffer.from('3132333435363738393031323334353637383930','hex')).update(counter).digest();
+ const offset=digest[digest.length-1]&15;
+ const code=String((digest.readUInt32BE(offset)&0x7fffffff)%1000000).padStart(6,'0');
+ await staff.page.locator('#staffMfa input[name=code]').fill(code);
+ await staff.page.locator('#staffMfa button').click();
+ await staff.page.locator('#staffStatus').getByText('Fila de moderação carregada.',{exact:true}).waitFor();
+ assert.equal(await staff.page.locator('#staffMfa').isVisible(),false);
+ await staff.page.getByRole('heading',{name:'Documentos de verificação pendentes'}).waitFor();
+ await staff.page.getByRole('heading',{name:'Contestações',exact:true}).waitFor();
+ assert.equal(await staff.page.getByRole('heading',{name:'Resumo financeiro'}).count(),0);
+ assert.equal(await staff.page.getByRole('heading',{name:'Indicadores da plataforma'}).count(),0);
+ await widthCheck(staff.page,'moderator queue');
+ await staff.context.close();
+ console.log('PASS: moderator MFA unlocks moderation queues but not administrator metrics or billing');
  const guest=await makePage();
  await guest.page.goto(origin+'/admin-mysql.html');
  await guest.page.waitForURL('**/entrar.html');
