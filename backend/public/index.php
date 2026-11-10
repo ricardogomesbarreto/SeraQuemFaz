@@ -107,6 +107,8 @@ try {
     if(str_starts_with($route,'staff/')){
       sqfRequireStaff($db,$actor);
       if((int)($_SESSION['staff_mfa_until']??0)<=time())respond(['error'=>'MFA administrativo obrigatório'],403);
+      if($route==='staff/documents')respond(['data'=>sqfStaffDocuments($db,$actor)]);
+      if($route==='staff/document/decide'){sqfStaffDocumentDecide($db,$actor,required($body,'id'),required($body,'status'),required($body,'note'));respond(['ok'=>true]);}
       if($route==='staff/review-cases')respond(['data'=>sqfStaffReviewCases($db,$actor)]);
       if($route==='staff/review-case/decide'){sqfStaffReviewCaseDecide($db,$actor,required($body,'type'),required($body,'id'),required($body,'status'),required($body,'note'));respond(['ok'=>true]);}
       if($route==='staff/reviews')respond(['data'=>sqfStaffQueue($db,$actor)]);
