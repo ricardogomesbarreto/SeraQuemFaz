@@ -131,7 +131,7 @@ SeraQuemFaz/
 
 ## Banco de dados e privacidade
 
-O banco consolidado inclui perfis, `sqf_account_settings`, serviços, verificações, solicitações, mensagens, agenda, avaliações, suporte e faturamento. **Não repita o histórico SQL** de migrations/ no projeto consolidado. A migração histórica 03 possui assinatura incompatível de `sqf_request_verification()`; novas mudanças devem partir de um diff do banco, backup e ambiente de homologação. Consulte [Supabase](supabase/README.md).
+O banco consolidado inclui perfis, `sqf_account_settings`, serviços, verificações, solicitações, mensagens, agenda, avaliações, suporte e faturamento. **NÃO repita o histórico SQL** de migrations/ no projeto consolidado. A migração histórica 03 possui assinatura incompatível de `sqf_request_verification()`; novas mudanças devem partir de um diff do banco, backup e ambiente de homologação. Consulte [Supabase](supabase/README.md).
 
 - RLS protege dados por papel e titularidade; funções privilegiadas exigem auditoria de autorização por objeto.
 - Fotos de cliente/conta e anexos/documentos são privados. Avatares profissionais e portfólio possuem buckets públicos: links diretos conhecidos podem continuar acessíveis independentemente da publicação no catálogo. Não armazenar documentos pessoais nesses buckets.
