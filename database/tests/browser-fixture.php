@@ -13,3 +13,8 @@ sqfQuery($db,'UPDATE sqf_auth_users SET password_hash=?,email_confirmed_at=UTC_T
 sqfQuery($db,"UPDATE sqf_admin_members SET active=1,role='moderator' WHERE user_id=?",[$staff]);
 sqfQuery($db,'DELETE FROM sqf_staff_mfa_state WHERE user_id=?',[$staff]);
 echo "PASS: moderator browser fixture ready\n";
+
+$admin='00000000-0000-4000-8000-000000000099';
+sqfQuery($db,'INSERT INTO sqf_auth_users(id,email,password_hash,email_confirmed_at) VALUES (?,?,?,UTC_TIMESTAMP(6))',[$admin,'browser-admin@example.invalid',sqfPassword('browser-admin-12345')]);
+sqfQuery($db,"INSERT INTO profiles(id,full_name,account_type) VALUES (?,'CI Admin','cliente')",[$admin]);
+sqfQuery($db,"INSERT INTO sqf_admin_members(user_id,role,active) VALUES (?,'admin',1)",[$admin]);
