@@ -3,6 +3,7 @@ declare(strict_types=1);
 require_once __DIR__.'/../src/Database.php';
 require_once __DIR__.'/../src/Auth.php';
 require_once __DIR__.'/../src/Agenda.php';
+require_once __DIR__.'/../src/Services.php';
 
 header('Content-Type: application/json; charset=utf-8');
 header('Cache-Control: no-store');
@@ -35,6 +36,7 @@ try {
     $route=trim((string)($_GET['route']??''),'/');
     if($method==='GET'&&$route==='session')respond(['user_id'=>sqfSessionUser($db,$_SESSION),'csrf'=>$_SESSION['csrf']]);
     if($method==='GET'&&$route==='categories')respond(['data'=>sqfQuery($db,"SELECT id,name,description,image_url,status,created_at FROM categories WHERE status='active' ORDER BY name,id")->fetchAll(PDO::FETCH_ASSOC)]);
+    if($method==='GET'&&$route==='provider')respond(['data'=>sqfPublicProvider($db,(string)($_GET['id']??''))]);
     if($method==='GET'&&$route==='catalog')respond(['data'=>sqfCatalog($db,(string)($_GET['city']??''))]);
     if($method!=='POST')respond(['error'=>'Rota indisponível'],404);
     if(!hash_equals($_SESSION['csrf'],(string)($_SERVER['HTTP_X_CSRF_TOKEN']??'')))respond(['error'=>'CSRF inválido'],403);
@@ -72,6 +74,17 @@ try {
     }
     $actor=sqfSessionUser($db,$_SESSION);
     if(!$actor)respond(['error'=>'Autenticação necessária'],401);
+    if($route==='services')respond(['data'=>sqfOwnServices($db,$actor)]);
+    if($route==='service/save'){
+      $id=isset($body['id'])?required($body,'id'):null;
+      $minimum=isset($body['price_min_cents'])?number($body,'price_min_cents'):null;
+      $maximum=isset($body['price_max_cents'])?number($body,'price_max_cents'):null;
+      respond(['data'=>sqfSaveService($db,$actor,$id,required($body,'category_id'),required($body,'service_title'),required($body,'description'),$minimum,$maximum)]);
+    }
+    if($route==='service/toggle'){
+      if(!isset($body['is_active'])||!is_bool($body['is_active']))throw new DomainException('Estado inválido');
+      sqfToggleService($db,$actor,required($body,'id'),$body['is_active']);respond(['ok'=>true]);
+    }
     if($route==='profile/update'){
       $name=trim(required($body,'full_name'));$bio=trim(required($body,'bio'));$code=isset($body['city_ibge'])?required($body,'city_ibge'):null;
       if(mb_strlen($name)<2||mb_strlen($name)>120||mb_strlen($bio)>1500)throw new DomainException('Perfil inválido');
