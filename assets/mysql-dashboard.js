@@ -30,9 +30,40 @@
      if(['proposed','confirmed'].includes(x.status))card.append(button('Cancelar horário',async()=>{await api.appointment({request_id:x.request_id,action:'cancel'});await load();}));agenda.append(card);
    }
    const notes=$('mysqlNotifications');empty(notes,n.data,'Nenhuma notificação.');for(const item of n.data){const c=wrap(item.title);c.append(el('p',item.body));notes.append(c);}
+   const serviceSection=$('mysqlServiceSection');
+   serviceSection.hidden=profile.account_type!=='prestador';
+   if(!serviceSection.hidden){
+     const [categories,services]=await Promise.all([api.categories(),api.services()]);
+     const select=$('mysqlServiceForm').elements.category_id;
+     const previous=select.value;select.replaceChildren();
+     for(const category of categories.data){const option=el('option',category.name);option.value=category.id;select.append(option);}
+     if(categories.data.some(x=>x.id===previous))select.value=previous;
+     const target=$('mysqlServices');empty(target,services.data,'Nenhum serviço cadastrado.');
+     for(const service of services.data){
+       const card=wrap(service.service_title);
+       card.append(el('p',(service.is_active?'Ativo':'Inativo')+' · '+(service.description||'Sem descrição')));
+       card.append(button(service.is_active?'Desativar serviço':'Ativar serviço',async()=>{
+         await api.toggleService({id:service.id,is_active:!Boolean(service.is_active)});
+         await load();
+       }));
+       target.append(card);
+     }
+   }
    $('mysqlContent').hidden=false;status('Dados carregados.');
  };
  $('mysqlLogout').addEventListener('click',async()=>{try{await api.logout();location.replace('entrar.html');}catch(e){status(e.message);}});
+ $('mysqlServiceForm').addEventListener('submit',async e=>{
+   e.preventDefault();const form=e.currentTarget,fields=form.elements;
+   const minimum=fields.price_min_cents.value,maximum=fields.price_max_cents.value;
+   if((minimum==='')!==(maximum==='')){status('Informe os dois preços ou deixe ambos em branco.');return;}
+   const request={category_id:fields.category_id.value,service_title:fields.service_title.value,
+     description:fields.description.value,price_min_cents:minimum===''?null:Number(minimum),
+     price_max_cents:maximum===''?null:Number(maximum)};
+   const submit=form.querySelector('[type="submit"]');submit.disabled=true;
+   try{await api.saveService(request);form.reset();await load();status('Serviço cadastrado.');}
+   catch(error){status(error.message||'Falha ao cadastrar serviço.');}
+   finally{submit.disabled=false;}
+ });
  $('mysqlProfile').addEventListener('submit',async e=>{e.preventDefault();try{const f=new FormData(e.currentTarget);await api.updateProfile({full_name:f.get('full_name'),bio:f.get('bio'),city_ibge:f.get('city_ibge')||null});await load();status('Perfil atualizado.');}catch(e){status(e.message);}});
  try{if(window.SQFDataMode!=='mysql')throw new Error('Ative MySQL apenas no ambiente de homologação.');const s=await api.session();if(!s.user_id){location.replace('entrar.html');return;}user=s.user_id;await load();}catch(e){status(e.message||'Falha ao carregar painel.');}
 })();
