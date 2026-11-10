@@ -43,5 +43,6 @@ function sqfPublicProvider(PDO $db,string $provider):?array {
     if(!$row)return null;
     $row['services']=sqfQuery($db,'SELECT id,category_id,service_title,description,price_min_cents,price_max_cents FROM provider_services WHERE provider_id=? AND is_active=1 ORDER BY service_title,id LIMIT 100',[$provider])->fetchAll(PDO::FETCH_ASSOC);
     $row['portfolio']=sqfQuery($db,'SELECT ph.id,ph.caption,ph.service_id,ph.is_cover FROM portfolio_photos ph JOIN provider_services s ON s.id=ph.service_id AND s.provider_id=ph.provider_id AND s.is_active=1 WHERE ph.provider_id=? ORDER BY ph.is_cover DESC,ph.created_at DESC LIMIT 50',[$provider])->fetchAll(PDO::FETCH_ASSOC);
+    $row['professional']=sqfQuery($db,'SELECT professional_title,specialties,experience_years,service_mode,coverage_area,workdays,work_period,quote_policy,professional_website FROM provider_professional_details WHERE provider_id=?',[$provider])->fetch(PDO::FETCH_ASSOC)?:null;
     return $row;
 }
