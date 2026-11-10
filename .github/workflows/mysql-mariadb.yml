@@ -43,7 +43,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Install PHP PDO driver
-        run: sudo apt-get update && sudo apt-get install -y php-cli php-mysql php-mbstring php-gd
+        run: sudo apt-get update && sudo apt-get install -y php-cli php-mysql php-mbstring php-gd php-curl
       - name: Install browser testing dependencies
         run: |
           npm install --no-save --package-lock=false playwright@1.56.1
@@ -108,5 +108,10 @@ jobs:
           node --check assets/mysql-public-provider.js
           node --check assets/mysql-admin.js
           node database/tests/http-integration.mjs
+          SQF_ALLOW_INSECURE_LOCAL=1 SQF_MP_WEBHOOK_ENABLED=1 SQF_MP_WEBHOOK_SECRET=fixture-webhook-secret SQF_MP_ACCESS_TOKEN= php -S 127.0.0.1:8081 -t "$STAGING_ROOT" database/tests/browser-router.php >/tmp/sqf-webhook.log 2>&1 &
+          WEBHOOK_PID=$!
+          for i in $(seq 1 20); do curl -fsS 'http://127.0.0.1:8081/index.php?route=session' >/dev/null && break; sleep 1; done
+          node database/tests/webhook-http.mjs
+          kill "$WEBHOOK_PID"
           node database/tests/browser-integration.mjs
           php database/tests/integrity.php
