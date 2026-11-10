@@ -77,6 +77,7 @@ jobs:
           php -l backend/src/MigrationPreflight.php
           php -l backend/bin/notifications.php
           php -l backend/bin/preflight-identities.php
+          php -l backend/bin/hostinger-preflight.php
           php -l backend/src/Moderation.php
           php -l backend/src/PrivateMedia.php
           php -l database/tests/private-media-integration.php
@@ -100,9 +101,12 @@ jobs:
           test ! -e "$STAGING_ROOT/assets/account.js"
           test ! -e "$STAGING_ROOT/service-worker.js"
           test -f "$STAGING_ROOT/api/index.php"
+          test -f "$STAGING_ROOT/.htaccess"
+          test -f "$PWD/dist/mysql-candidate/unlimited-profile.json"
           test -f "$PWD/dist/mysql-candidate/sqf-private/backend/src/Database.php"
           mkdir -m 700 "$PWD/dist/mysql-candidate/sqf-private/media"
           SQF_PRIVATE_MEDIA_ROOT="$PWD/dist/mysql-candidate/sqf-private/media" php -r 'require "dist/mysql-candidate/sqf-private/backend/src/PrivateMedia.php"; echo sqfMediaRoot().PHP_EOL;'
+          SQF_PREFLIGHT_CI=1 SQF_PRIVATE_MEDIA_ROOT="$PWD/dist/mysql-candidate/sqf-private/media" php "$PWD/dist/mysql-candidate/sqf-private/backend/bin/hostinger-preflight.php"
           rmdir "$PWD/dist/mysql-candidate/sqf-private/media"
           printf '<?php // CI inherits disposable configuration from environment.\n' > "$PWD/dist/mysql-candidate/sqf-private/config.php"
           SQF_ALLOW_INSECURE_LOCAL=1 php -S 127.0.0.1:8080 -t "$STAGING_ROOT" database/tests/browser-router.php >/tmp/sqf-http.log 2>&1 &

@@ -6,5 +6,9 @@
     "MariaDB 10.11"
   ],
   "production": false,
-  "deploymentAllowed": false
+  "deploymentAllowed": false,
+  "hosting": {
+    "provider": "Hostinger",
+    "plan": "Unlimited"
+  }
 }
