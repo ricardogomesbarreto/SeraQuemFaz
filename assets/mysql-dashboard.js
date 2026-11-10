@@ -30,6 +30,9 @@
      if(['proposed','confirmed'].includes(x.status))card.append(button('Cancelar horário',async()=>{await api.appointment({request_id:x.request_id,action:'cancel'});await load();}));agenda.append(card);
    }
    const notes=$('mysqlNotifications');empty(notes,n.data,'Nenhuma notificação.');for(const item of n.data){const c=wrap(item.title);c.append(el('p',item.body));notes.append(c);}
+   const discoverySection=$('mysqlDiscoverySection');
+   discoverySection.hidden=profile.account_type!=='cliente';
+   if(!discoverySection.hidden&&profile.city_ibge&&!$('mysqlDiscoveryForm').elements.city.value)$('mysqlDiscoveryForm').elements.city.value=profile.city_ibge;
    const serviceSection=$('mysqlServiceSection');
    serviceSection.hidden=profile.account_type!=='prestador';
    if(!serviceSection.hidden){
@@ -53,6 +56,43 @@
    $('mysqlContent').hidden=false;status('Dados carregados.');
  };
  $('mysqlLogout').addEventListener('click',async()=>{try{await api.logout();location.replace('entrar.html');}catch(e){status(e.message);}});
+ $('mysqlDiscoveryForm').addEventListener('submit',async e=>{
+   e.preventDefault();const form=e.currentTarget,city=String(form.elements.city.value).trim(),target=$('mysqlDiscoveryResults');
+   target.replaceChildren(el('p','Buscando profissionais aprovados…'));
+   try{
+     const result=await api.catalog(city);
+     empty(target,result.data,'Nenhum profissional aprovado e disponível para este município.');
+     for(const provider of result.data){
+       const card=wrap(provider.full_name);
+       card.append(el('p',provider.city||''),el('p',provider.bio||''));
+       const details=el('div');
+       card.append(button('Ver serviços',async()=>{
+         const result=await api.provider(provider.id);details.replaceChildren();
+         if(!result.data?.services?.length){details.append(el('p','Nenhum serviço ativo.'));return;}
+         const form=el('form'),list=el('select');
+         list.required=true;
+         for(const service of result.data.services){
+           const option=el('option',service.service_title);option.value=service.id;list.append(option);
+         }
+         const description=el('textarea');description.required=true;description.minLength=25;description.maxLength=2000;
+         description.placeholder='Descreva o serviço desejado (mínimo 25 caracteres)';
+         const date=el('input');date.type='date';
+         const submit=el('button','Solicitar orçamento');submit.className='button button-primary';submit.type='submit';
+         form.append(list,description,date,submit);
+         form.addEventListener('submit',async event=>{
+           event.preventDefault();submit.disabled=true;
+           try{
+             await api.createRequest({provider_id:provider.id,service_id:list.value,description:description.value,desired_date:date.value||undefined});
+             status('Solicitação enviada ao profissional.');await load();
+           }catch(error){status(error.message||'Falha ao solicitar orçamento.');}
+           finally{submit.disabled=false;}
+         });
+         details.append(form);
+       }),details);
+       target.append(card);
+     }
+   }catch(error){target.replaceChildren(el('p',error.message||'Busca indisponível'));}
+ });
  $('mysqlServiceForm').addEventListener('submit',async e=>{
    e.preventDefault();const form=e.currentTarget,fields=form.elements;
    const minimum=fields.price_min_cents.value,maximum=fields.price_max_cents.value;
