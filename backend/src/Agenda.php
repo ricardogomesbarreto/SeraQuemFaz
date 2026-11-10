@@ -56,6 +56,8 @@ function sqfAgenda(PDO $db, string $actor, string $request, string $action, ?str
                 $run("UPDATE sqf_appointments SET status='canceled',pending_starts_at=NULL,pending_duration_minutes=NULL,pending_proposed_by=NULL,updated_at=UTC_TIMESTAMP(6) WHERE id=?", [$a['id']]); $result='canceled';
             }
         }
+        $receiver=$actor===$r['client_id']?$r['provider_id']:$r['client_id'];
+        $run('INSERT INTO sqf_notifications(recipient_id,kind,title,body,request_id) VALUES (?,?,?,?,?)',[$receiver,'appointment','Agenda atualizada','Confira o horário e a situação do atendimento.',$request]);
         $db->commit(); return $result;
     } catch (Throwable $e) { if ($db->inTransaction()) $db->rollBack(); throw $e; }
 }
