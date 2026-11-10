@@ -32,6 +32,7 @@
     requestReset:email=>call('request-reset',{email}),
     reset:(token,password)=>call('reset',{token,password}),
     logout:async()=>{try{return await call('logout',{});}finally{csrf=null;}},
+    categories:()=>call('categories'),
     catalog:city=>call('catalog',undefined,{city}),
     createRequest:body=>call('request/create',body),
     quote:body=>call('request/quote',body),
