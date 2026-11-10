@@ -24,6 +24,7 @@ await writeFile(join(pub,'assets/backend-mode.js'),"'use strict';\nwindow.SQFDat
 const site=await readFile(join(pub,'assets/site.js'),'utf8');
 await writeFile(join(pub,'assets/site.js'),site.replace("if(typeof navigator!=='undefined'","if(window.SQFDataMode!=='mysql'&&typeof navigator!=='undefined'"));
 await cp(join(root,'backend/src'),join(priv,'backend/src'),{recursive:true});
+await cp(join(root,'backend/bin'),join(priv,'backend/bin'),{recursive:true});
 await mkdir(join(priv,'backend/public'),{recursive:true});
 await cp(join(root,'backend/public/index.php'),join(priv,'backend/public/index.php'));
 await cp(join(root,'database/hostinger/config.example.php'),join(priv,'config.example.php'));
