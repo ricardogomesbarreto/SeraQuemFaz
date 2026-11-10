@@ -74,6 +74,7 @@ jobs:
           php -l backend/src/Category.php
           php -l backend/src/Professional.php
           php -l backend/src/AccountCases.php
+          php -l backend/src/AccountSecurity.php
           php -l backend/src/Moderation.php
           php -l backend/src/PrivateMedia.php
           php -l database/tests/private-media-integration.php
