@@ -23,5 +23,9 @@ verify(is_file(sqfPrivateImagePath($db,$provider,'attachment',$attachment)),'oth
 forbid(fn()=>sqfPrivateImagePath($db,$stranger,'attachment',$attachment),'third party cannot read request attachment');
 forbid(fn()=>sqfSavePrivateImage($db,$stranger,'attachment',$request,$bytes),'third party cannot attach to request');
 forbid(fn()=>sqfPrivateImagePath($db,$provider,'attachment','../etc/passwd'),'path traversal rejected');
+verify(count(sqfListPrivateMedia($db,$provider,'verification'))>=1,'provider sees own document inventory');
+forbid(fn()=>sqfListPrivateMedia($db,$client,'verification'),'client cannot list provider documents');
+verify(count(sqfListPrivateMedia($db,$provider,'attachment',$request))>=1,'request participant sees attachment inventory');
+forbid(fn()=>sqfListPrivateMedia($db,$stranger,'attachment',$request),'stranger cannot enumerate attachments');
 verify((int)sqfQuery($db,'SELECT COUNT(*) FROM sqf_verification_documents WHERE id=? AND provider_id=?',[$doc,$provider])->fetchColumn()===1,'private document metadata committed');
 verify((int)sqfQuery($db,'SELECT COUNT(*) FROM sqf_request_attachments WHERE id=? AND uploaded_by=?',[$attachment,$client])->fetchColumn()===1,'attachment metadata committed');
