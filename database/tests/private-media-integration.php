@@ -188,3 +188,5 @@ verify(is_array(sqfCompareQuotes($db,$client)),'client can compare own open quot
 forbid(fn()=>sqfCompareQuotes($db,$provider),'provider cannot access client quote comparison');
 sqfSetFavorite($db,$client,$provider,false);
 verify(count(sqfClientFavorites($db,$client))===0,'favorite removal persisted');
+
+forbid(fn()=>sqfStaffMetrics($db,$client),'client cannot access aggregate administration report');

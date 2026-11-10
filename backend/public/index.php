@@ -134,6 +134,7 @@ try {
     if(str_starts_with($route,'staff/')){
       sqfRequireStaff($db,$actor);
       if((int)($_SESSION['staff_mfa_until']??0)<=time())respond(['error'=>'MFA administrativo obrigatório'],403);
+      if($route==='staff/metrics')respond(['data'=>sqfStaffMetrics($db,$actor)]);
       if($route==='staff/billing')respond(['data'=>sqfStaffBilling($db,$actor)]);
       if($route==='staff/providers')respond(['data'=>sqfStaffProviders($db,$actor)]);
       if($route==='staff/provider/decide'){sqfStaffProviderDecide($db,$actor,required($body,'id'),required($body,'status'),required($body,'note'));respond(['ok'=>true]);}

@@ -30,3 +30,17 @@ function sqfCompareQuotes(PDO $db,string $actor):array {
     if(sqfQuery($db,'SELECT account_type FROM profiles WHERE id=?',[$actor])->fetchColumn()!=='cliente')throw new DomainException('Somente clientes');
     return sqfQuery($db,"SELECT r.id,r.provider_id,p.full_name,r.description,r.quote_cents,r.quote_terms,r.status FROM sqf_service_requests r JOIN profiles p ON p.id=r.provider_id WHERE r.client_id=? AND r.status='quoted' AND r.quote_cents IS NOT NULL ORDER BY r.quote_cents,r.id LIMIT 100",[$actor])->fetchAll(PDO::FETCH_ASSOC);
 }
+
+function sqfStaffMetrics(PDO $db,string $actor):array {
+    if(sqfRequireStaff($db,$actor)!=='admin')throw new DomainException('Somente administradores');
+    $sql=[
+      'clients'=>"SELECT COUNT(*) FROM profiles WHERE account_type='cliente'",
+      'providers'=>"SELECT COUNT(*) FROM profiles WHERE account_type='prestador'",
+      'published_providers'=>"SELECT COUNT(*) FROM profiles p JOIN provider_verifications v ON v.provider_id=p.id WHERE ".sqfPublicPredicate(),
+      'requests'=>"SELECT COUNT(*) FROM sqf_service_requests",
+      'completed'=>"SELECT COUNT(*) FROM sqf_service_requests WHERE status='completed'",
+      'pending_verifications'=>"SELECT COUNT(*) FROM provider_verifications WHERE status='pending'"
+    ];
+    $result=[];foreach($sql as $key=>$query)$result[$key]=(int)$db->query($query)->fetchColumn();
+    return $result;
+}

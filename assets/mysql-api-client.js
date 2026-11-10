@@ -69,6 +69,7 @@
     favoriteCategories:()=>call('favorites/categories',{}),
     favoriteCategory:body=>call('favorite/category',body),
     billing:()=>call('billing',{}),
+    staffMetrics:()=>call('staff/metrics',{}),
     staffBilling:()=>call('staff/billing',{}),
     accountSecurity:()=>call('account/security',{}),
     changePassword:body=>call('account/password',body),
