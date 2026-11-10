@@ -1,5 +1,5 @@
 {
-  "version": "3.14.0-rc.1",
+  "version": "3.14.0-rc.2",
   "status": "homologacao",
   "database": [
     "MySQL 8.0",
