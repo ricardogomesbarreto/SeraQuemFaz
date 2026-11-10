@@ -69,3 +69,7 @@ Aplique também `mysql/migrations/003_staff_mfa.sql`. `backend/src/Moderation.ph
 ### Estado desta etapa
 
 A tela candidata `painel-mysql.html` permite ao prestador enviar e consultar seus próprios documentos de verificação. Não existe aprovação automática de documentos. Ainda falta a interface administrativa de análise dos documentos, portfólio público, anexos no fluxo principal de mensagens e migração dos arquivos do Storage Supabase.
+
+### Moderação documental com MFA
+
+A equipe ativa com MFA recente consulta `staff/documents` e decide via `staff/document/decide` (id, status `accepted` ou `rejected`, justificativa de 20–1000 caracteres). Cada operação bloqueia a linha, impede segunda decisão, rejeita decisão pelo proprietário e grava auditoria em `sqf_staff_decision_log`. A fila de `admin-mysql.html` expõe o arquivo somente através da rota privada com autenticação e MFA. Aceitar o documento **não altera** `provider_verifications.status`; não existe aprovação automática de prestadores. A análise jurídica/operacional dos documentos, LGPD, retenção e verificação da pessoa no mundo real continuam pendentes.
