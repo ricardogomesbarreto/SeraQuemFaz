@@ -99,6 +99,9 @@ jobs:
           test ! -e "$STAGING_ROOT/service-worker.js"
           test -f "$STAGING_ROOT/api/index.php"
           test -f "$PWD/dist/mysql-candidate/sqf-private/backend/src/Database.php"
+          mkdir -m 700 "$PWD/dist/mysql-candidate/sqf-private/media"
+          SQF_PRIVATE_MEDIA_ROOT="$PWD/dist/mysql-candidate/sqf-private/media" php -r 'require "dist/mysql-candidate/sqf-private/backend/src/PrivateMedia.php"; echo sqfMediaRoot().PHP_EOL;'
+          rmdir "$PWD/dist/mysql-candidate/sqf-private/media"
           SQF_ALLOW_INSECURE_LOCAL=1 php -S 127.0.0.1:8080 -t "$STAGING_ROOT" database/tests/browser-router.php >/tmp/sqf-http.log 2>&1 &
           trap 'kill $! 2>/dev/null || true; cat /tmp/sqf-http.log' EXIT
           for i in $(seq 1 20); do curl -fsS 'http://127.0.0.1:8080/index.php?route=session' >/dev/null && break; sleep 1; done
