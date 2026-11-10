@@ -64,6 +64,9 @@
      decision.addEventListener('submit',async e=>{e.preventDefault();submit.disabled=true;try{if(!confirm('Confirmar decisão cadastral?'))return;await api.staffProviderDecide({id:item.id,status:select.value,note:note.value});await load();}catch(error){status.textContent=error.message;}finally{submit.disabled=false;}});
    }
    try{
+     const billing=(await api.staffBilling()).data;
+     queue.append(el('h2','Resumo financeiro'),el('p','Prestadores com período pago vigente: '+billing.active_paid),el('p','Checkout indisponível na homologação.'));
+     for(const i of billing.invoices)queue.append(el('p',i.status+' · '+i.total+' faturas · '+new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(Number(i.cents)/100)));
      const cases=(await api.staffCases()).data;
      for(const [kind,items] of [['privacy',cases.privacy],['support',cases.support]]){
        queue.append(el('h2',kind==='privacy'?'Solicitações de privacidade':'Chamados de suporte'));
