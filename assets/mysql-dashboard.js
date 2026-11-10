@@ -37,8 +37,8 @@
      const messages=el('div');card.append(button('Abrir conversa',async()=>{const result=await api.messages(r.id);messages.replaceChildren();for(const m of result.data.slice().reverse())messages.append(el('p',(m.sender_id===user?'Você: ':'Outra parte: ')+m.body));}),messages);
      const attachments=el('div');card.append(button('Ver anexos',async()=>{const result=await api.mediaList('attachment',r.id);empty(attachments,result.data,'Nenhum anexo.');for(const item of result.data){const box=el('figure');box.append(image('attachment',item.id,item.caption||'Anexo da solicitação'),el('figcaption',item.caption||'Imagem'));attachments.append(box);}}),attachments);
      if(['requested','quoted','accepted','in_progress','awaiting_confirmation'].includes(r.status)){
-       const file=el('input');file.type='file';file.accept='image/webp';file.setAttribute('aria-label','Imagem para anexar');
-       card.append(file,button('Enviar anexo',async()=>{const selected=file.files?.[0];if(!selected||selected.type!=='image/webp'||selected.size>5*1024*1024)throw new Error('Selecione WebP de até 5 MB.');await api.uploadMedia('attachment',r.id,selected);file.value='';status('Anexo enviado.');}));
+       const file=el('input');file.type='file';file.accept='image/webp,image/jpeg,image/png';file.setAttribute('aria-label','Imagem para anexar');
+       card.append(file,button('Enviar anexo',async()=>{const selected=file.files?.[0];if(!selected||!['image/webp','image/jpeg','image/png'].includes(selected.type)||selected.size>5*1024*1024)throw new Error('Selecione WebP, JPEG ou PNG de até 5 MB.');await api.uploadMedia('attachment',r.id,selected);file.value='';status('Anexo enviado.');}));
      }
      if(['requested','quoted','accepted','in_progress','awaiting_confirmation'].includes(r.status)){const input=el('textarea');input.placeholder='Mensagem privada';input.maxLength=2000;card.append(input,button('Enviar mensagem',async()=>{await api.sendMessage({request_id:r.id,body:input.value});input.value='';status('Mensagem enviada.');}));}
      if(['accepted','in_progress','awaiting_confirmation'].includes(r.status)){const dt=el('input');dt.type='datetime-local';const dur=el('input');dur.type='number';dur.min='30';dur.max='480';dur.value='60';card.append(dt,dur,button('Propor horário',async()=>{if(!dt.value)throw new Error('Informe a data');await api.appointment({request_id:r.id,action:'propose',starts_at:new Date(dt.value).toISOString(),duration_minutes:Number(dur.value)});await load();}));}
@@ -153,7 +153,7 @@
  for(const [id,kind] of [['mysqlAvatarForm','avatar'],['mysqlPortfolioForm','portfolio']]){
    $(id).addEventListener('submit',async event=>{
      event.preventDefault();const form=event.currentTarget,file=form.elements.file.files?.[0];
-     if(!file||file.type!=='image/webp'||file.size>5*1024*1024){status('Envie WebP de até 5 MB.');return;}
+     if(!file||!['image/webp','image/jpeg','image/png'].includes(file.type)||file.size>5*1024*1024){status('Envie WebP, JPEG ou PNG de até 5 MB.');return;}
      const submit=form.querySelector('[type="submit"]');submit.disabled=true;
      try{await api.uploadMedia(kind,kind==='avatar'?'self':form.elements.service_id.value,file,form.elements.caption?.value||'');form.reset();await load();status('Imagem salva.');}
      catch(error){status(error.message||'Falha ao salvar imagem.');}finally{submit.disabled=false;}
@@ -162,7 +162,7 @@
  $('mysqlDocumentForm').addEventListener('submit',async event=>{
    event.preventDefault();
    const form=event.currentTarget,file=form.elements.file.files?.[0],type=form.elements.document_kind.value;
-   if(!file||file.type!=='image/webp'||file.size>5*1024*1024){status('Envie uma imagem WebP válida de até 5 MB.');return;}
+   if(!file||!['image/webp','image/jpeg','image/png'].includes(file.type)||file.size>5*1024*1024){status('Envie uma imagem WebP, JPEG ou PNG válida de até 5 MB.');return;}
    const submit=form.querySelector('[type="submit"]');submit.disabled=true;
    try{await api.uploadMedia('verification',type,file);form.reset();await load();status('Documento enviado para análise.');}
    catch(error){status(error.message||'Falha ao enviar documento.');}
