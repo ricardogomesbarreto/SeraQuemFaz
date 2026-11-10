@@ -2,7 +2,7 @@
 /* Candidate client. Existing Supabase pages remain unchanged until their full
    contracts are ported. Never transmit credentials or SQL to this client. */
 (function(scope){
-  let csrf=null;
+  let csrf=null, sessionFlight=null;
   const endpoint='/api/index.php';
   async function call(route,body,query={}){
     const url=new URL(endpoint,scope.location.origin);
@@ -30,7 +30,10 @@
     const result=await response.json();if(!response.ok)throw new Error(result.error||'Falha ao enviar arquivo');return result;
   }
   const mediaUrl=(kind,id)=>{const url=new URL(endpoint,scope.location.origin);url.searchParams.set('route','media/read');url.searchParams.set('kind',kind);url.searchParams.set('id',id);return url.pathname+url.search;};
-  const session=()=>call('session');
+  const session=()=>{
+    if(!sessionFlight)sessionFlight=call('session').finally(()=>{sessionFlight=null;});
+    return sessionFlight;
+  };
   scope.SQFMySQL=Object.freeze({
     session,
     login:(email,password)=>call('login',{email,password}),
