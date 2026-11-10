@@ -41,3 +41,24 @@ forbid(fn()=>sqfStaffDocumentDecide($db,$stranger,$doc,'rejected','Tentativa de 
 verify((int)sqfQuery($db,"SELECT COUNT(*) FROM sqf_staff_decision_log WHERE entity_type='verification_document' AND entity_id=?",[$doc])->fetchColumn()===1,'document moderation audit exists');
 sqfQuery($db,'UPDATE sqf_admin_members SET active=0 WHERE user_id=?',[$stranger]);
 forbid(fn()=>sqfStaffDocuments($db,$stranger),'revoked moderator blocked from queue');
+
+require_once __DIR__.'/../../backend/src/Services.php';
+$service=(string)sqfQuery($db,'SELECT id FROM provider_services WHERE provider_id=? AND is_active=1 LIMIT 1',[$provider])->fetchColumn();
+verify($service!=='','active provider service available');
+$photo=sqfSavePrivateImage($db,$provider,'portfolio',$service,$bytes,'Trabalho de teste');
+verify(is_file(sqfPrivateImagePath($db,$provider,'portfolio',$photo)),'provider sees own portfolio');
+verify(is_file(sqfPrivateImagePath($db,'','portfolio',$photo)),'approved public portfolio visible');
+forbid(fn()=>sqfSavePrivateImage($db,$client,'portfolio',$service,$bytes),'client cannot upload portfolio');
+verify(in_array($photo,array_column(sqfPublicProvider($db,$provider)['portfolio'],'id'),true),'public profile exposes permitted portfolio');
+sqfQuery($db,'UPDATE provider_services SET is_active=0 WHERE id=?',[$service]);
+forbid(fn()=>sqfPrivateImagePath($db,'','portfolio',$photo),'inactive service photo hidden');
+sqfQuery($db,'UPDATE provider_services SET is_active=1 WHERE id=?',[$service]);
+sqfSavePrivateImage($db,$provider,'avatar','self',$bytes);
+verify(is_file(sqfPrivateImagePath($db,'','avatar',$provider)),'approved provider avatar visible');
+sqfSavePrivateImage($db,$client,'avatar','self',$bytes);
+verify(is_file(sqfPrivateImagePath($db,$client,'avatar',$client)),'client sees own avatar');
+forbid(fn()=>sqfPrivateImagePath($db,$provider,'avatar',$client),'client avatar remains private');
+sqfQuery($db,"UPDATE provider_verifications SET status='suspended' WHERE provider_id=?",[$provider]);
+forbid(fn()=>sqfPrivateImagePath($db,'','portfolio',$photo),'suspended provider portfolio hidden');
+forbid(fn()=>sqfPrivateImagePath($db,'','avatar',$provider),'suspended provider avatar hidden');
+sqfQuery($db,"UPDATE provider_verifications SET status='approved' WHERE provider_id=?",[$provider]);
