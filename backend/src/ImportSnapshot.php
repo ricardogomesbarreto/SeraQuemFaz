@@ -33,7 +33,7 @@ function sqfImportSnapshot(PDO $db,array $snapshot,string $mediaRoot,bool $commi
         foreach($tables as $table){
             if(!is_array($rows[$table])||!array_is_list($rows[$table])||count($rows[$table])>50000)throw new DomainException('Lote inválido');
             if((int)$db->query("SELECT COUNT(*) FROM `$table`")->fetchColumn()!==0)throw new DomainException('Tabela de destino não vazia');
-            $columns=sqfQuery($db,'SELECT column_name FROM information_schema.columns WHERE table_schema=DATABASE() AND table_name=? AND column_name<>'current_user_id'',[$table])->fetchAll(PDO::FETCH_COLUMN);
+            $columns=sqfQuery($db,'SELECT column_name FROM information_schema.columns WHERE table_schema=DATABASE() AND table_name=? AND column_name<>? ',[$table,'current_user_id'])->fetchAll(PDO::FETCH_COLUMN);
             foreach($rows[$table] as $row){
                 if(!is_array($row)||!$row||array_is_list($row)||array_diff(array_keys($row),$columns))throw new DomainException('Colunas inválidas');
                 if($table==='sqf_auth_users'){
