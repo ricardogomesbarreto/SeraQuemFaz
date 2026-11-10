@@ -10,7 +10,7 @@ Na raiz do repositório execute:
 node database/hostinger/build-install.mjs
 ```
 
-Resultado: `dist/hostinger/01-instalar-banco.sql`, `02-verificar-banco.sql`, `SHA256SUMS`, este guia e os exemplos de configuração/entrada PHP. A CI também gera um artefato para baixar. O SQL consolida 001, 002, 003 e os dados públicos de categorias e municípios; sem contas reais, dados privados, criação/exclusão de banco, GRANT ou DEFINER. O checksum permite conferir o arquivo. Não editar o arquivo gerado: modificar as migrations e gerar novamente.
+Resultado: `dist/hostinger/01-instalar-banco.sql`, `02-verificar-banco.sql`, `SHA256SUMS`, este guia e os exemplos de configuração/entrada PHP. A CI também gera um artefato para baixar. O SQL consolida 001 a 006 e os dados públicos de categorias e municípios; sem contas reais, dados privados, criação/exclusão de banco, GRANT ou DEFINER. O checksum permite conferir o arquivo. Não editar o arquivo gerado: modificar as migrations e gerar novamente.
 
 ## hPanel — passo a passo
 
@@ -23,7 +23,7 @@ Resultado: `dist/hostinger/01-instalar-banco.sql`, `02-verificar-banco.sql`, `SH
 
 ## Configuração segura da aplicação candidata
 
-Use PHP 8.1+ com PDO MySQL, mbstring, GD com WebP, fileinfo, Argon2id e HTTPS. O endereço do banco, nome e usuário devem ser copiados do hPanel; não adivinhar o prefixo da conta.
+Use PHP 8.1+ com PDO MySQL, mbstring, GD com WebP, fileinfo, cURL, Argon2id e HTTPS. O endereço do banco, nome e usuário devem ser copiados do hPanel; não adivinhar o prefixo da conta.
 
 ```text
 diretorio-do-dominio/
@@ -36,7 +36,7 @@ diretorio-do-dominio/
 
 Copie `database/hostinger/config.example.php` para `sqf-private/config.php` e preencha os campos no servidor. Copie a pasta `backend/` para `sqf-private/backend/`. Copie `database/hostinger/api-entry.example.php` como `public_html/api/index.php`. A entrada deve carregar `dirname(__DIR__, 2).'/sqf-private/config.php'` e depois `dirname(__DIR__, 2).'/sqf-private/backend/public/index.php'`. Ajuste caminhos se o layout real do hPanel for diferente. O backend usa variáveis de ambiente, não o navegador. Crie `media/` com permissões restritas ao processo PHP; jamais usar public_html.
 
-Ative `window.SQFDataMode = 'mysql'` somente na cópia de homologação. A versão principal continua Supabase até todos os gates passarem. Configure transporte de e-mail real, MFA administrativo individual e backups; não use credenciais de exemplo. Não habilite checkout real.
+Gere a distribuição isolada com `node database/hostinger/build-install.mjs` e `node database/hostinger/build-candidate.mjs`. O resultado `dist/mysql-candidate/` contém public_html, sqf-private e database, sem SDK Supabase, sem painel legado e sem credenciais. O modo MySQL já está fixado. Não usar o ZIP estático legado como pacote MySQL. A versão principal continua Supabase até todos os gates passarem. Configure transporte de e-mail real, MFA administrativo individual e backups; não use credenciais de exemplo. Não habilite checkout real.
 
 ## Validação e corte
 
