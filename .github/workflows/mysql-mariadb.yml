@@ -77,6 +77,10 @@ jobs:
           php -l backend/src/AccountSecurity.php
           php -l backend/src/Billing.php
           php -l backend/src/MercadoPago.php
+          php -l backend/src/Notifications.php
+          php -l backend/src/MigrationPreflight.php
+          php -l backend/bin/notifications.php
+          php -l backend/bin/preflight-identities.php
           php -l backend/src/Moderation.php
           php -l backend/src/PrivateMedia.php
           php -l database/tests/private-media-integration.php
@@ -85,10 +89,12 @@ jobs:
           php -l backend/public/index.php
           php -l database/seed/import-public.php
           php database/seed/import-public.php
+          php database/tests/migration-preflight.php
           php database/tests/agenda-integration.php
           php database/tests/auth-integration.php
           mkdir -m 700 -p /tmp/sqf-private-media
           php database/tests/private-media-integration.php
+          php database/tests/notifications-integration.php
 
           php database/tests/browser-fixture.php
           php database/tests/integrity.php
