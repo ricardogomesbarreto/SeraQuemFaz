@@ -1,7 +1,5 @@
 "use strict";
-/* Navegação autenticada global, independente da tabela public.profiles.
-   Não toma decisões de autorização: papéis são apenas para rótulos visuais.
-   O Supabase/RLS continua responsável por qualquer acesso a dados. */
+/* Navegação autenticada; autorização sempre no backend PHP. */
 (() => {
   const nav = document.getElementById('site-menu');
   if (!nav) return;
@@ -9,7 +7,6 @@
   if (!root) return;
   root.setAttribute('data-auth-loading', 'true');
   let generation = 0;
-  let client = null;
   const text = (tag, cls, value) => {
     const n = document.createElement(tag);
     if (cls) n.className = cls;
@@ -23,9 +20,9 @@
       if (link.dataset.sqfOriginalLabel === undefined) link.dataset.sqfOriginalLabel = link.textContent;
       const original = link.dataset.sqfOriginalHref;
       if (original === 'entrar.html') {
-        link.href = authenticated ? (window.SQFDataMode==='mysql'?'painel-mysql.html':'painel.html') : original;
+        link.href = authenticated ? 'painel-mysql.html' : original;
         link.textContent = authenticated ? 'Minha conta' : link.dataset.sqfOriginalLabel;
-      } else if (original === 'painel.html' && window.SQFDataMode==='mysql') {
+      } else if (original === 'painel.html') {
         link.href = authenticated ? 'painel-mysql.html' : 'entrar.html';
       } else if (original === 'cadastro.html') {
         link.hidden = authenticated;
@@ -45,25 +42,6 @@
   }
   function initials(name) {
     return String(name || 'U').trim().split(/\s+/).slice(0, 2).map(part => part[0] || '').join('').toLocaleUpperCase('pt-BR').slice(0, 2);
-  }
-  function formatName(user, profile) {
-    const label = String(profile?.full_name || user.user_metadata?.full_name || user.email?.split('@')[0] || 'Minha conta').trim();
-    return label.slice(0, 70);
-  }
-  async function avatarUrl(api, user, profile) {
-    const path = profile?.avatar_path;
-    if (typeof path !== 'string' || !new RegExp(`^${user.id}/[0-9a-f-]{36}\\.webp$`, 'i').test(path)) return null;
-    try {
-      if (profile?.account_type === 'cliente') {
-        const {data, error} = await api.storage.from('sqf-client-avatars').createSignedUrl(path, 120);
-        if (error) return null;
-        const parsed = new URL(data.signedUrl, location.href);
-        return parsed.protocol === 'https:' && parsed.host === new URL(window.SQFSupabase.url).host ? parsed.href : null;
-      }
-      const {data} = api.storage.from('sqf-avatars').getPublicUrl(path);
-      const parsed = new URL(data?.publicUrl);
-      return parsed.protocol === 'https:' && parsed.host === new URL(window.SQFSupabase.url).host ? parsed.href : null;
-    } catch { return null; }
   }
   function makeLink(label, href) {
     const link = text('a', 'sqf-account-link', label);
@@ -91,8 +69,8 @@
     summary.append(avatar, text('span', 'sqf-account-name', name), text('span', 'sqf-account-chevron', '⌄'));
     const content = text('div', 'sqf-account-dropdown');
     content.append(text('p', 'sqf-account-caption', verified ? 'Conta conectada' : 'Confirmando sessão'));
-    const edit = makeLink('Minha conta e perfil', window.SQFDataMode==='mysql'?'painel-mysql.html':'painel.html#accountProfile');
-    const activity = makeLink('Solicitações e mensagens', window.SQFDataMode==='mysql'?'painel-mysql.html#requests':'painel.html#sqfRequestPortal');
+    const edit = makeLink('Minha conta e perfil', 'painel-mysql.html');
+    const activity = makeLink('Solicitações e mensagens', 'painel-mysql.html#requests');
     const logout = text('button', 'sqf-account-signout', 'Sair da conta');
     logout.type = 'button';
     const notice = text('p', 'sqf-account-error');
@@ -100,7 +78,7 @@
     logout.addEventListener('click', async () => {
       logout.disabled = true;
       try {
-        if(window.SQFDataMode==='mysql'){await window.SQFMySQL.logout();}else{const {error}=await (client || window.getSQFClient()).auth.signOut();if(error)throw error;}
+        await window.SQFMySQL.logout();
         guest();
         location.replace('index.html');
       } catch {
@@ -125,54 +103,8 @@
   async function refresh() {
     const token = ++generation;
     eventSignal.abort(); eventSignal = new AbortController();
-    if(window.SQFDataMode==='mysql'){
-      try{const s=await window.SQFMySQL.session();if(token!==generation)return;if(!s.user_id){guest();return;}const p=await window.SQFMySQL.profile();if(token!==generation)return;userMenu({id:s.user_id},p.data?.full_name||'Minha conta',Number(p.data?.has_avatar)===1?window.SQFMySQL.mediaUrl('avatar',s.user_id):null,true);if(['entrar.html','cadastro.html'].includes(location.pathname.split('/').pop()))location.replace('painel-mysql.html');}catch{if(token===generation)guest();}return;
-    }
-    try { client = window.getSQFClient(); }
-    catch { guest(); return; }
-    let user;
-    try {
-      const { data:sessionData } = await client.auth.getSession();
-      if (token !== generation) return;
-      if (!sessionData?.session?.user) { guest(); return; }
-      user = sessionData.session.user;
-      // A sessão local já permite mostrar o botão Sair, mesmo sem resposta da API.
-      userMenu(user, formatName(user, null), null, false);
-      const { data, error } = await client.auth.getUser();
-      if (token !== generation) return;
-      if (!error && data?.user) user = data.user;
-      // Uma indisponibilidade temporária do Auth não deve esconder o botão Sair.
-      let profile = null;
-      if (!error) {
-        try {
-          const response = await client.from('profiles')
-            .select('full_name,account_type,avatar_path').eq('id', user.id).maybeSingle();
-          if (!response.error && response.data) profile = response.data;
-        } catch { /* perfil SQL pode não estar instalado */ }
-      }
-      let compat = null;
-      if (!profile && window.SQFAccountCompat) {
-        compat = await window.SQFAccountCompat.read(client, user);
-      }
-      if (token !== generation) return;
-      const name = compat?.display_name || formatName(user, profile);
-      const url = compat ? await window.SQFAccountCompat.signedPhoto(client,user,compat.avatar_path)
-        : profile ? await avatarUrl(client, user, profile) : null;
-      if (token !== generation) return;
-      userMenu(user, name, url, !error);
-      const page = location.pathname.split('/').pop()?.toLowerCase();
-      const recovery = new URLSearchParams(location.search).has('recuperar') || /type=recovery/i.test(location.hash);
-      if (!error && !recovery && ['entrar.html','cadastro.html'].includes(page)) location.replace('painel.html');
-    } catch {
-      // Sem backend: tentar manter o acesso ao encerramento da sessão local.
-      if (token === generation && user) userMenu(user, formatName(user, null), null, false);
-      else if (token === generation) guest();
-    }
+    try{const s=await window.SQFMySQL.session();if(token!==generation)return;if(!s.user_id){guest();return;}const p=await window.SQFMySQL.profile();if(token!==generation)return;userMenu({id:s.user_id},p.data?.full_name||'Minha conta',Number(p.data?.has_avatar)===1?window.SQFMySQL.mediaUrl('avatar',s.user_id):null,true);if(['entrar.html','cadastro.html'].includes(location.pathname.split('/').pop()))location.replace('painel-mysql.html');}catch{if(token===generation)guest();}
   }
   window.SQFAccountNavigation = Object.freeze({ refresh });
   void refresh();
-  if(window.SQFDataMode!=='mysql')try {
-    client = window.getSQFClient();
-    client.auth.onAuthStateChange(() => { queueMicrotask(() => void refresh()); });
-  } catch { /* O restante do site continua navegável como visitante. */ }
 })();
