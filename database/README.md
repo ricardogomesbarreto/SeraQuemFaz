@@ -1,5 +1,9 @@
 # Banco de dados — Será Quem Faz?
 
+## Instalação na Hostinger
+
+**Entrada recomendada:** [`hostinger/README.md`](hostinger/README.md). Gere o SQL único com `node database/hostinger/build-install.mjs` na raiz do repositório. O resultado fica em `dist/hostinger/01-instalar-banco.sql`, com `SHA256SUMS`; a CI publica o artefato de homologação e testa a importação em MySQL 8.0 e MariaDB 10.11. Nunca importe em um banco não vazio. A configuração de exemplo fica em `hostinger/config.example.php` e deve ser copiada para fora da raiz pública.
+
 ## Estrutura
 
 - `mysql/migrations/002_auth.sql`: identidade local, tokens e limitação de tentativas.
@@ -12,7 +16,7 @@ O diretório legado `supabase/` permanece intacto até o corte de produção. O 
 
 ## Instalação isolada
 
-Criar um banco vazio e um usuário próprio. Importar `mysql/migrations/001_schema.sql` e depois `mysql/migrations/002_auth.sql` pelo cliente mysql/mariadb ou painel de administração. Nunca importar sobre o banco de produção. Usar UTF-8 e UTC. No ambiente PHP, definir `SQF_DB_DSN=mysql:host=127.0.0.1;dbname=sqf_test;charset=utf8mb4`, `SQF_DB_USER` e `SQF_DB_PASSWORD` apenas no servidor. PHP 8.1+, PDO MySQL, Argon2id e mbstring.
+Criar um banco vazio e um usuário próprio. Importar o SQL consolidado para Hostinger ou, em desenvolvimento, `mysql/migrations/001_schema.sql`, `002_auth.sql` e `003_staff_mfa.sql` em ordem, pelo cliente mysql/mariadb ou painel de administração. Nunca importar sobre o banco de produção. Usar UTF-8 e UTC. No ambiente PHP, definir `SQF_DB_DSN=mysql:host=127.0.0.1;dbname=sqf_test;charset=utf8mb4`, `SQF_DB_USER` e `SQF_DB_PASSWORD` apenas no servidor. PHP 8.1+, PDO MySQL, Argon2id e mbstring.
 
 Executar `php database/tests/agenda-integration.php` e `php database/tests/auth-integration.php` exclusivamente em banco de testes vazio. A CI usa MySQL 8.0 e MariaDB 10.11.
 
