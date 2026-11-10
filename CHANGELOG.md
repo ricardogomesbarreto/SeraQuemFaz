@@ -1,3 +1,11 @@
+# v3.13.0 — Agenda, portfólio e indicadores operacionais
+
+- Agenda: filtros de próximos horários, histórico, situação e data; aviso de sobreposição entre horários carregados, sem bloqueio transacional no servidor.
+- Portfólio: agrupamento por serviço, capas primeiro, filtro exclusivo de capas e contador real.
+- Desempenho e administração: percentual histórico de atendimentos concluídos por solicitações, sem confundir com conversão comercial; valores ausentes aparecem como indisponíveis, inclusive no CSV.
+- Layout responsivo e testes automatizados. RLS e RPCs existentes preservadas; sem migração.
+- Sem Mercado Pago, SMTP ou hospedagem. A homologação multiusuário e a prevenção transacional de conflitos continuam pendentes.
+
 # v3.12.0 — Pesquisa assistida e comparação de orçamentos
 
 - **Catálogo:** busca assistida em português, com termos cotidianos relacionados às categorias reais ativas (ex.: faxina → Limpeza, notebook → Técnico de Informática, vazamento → Encanador). Os destinos só aparecem se estiverem efetivamente cadastrados; não são inventados prestadores ou categorias.
