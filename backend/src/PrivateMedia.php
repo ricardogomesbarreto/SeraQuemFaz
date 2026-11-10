@@ -8,6 +8,8 @@ function sqfMediaRoot():string {
     if(!$root||!is_dir($root)||!is_writable($root))throw new RuntimeException('Armazenamento privado indisponível');
     $resolved=realpath($root);
     $site=realpath(__DIR__.'/../../');
+    $docroot=isset($_SERVER['DOCUMENT_ROOT'])&&$_SERVER['DOCUMENT_ROOT']!==''?realpath($_SERVER['DOCUMENT_ROOT']):false;
+    if($resolved&&$docroot&&($resolved===$docroot||str_starts_with($resolved,$docroot.DIRECTORY_SEPARATOR)))throw new RuntimeException('Diretório privado inseguro');
     if(!$resolved||($site&&($resolved===$site||str_starts_with($resolved,$site.DIRECTORY_SEPARATOR))))throw new RuntimeException('Diretório privado inseguro');
     return $resolved;
 }
@@ -104,4 +106,25 @@ function sqfListPrivateMedia(PDO $db,string $actor,string $kind,?string $request
         return sqfQuery($db,'SELECT id,caption,created_at FROM sqf_request_attachments WHERE request_id=? ORDER BY created_at DESC LIMIT 50',[$request])->fetchAll(PDO::FETCH_ASSOC);
     }
     throw new DomainException('Tipo de mídia inválido');
+}
+
+function sqfManagePortfolio(PDO $db,string $actor,string $id,string $action):void {
+    if(!in_array($action,['cover','delete'],true))throw new DomainException('Ação inválida');
+    $path=sqfTxn($db,function()use($db,$actor,$id,$action){
+        if(sqfQuery($db,'SELECT account_type FROM profiles WHERE id=? FOR UPDATE',[$actor])->fetchColumn()!=='prestador')throw new DomainException('Somente prestadores');
+        $photo=sqfQuery($db,'SELECT storage_path FROM portfolio_photos WHERE id=? AND provider_id=? FOR UPDATE',[$id,$actor])->fetch(PDO::FETCH_ASSOC);
+        if(!$photo)throw new DomainException('Foto indisponível');
+        if($action==='cover'){
+            sqfQuery($db,'UPDATE portfolio_photos SET is_cover=0 WHERE provider_id=?',[$actor]);
+            sqfQuery($db,'UPDATE portfolio_photos SET is_cover=1 WHERE id=? AND provider_id=?',[$id,$actor]);
+            return null;
+        }
+        sqfQuery($db,'DELETE FROM portfolio_photos WHERE id=? AND provider_id=?',[$id,$actor]);
+        return $photo['storage_path'];
+    });
+    // Metadata deletion revokes access immediately. Only remove the exact generated path.
+    if($path!==null&&$path===$actor.'/'.$id.'.webp'){
+        $root=sqfMediaRoot();$file=$root.'/portfolio/'.$path;$resolved=realpath($file);
+        if($resolved&&str_starts_with($resolved,$root.DIRECTORY_SEPARATOR)&&is_file($resolved)&&!is_link($file)&&!@unlink($file))error_log('SQF portfolio cleanup pending');
+    }
 }
