@@ -89,8 +89,8 @@
     summary.append(avatar, text('span', 'sqf-account-name', name), text('span', 'sqf-account-chevron', '⌄'));
     const content = text('div', 'sqf-account-dropdown');
     content.append(text('p', 'sqf-account-caption', verified ? 'Conta conectada' : 'Confirmando sessão'));
-    const edit = makeLink('Minha conta e perfil', 'painel.html#accountProfile');
-    const activity = makeLink('Solicitações e mensagens', 'painel.html#sqfRequestPortal');
+    const edit = makeLink('Minha conta e perfil', window.SQFDataMode==='mysql'?'painel-mysql.html':'painel.html#accountProfile');
+    const activity = makeLink('Solicitações e mensagens', window.SQFDataMode==='mysql'?'painel-mysql.html#requests':'painel.html#sqfRequestPortal');
     const logout = text('button', 'sqf-account-signout', 'Sair da conta');
     logout.type = 'button';
     const notice = text('p', 'sqf-account-error');
@@ -98,8 +98,7 @@
     logout.addEventListener('click', async () => {
       logout.disabled = true;
       try {
-        const { error } = await (client || window.getSQFClient()).auth.signOut();
-        if (error) throw error;
+        if(window.SQFDataMode==='mysql'){await window.SQFMySQL.logout();}else{const {error}=await (client || window.getSQFClient()).auth.signOut();if(error)throw error;}
         guest();
         location.replace('index.html');
       } catch {
@@ -124,6 +123,9 @@
   async function refresh() {
     const token = ++generation;
     eventSignal.abort(); eventSignal = new AbortController();
+    if(window.SQFDataMode==='mysql'){
+      try{const s=await window.SQFMySQL.session();if(token!==generation)return;if(!s.user_id){guest();return;}const p=await window.SQFMySQL.profile();if(token!==generation)return;userMenu({id:s.user_id},p.data?.full_name||'Minha conta',null,true);if(['entrar.html','cadastro.html'].includes(location.pathname.split('/').pop()))location.replace('painel-mysql.html');}catch{if(token===generation)guest();}return;
+    }
     try { client = window.getSQFClient(); }
     catch { guest(); return; }
     let user;
@@ -167,7 +169,7 @@
   }
   window.SQFAccountNavigation = Object.freeze({ refresh });
   void refresh();
-  try {
+  if(window.SQFDataMode!=='mysql')try {
     client = window.getSQFClient();
     client.auth.onAuthStateChange(() => { queueMicrotask(() => void refresh()); });
   } catch { /* O restante do site continua navegável como visitante. */ }
