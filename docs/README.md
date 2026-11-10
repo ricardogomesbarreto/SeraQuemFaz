@@ -13,6 +13,8 @@
 
 ## Referências principais
 
+- [Auditoria técnica e roadmap — 10/11/2026](operacao/AUDITORIA-ROADMAP-20261110.md)
+
 - [Como configurar a autenticação](contas/AUTENTICACAO-EMAIL-v3.9.5.md)
 - [Compatibilidade com o banco existente](contas/COMPATIBILIDADE-SUPABASE-v3.9.4.md)
 - [Auditoria das imagens do catálogo](catalogo/AUDITORIA-IMAGENS-CATALOGO.md)
