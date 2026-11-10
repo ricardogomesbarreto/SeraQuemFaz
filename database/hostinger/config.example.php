@@ -27,3 +27,5 @@ putenv('SQF_SMTP_USER=');
 putenv('SQF_SMTP_PASSWORD=');
 
 putenv('SQF_MP_CHECKOUT_ENABLED=0');
+
+putenv('SQF_IMPORT_STAGING_ENABLED=0');

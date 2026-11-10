@@ -88,11 +88,14 @@ jobs:
           php -l backend/src/Auth.php
           php -l backend/src/Mail.php
           php -l backend/src/SubscriptionActions.php
+          php -l backend/src/ImportSnapshot.php
+          php -l backend/bin/import-snapshot.php
           php database/tests/mail-unit.php
           php -l backend/public/index.php
           php -l database/seed/import-public.php
           php database/seed/import-public.php
           php database/tests/migration-preflight.php
+          php database/tests/snapshot-integration.php
           php database/tests/agenda-integration.php
           php database/tests/auth-integration.php
           mkdir -m 700 -p /tmp/sqf-private-media
@@ -144,6 +147,10 @@ jobs:
           docker exec -i ${{ job.services.database.id }} sh -c 'mysql -uroot -p"$MYSQL_ROOT_PASSWORD" sqf_restore' < /tmp/sqf-ci-backup.sql
           SQF_RESTORE_DSN='mysql:host=127.0.0.1;port=3306;dbname=sqf_restore;charset=utf8mb4' php database/tests/restore-check.php
           SQF_DB_DSN='mysql:host=127.0.0.1;port=3306;dbname=sqf_restore;charset=utf8mb4' php database/tests/integrity.php
+          mkdir -m 700 /tmp/sqf-restored-media
+          cp -a /tmp/sqf-private-media/. /tmp/sqf-restored-media/
+          SQF_RESTORE_MEDIA_ROOT=/tmp/sqf-restored-media php database/tests/media-restore.php
+          rm -rf /tmp/sqf-restored-media
           rm -f /tmp/sqf-ci-backup.sql "$PWD/dist/mysql-candidate/sqf-private/config.php"
 
       - name: Store isolated candidate package
