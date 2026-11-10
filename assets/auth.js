@@ -41,7 +41,7 @@
   const signup = $('signupForm');
   if(mysql){
     if(signup){$('password').minLength=12;$('password').placeholder='Mínimo 12 caracteres';}
-    const code=$('emailCode');if(code){code.pattern='[0-9a-f]{64}';code.minLength=64;code.maxLength=64;code.inputMode='text';code.placeholder='Código de 64 caracteres';const label=document.querySelector('label[for="emailCode"]');if(label)label.textContent='Código de 64 caracteres';const hint=$('emailCodeForm')?.querySelector('p.muted');if(hint)hint.textContent='Informe o código recebido por e-mail. Ele expira após 30 minutos.';}
+    const code=$('emailCode');if(code){code.pattern='[0-9a-f]{64}';code.maxLength=64;code.minLength=64;code.inputMode='text';code.placeholder='Código de 64 caracteres';const label=document.querySelector('label[for="emailCode"]');if(label)label.textContent='Código de 64 caracteres';const hint=$('emailCodeForm')?.querySelector('p.muted');if(hint)hint.textContent='Informe o código recebido por e-mail. Ele expira após 30 minutos.';}
     const reset=$('resetPassword');if(reset){reset.minLength=12;reset.placeholder='Mínimo 12 caracteres';const label=document.createElement('label');label.textContent='Código de recuperação recebido por e-mail';const token=document.createElement('input');token.id='mysqlResetToken';token.required=true;token.minLength=64;token.maxLength=64;token.autocomplete='one-time-code';label.append(token);reset.parentNode.insertBefore(label,reset);}
   }
   let signupInFlight = false;
