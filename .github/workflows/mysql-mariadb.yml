@@ -132,6 +132,7 @@ jobs:
           node database/tests/webhook-http.mjs
           kill "$WEBHOOK_PID"
           node database/tests/browser-integration.mjs
+          node database/tests/pwa-integration.mjs
           php database/tests/integrity.php
           # Restore only the disposable CI database into a second isolated schema.
           docker exec ${{ job.services.database.id }} sh -c 'mysqldump -uroot -p"$MYSQL_ROOT_PASSWORD" --single-transaction --skip-lock-tables sqf_test' > /tmp/sqf-ci-backup.sql

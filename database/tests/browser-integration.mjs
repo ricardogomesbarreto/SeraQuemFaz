@@ -100,11 +100,17 @@ try{
  await client.page.locator('#providersList a.provider-card-link').first().click();
  await client.page.waitForURL('**/prestador-mysql.html?*');
  await client.page.locator('#publicProviderContent').waitFor({state:'visible'});
+ await client.page.getByRole('button',{name:'Salvar profissional'}).click();
+ await client.page.getByRole('button',{name:'Remover dos favoritos'}).waitFor();
  await widthCheck(client.page,'public provider');
  await client.page.goto(origin+'/painel-mysql.html');await client.page.locator('#mysqlContent').waitFor({state:'visible'});
  await client.page.locator('#mysqlFavorites').getByRole('button',{name:'Remover favorito'}).click();
  await client.page.locator('#mysqlFavorites').getByText('Nenhuma categoria favorita.').waitFor();
  console.log('PASS: category detail, public provider and private favorites UI');
+ await client.page.locator('#mysqlProviderFavorites').getByRole('button',{name:'Remover profissional'}).click();
+ await client.page.locator('#mysqlProviderFavorites').getByText('Nenhum profissional favorito.').waitFor();
+ await provider.page.locator('#mysqlMetricsSection').waitFor({state:'visible'});
+ await client.page.locator('#mysqlQuoteCompareSection').waitFor({state:'visible'});
  const pref=client.page.locator('#mysqlNotificationPreference');
  await pref.locator('input[name=email_enabled]').check();
  await pref.getByRole('button',{name:'Salvar preferência'}).click();

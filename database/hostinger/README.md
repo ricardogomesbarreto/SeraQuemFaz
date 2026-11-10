@@ -22,3 +22,7 @@ Referências oficiais: https://www.hostinger.com/br/hospedagem-php ; https://www
 ### Rotina de manutenção
 
 Após homologação, configure um Cron Job PHP para `sqf-private/backend/bin/maintenance.php` (por exemplo, a cada hora), habilitando `SQF_MAINTENANCE_ENABLED=1` no config privado. Remove somente tokens de autenticação e limites de tentativas expirados, em lotes de até 200 por execução e com bloqueio concorrente. Não modifica contas, pedidos, faturas ou mídia. Por padrão permanece desativado. Não agendar antes da aprovação do ambiente.
+
+## PWA e paridade funcional
+
+RC.8 recupera instalação PWA, favoritos de profissionais, comparação de propostas e métricas. O service worker não armazena páginas de conta, API, mensagens ou mídia privada. CDN deve respeitar a exclusão de API e páginas autenticadas. Node.js é usado no build e nos testes Chromium; o PHP continua sendo o runtime da API. Não há segunda aplicação Node obrigatória.

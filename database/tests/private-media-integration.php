@@ -174,3 +174,17 @@ sqfQuery($db,'DELETE FROM sqf_billing_invoices WHERE subscription_id=?',[$sub]);
 sqfQuery($db,'DELETE FROM sqf_billing_subscriptions WHERE id=?',[$sub]);
 sqfQuery($db,'UPDATE sqf_billing_settings SET require_paid_subscription=0 WHERE singleton=1');
 verify(sqfProviderPublic($db,$provider),'fixture restores free publication mode');
+
+require_once __DIR__.'/../../backend/src/Engagement.php';
+sqfSetFavorite($db,$client,$provider,true);
+sqfSetFavorite($db,$client,$provider,true);
+verify(count(sqfClientFavorites($db,$client))===1,'provider favorite is idempotent');
+verify(count(sqfClientFavorites($db,$stranger))===0,'favorites are isolated by owner');
+forbid(fn()=>sqfSetFavorite($db,$provider,$client,true),'provider cannot create client favorite');
+sqfRecordView($db,$client,$provider);sqfRecordView($db,$client,$provider);sqfRecordView($db,$provider,$provider);
+verify(sqfProviderMetrics($db,$provider)['views_authenticated']===1,'one authenticated view per user and day; self excluded');
+forbid(fn()=>sqfProviderMetrics($db,$client),'client cannot read provider metrics');
+verify(is_array(sqfCompareQuotes($db,$client)),'client can compare own open quotes');
+forbid(fn()=>sqfCompareQuotes($db,$provider),'provider cannot access client quote comparison');
+sqfSetFavorite($db,$client,$provider,false);
+verify(count(sqfClientFavorites($db,$client))===0,'favorite removal persisted');
