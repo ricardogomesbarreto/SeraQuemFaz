@@ -14,7 +14,7 @@
  const tell=(id,message,isError=false)=>{const e=$(id);if(e){e.textContent=message;e.dataset.error=String(isError);}};
  const validId=v=>typeof v==='string'&&/^[0-9a-f]{8}-[0-9a-f-]{27}$/i.test(v);
  let client,user,role;
- let compareCache=[],compareNames=new Map();
+ let compareCache=[],compareNames=new Map(),agendaCache=[];
  function activity(title,detail,stamp,link){
   const item=make('article','sqf-activity-item');
   const content=make('div');
@@ -90,25 +90,41 @@
    $('sqfEmailNotifyHelp').textContent='Preferências indisponíveis até a aplicação da migração de notificações.';
   }
  }
+ function renderAppointments(){
+  const list=$('sqfAppointmentList');if(!list)return;
+  const ops=window.SQFOps;
+  const period=$('sqfAgendaPeriod')?.value||'upcoming';
+  const status=$('sqfAgendaStatus')?.value||'all';
+  const day=$('sqfAgendaDay')?.value||'';
+  const visible=ops?ops.agenda(agendaCache,{period,status,day}):agendaCache;
+  const overlaps=ops?ops.conflicts(agendaCache):new Set();
+  list.replaceChildren();
+  if(!agendaCache.length){missing(list,'Sua agenda está vazia. Abra um orçamento aceito para propor um horário de atendimento.');}
+  else if(!visible.length){missing(list,'Nenhum horário corresponde aos filtros. Escolha outro período ou limpe a data.');}
+  const labels={proposed:'Aguardando confirmação',confirmed:'Horário confirmado',declined:'Proposta recusada',canceled:'Agendamento cancelado'};
+  for(const row of visible){
+   const detail=fmtDate(row.starts_at)+' · '+row.duration_minutes+' minutos';
+   const item=activity(labels[row.status]||'Agenda',detail,'',row.request_id);
+   if(overlaps.has(row.id))item.append(make('small','sqf-agenda-overlap','Possível sobreposição com outro horário carregado.'));
+   list.append(item);
+  }
+  tell('sqfAppointmentStatus',visible.length+' de '+agendaCache.length+' horário(s) carregado(s).');
+ }
  async function appointments(){
   const list=$('sqfAppointmentList');if(!list)return;
+  const button=$('sqfAppointmentRefresh');if(button)button.disabled=true;
   try{
    const {data,error}=await client.from('sqf_appointments')
     .select('id,request_id,starts_at,duration_minutes,status,proposed_by')
-    .order('starts_at',{ascending:true}).limit(70);
+    .order('starts_at',{ascending:false}).limit(200);
    if(error)throw error;
-   list.replaceChildren();
-   if(!data?.length){missing(list,'Sua agenda está vazia. Abra um orçamento aceito para propor um horário de atendimento.');return;}
-   const labels={proposed:'Aguardando confirmação',confirmed:'Horário confirmado',declined:'Proposta recusada',canceled:'Agendamento cancelado'};
-   for(const row of data){
-    const detail=fmtDate(row.starts_at)+' · '+row.duration_minutes+' minutos';
-    list.append(activity(labels[row.status]||'Agenda',detail,'',row.request_id));
-   }
-   tell('sqfAppointmentStatus',data.filter(x=>x.status==='confirmed').length+' horário(s) confirmado(s).');
+   agendaCache=Array.isArray(data)?data:[];
+   renderAppointments();
   }catch{
-   missing(list,'Agenda ainda não implantada no banco. Solicitações e mensagens continuam disponíveis.');
+   agendaCache=[];
+   missing(list,'Não foi possível consultar a agenda. Tente atualizar.');
    tell('sqfAppointmentStatus','Não foi possível consultar a agenda.',true);
-  }
+  }finally{if(button)button.disabled=false;}
  }
  function renderComparedQuotes(){
   const list=$('sqfQuoteCompareList');if(!list||role!=='cliente')return;
@@ -192,7 +208,11 @@
     block.append(make('span','',label),make('strong','',Number.isFinite(Number(total))?String(total):'—'));
     list.append(block);
    }
-   tell('sqfPerformanceStatus','Valores consultados do banco; não incluem visualizações anônimas.');
+   const completion=window.SQFOps?.percentage(row.requests_completed,row.requests_total);
+   const rate=make('div','client-stat');
+   rate.append(make('span','','Atendimentos concluídos / solicitações'),make('strong','',completion==null?'—':completion.toLocaleString('pt-BR')+'%'));
+   list.append(rate);
+   tell('sqfPerformanceStatus','Valores consultados do banco; não incluem visualizações anônimas. A taxa usa o histórico total; não é conversão de vendas.');
   }catch{
    missing(list,'Relatório de desempenho ainda indisponível. A migração de métricas pode estar pendente.');
    tell('sqfPerformanceStatus','Nenhum indicador foi estimado ou inventado.',true);
@@ -229,6 +249,10 @@
   if(role==='cliente')$('sqfQuoteCompare').hidden=false;
   $('sqfNotifyRefresh')?.addEventListener('click',()=>void notifications());
   $('sqfAppointmentRefresh')?.addEventListener('click',()=>void appointments());
+  for(const id of ['sqfAgendaPeriod','sqfAgendaStatus','sqfAgendaDay'])$(id)?.addEventListener('change',renderAppointments);
+  $('sqfAgendaClear')?.addEventListener('click',()=>{
+   $('sqfAgendaPeriod').value='all';$('sqfAgendaStatus').value='all';$('sqfAgendaDay').value='';renderAppointments();
+  });
   $('sqfPerformanceRefresh')?.addEventListener('click',()=>void performance());
   $('sqfCompareRefresh')?.addEventListener('click',()=>void compareQuotes());
   for(const id of ['sqfCompareSearch','sqfCompareStatus','sqfCompareOrder']){
