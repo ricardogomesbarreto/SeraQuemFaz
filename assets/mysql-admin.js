@@ -4,11 +4,11 @@
  const el=(tag,text)=>{const n=document.createElement(tag);if(text!==undefined)n.textContent=text;return n;};
  async function load(){
    const result=await api.staffReviews();queue.replaceChildren();
-   try{const m=(await api.staffMetrics()).data,card=el('article');card.className='card';card.append(el('h2','Indicadores da plataforma'));const labels={clients:'Clientes',providers:'Prestadores',published_providers:'Prestadores publicados',requests:'Solicitações',completed:'Atendimentos concluídos',pending_verifications:'Verificações pendentes'};for(const [k,label] of Object.entries(labels))card.append(el('p',label+': '+m[k]));const exportBtn=el('button','Baixar indicadores CSV');exportBtn.type='button';exportBtn.className='button button-outline';exportBtn.addEventListener('click',()=>{const csv='Indicador;Quantidade\n'+Object.entries(labels).map(([k,label])=>label+';'+Number(m[k])).join('\n');const url=URL.createObjectURL(new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'}));const a=el('a');a.href=url;a.download='indicadores-sqf.csv';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);});card.append(exportBtn);queue.append(card);}catch{/* Non-admin moderators keep their moderation queues. */}
+   try{const m=(await api.staffMetrics()).data,card=el('article');card.className='card';card.append(el('h2','Indicadores da plataforma'));const labels={clients:'Clientes',providers:'Prestadores',published_providers:'Prestadores publicados',requests:'Solicitações',completed:'Atendimentos concluídos',pending_verifications:'Verificações pendentes'};for(const [k,label] of Object.entries(labels))card.append(el('p',label+': '+m[k]));const exportBtn=el('button','Baixar indicadores CSV');exportBtn.type='button';exportBtn.className='button button-outline';exportBtn.addEventListener('click',()=>{const csv='Indicador;Quantidade\n'+Object.entries(labels).map(([k,label])=>label+';'+Number(m[k])).join('\n');const url=URL.createObjectURL(new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'}));const a=el('a');a.href=url;a.download='indicadores-sqf.csv';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);});card.append(exportBtn);queue.append(card);}catch(error){if(!/Somente administradores/.test(error.message))throw error; /* Moderators retain their authorized queues. */}
    if(!result.data.length)queue.append(el('p','Nenhuma avaliação pendente.'));
    for(const r of result.data){
      const card=el('article');card.className='card';card.append(el('h2','Avaliação '+r.rating+'/5'),el('p',r.comment));
-     const decision=el('form'),note=el('textarea'),select=el('select');note.required=true;note.minLength=20;note.maxLength=1000;note.placeholder='Justifique a decisão (mínimo 20 caracteres)';
+     const decision=el('form'),note=el('textarea'),select=el('select');note.required=true;note.minLength=20;note.maxLength=1000;note.placeholder='Justifique a decisão (mínimo 20 caracteres)';note.setAttribute('aria-label','Justificativa da moderação');select.setAttribute('aria-label','Decisão da avaliação');
      for(const [value,label] of [['published','Publicar'],['rejected','Rejeitar'],['hidden','Ocultar']]){const o=el('option',label);o.value=value;select.append(o);}
      const submit=el('button','Registrar decisão');submit.type='submit';submit.className='button button-primary';decision.append(select,note,submit);
      decision.addEventListener('submit',async event=>{event.preventDefault();submit.disabled=true;try{
@@ -29,7 +29,7 @@
        card.append(el('p',item.message||item.details));
        const decision=el('form'),select=el('select'),note=el('textarea');
        for(const [value,label] of states){const option=el('option',label);option.value=value;select.append(option);}
-       note.required=true;note.minLength=20;note.maxLength=1000;note.placeholder='Justificativa da decisão';
+       note.required=true;note.minLength=20;note.maxLength=1000;note.placeholder='Justificativa da decisão';note.setAttribute('aria-label','Justificativa do caso');select.setAttribute('aria-label','Decisão do caso');
        const submit=el('button','Registrar decisão');submit.className='button button-primary';submit.type='submit';
        decision.append(select,note,submit);card.append(decision);queue.append(card);
        decision.addEventListener('submit',async event=>{event.preventDefault();submit.disabled=true;try{
@@ -49,7 +49,7 @@
      for(const [value,label] of [['accepted','Aceitar documento'],['rejected','Rejeitar documento']]){
        const option=el('option',label);option.value=value;select.append(option);
      }
-     note.required=true;note.minLength=20;note.maxLength=1000;note.placeholder='Justificativa da análise documental (mínimo 20 caracteres)';
+     note.required=true;note.minLength=20;note.maxLength=1000;note.placeholder='Justificativa da análise documental (mínimo 20 caracteres)';note.setAttribute('aria-label','Justificativa documental');select.setAttribute('aria-label','Decisão documental');
      const submit=el('button','Registrar análise');submit.type='submit';submit.className='button button-primary';decision.append(select,note,submit);card.append(decision);queue.append(card);
      decision.addEventListener('submit',async event=>{event.preventDefault();submit.disabled=true;try{
        if(!window.confirm('Registrar a decisão documental? Esta ação não aprova automaticamente o prestador.'))return;
