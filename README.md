@@ -1,4 +1,4 @@
-# SERÁ QUEM FAZ? — v3.11.0
+# SERÁ QUEM FAZ? — v3.11.1
 
 <p align="center">
   <img src="assets/brand/logo-horizontal.png" alt="Logomarca do Será Quem Faz?" width="380">
@@ -8,7 +8,7 @@
   <img src="https://img.shields.io/badge/Frontend-HTML%2FCSS%2FJS-e34f26" alt="Frontend HTML, CSS e JavaScript">
   <img src="https://img.shields.io/badge/Banco-PostgreSQL-4169e1?logo=postgresql&logoColor=white" alt="Banco PostgreSQL">
   <img src="https://img.shields.io/badge/Backend-Supabase-3ecf8e?logo=supabase&logoColor=white" alt="Backend Supabase">
-  <a href="https://github.com/ricardogomesbarreto/SeraQuemFaz/releases"><img src="https://img.shields.io/badge/vers%C3%A3o-v3.11.0-8b3a45" alt="Versão v3.11.0"></a>
+  <a href="https://github.com/ricardogomesbarreto/SeraQuemFaz/releases"><img src="https://img.shields.io/badge/vers%C3%A3o-v3.11.1-8b3a45" alt="Versão v3.11.1"></a>
   <a href="https://github.com/ricardogomesbarreto/SeraQuemFaz/actions/workflows/ci.yml"><img src="https://github.com/ricardogomesbarreto/SeraQuemFaz/actions/workflows/ci.yml/badge.svg?branch=main" alt="Status da integração contínua"></a>
 </p>
 
@@ -16,7 +16,16 @@
 
 O **Será Quem Faz?** conecta quem precisa contratar um serviço a profissionais da sua região. O catálogo com sidebar permite pesquisar por município e categoria, consultar perfis e solicitar orçamentos. Clientes e prestadores conversam pelo painel e acompanham cada atendimento até a conclusão. O projeto começou em Santa Inês (MA) e usa o cadastro nacional de municípios do IBGE.
 
-## Última versão · v3.11.0
+## Última versão · v3.11.1
+
+- **Foto do perfil:** uma única moldura circular na sidebar; removida a montagem de outro avatar com borda por dentro, corrigindo a aparência de duas fotos sobrepostas.
+- **Visibilidade de prestadores:** o catálogo continua exibindo somente contas com aprovação e publicação autorizadas. Foi corrigida a mensagem quando ainda não há profissionais publicados, sem expor cadastros pendentes.
+- **Estado da verificação:** o perfil agora diferencia “Análise não solicitada” de “Aguardando análise”; inclui indicação explícita e atalho para solicitar avaliação.
+- **Prévia privada:** ao visualizar seu próprio perfil antes da aprovação, o prestador recebe aviso de que essa página ainda não está disponível para clientes.
+- **Sem mudanças de RLS:** a correção não aprova automaticamente cadastros, não libera informações privadas nem altera as condições comerciais.
+- **Qualidade:** testes para borda única do avatar, fila de verificação e indicação de visibilidade. A aprovação administrativa continua exigida.
+
+### Versão anterior · v3.11.0
 
 - **Painéis separados por telas** para cliente e prestador: sidebar unificada, informações específicas por perfil e navegação `painel.html?pagina=cliente/atividades` ou `painel.html?pagina=prestador/servicos`, preservando a sessão sem rolagem interminável.
 - **Perfil de prestador:** serviços com disponibilidade/estimativas de preço, portfólio por serviço com capa, agenda e indicadores em telas específicas.
