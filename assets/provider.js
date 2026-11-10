@@ -46,8 +46,12 @@
       // A política RLS libera a prévia ao proprietário, mesmo sem aprovação.
       // A disponibilidade PÚBLICA é consultada com a mesma função usada nas RLS.
       // Em caso de falha, nunca assumir que o perfil está publicado.
-      const {data:publiclyVisible,error:visibilityError}=await client.rpc('sqf_provider_public',{p_provider:providerId});
-      if(visibilityError || publiclyVisible!==true){
+      let publiclyVisible=false;
+      try{
+        const {data,error}=await client.rpc('sqf_provider_public',{p_provider:providerId});
+        publiclyVisible=!error&&data===true;
+      }catch{ /* Sem resposta, manter a indicação conservadora de prévia privada. */ }
+      if(!publiclyVisible){
         const notice=$('sqfOwnerPreviewNotice');
         if(notice)notice.hidden=false;
         $('providerTrustStatus').textContent='Prévia somente para sua conta: a publicação pública ainda não foi autorizada.';
