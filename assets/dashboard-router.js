@@ -196,5 +196,9 @@
   });
   togglePage(routeFromLocation(),{historyMode:'replace'});
  }
+ window.SQFDashboardRoutes=Object.freeze({
+  cliente:pages.cliente.map(p=>p.slug),
+  prestador:pages.prestador.map(p=>p.slug)
+ });
  window.addEventListener('sqf:account-ready',init,{once:true});
 })();
