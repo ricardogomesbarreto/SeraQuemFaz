@@ -29,6 +29,10 @@ jobs:
       - uses: actions/checkout@v4
       - name: Install PHP PDO driver
         run: sudo apt-get update && sudo apt-get install -y php-cli php-mysql php-mbstring php-gd
+      - name: Install browser testing dependencies
+        run: |
+          npm install --no-save --package-lock=false playwright@1.56.1
+          npx playwright install --with-deps chromium
       - name: Install schema
         run: docker exec -i ${{ job.services.database.id }} sh -c 'mysql -uroot -p"$MYSQL_ROOT_PASSWORD" sqf_test' < database/mysql/migrations/001_schema.sql
       - name: Install authentication migration
@@ -59,7 +63,13 @@ jobs:
           mkdir -m 700 -p /tmp/sqf-private-media
           php database/tests/private-media-integration.php
 
-          SQF_ALLOW_INSECURE_LOCAL=1 php -S 127.0.0.1:8080 -t backend/public >/tmp/sqf-http.log 2>&1 &
+          php database/tests/browser-fixture.php
+          php database/tests/integrity.php
+          STAGING_ROOT=$(mktemp -d)
+          cp ./*.html "$STAGING_ROOT/"
+          cp -a assets "$STAGING_ROOT/"
+          printf "window.SQFDataMode = 'mysql';\n" > "$STAGING_ROOT/assets/backend-mode.js"
+          SQF_ALLOW_INSECURE_LOCAL=1 php -S 127.0.0.1:8080 -t "$STAGING_ROOT" database/tests/browser-router.php >/tmp/sqf-http.log 2>&1 &
           trap 'kill $! 2>/dev/null || true; cat /tmp/sqf-http.log' EXIT
           for i in $(seq 1 20); do curl -fsS 'http://127.0.0.1:8080/index.php?route=session' >/dev/null && break; sleep 1; done
           node --check assets/mysql-api-client.js
@@ -68,3 +78,5 @@ jobs:
           node --check assets/mysql-dashboard.js
           node --check assets/mysql-admin.js
           node database/tests/http-integration.mjs
+          node database/tests/browser-integration.mjs
+          php database/tests/integrity.php
