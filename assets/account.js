@@ -236,7 +236,7 @@
     const {data,error}=await client.from('provider_services').select('id,category_id,service_title,description,price_min_cents,price_max_cents,is_active').eq('provider_id',user.id).order('service_title');
     if(error) throw error;
     providerServicesCache=data||[];
-    currentServiceCount=data?.length||0;updateReadiness();
+    currentServiceCount=(data||[]).filter(service=>service.is_active).length;updateReadiness();
     for(const id of ['portfolioService','portfolioServiceFilter']){
       const select=$(id);if(!select)continue;
       const previous=select.value;
@@ -250,7 +250,7 @@
       }
       if([...select.options].some(o=>o.value===previous))select.value=previous;
     }
-    if($('providerStatServices'))$('providerStatServices').textContent=String(currentServiceCount);
+    if($('providerStatServices'))$('providerStatServices').textContent=String(data?.length||0);
     if(!data?.length) {ui.state(list,'Nenhum serviço cadastrado','Adicione uma categoria e descreva a sua atividade.'); return data || [];}
     for(const service of data){
       const item=ui.make('div','editable-row'); const text=ui.make('div');
@@ -803,7 +803,7 @@
       if(fullName.length<2 || fullName.length>120 || city.length>100 || bio.length>1500){announce('profileMessage','Confira os tamanhos dos campos.',true);return;}
       if(publish){
         if(!profile.avatar_path && !$('avatarFile').files[0]){announce('profileMessage','Para publicar, adicione sua foto de perfil.',true);return;}
-        const {data:services,error}=await client.from('provider_services').select('id').eq('provider_id',user.id).limit(1);
+        const {data:services,error}=await client.from('provider_services')    .select('id').eq('provider_id',user.id).eq('is_active',true).limit(1);
         if(error) {announce('profileMessage','Não foi possível validar os serviços cadastrados.',true);return;}
         if(!services?.length || bio.length<40){announce('profileMessage','Para solicitar publicação, cadastre pelo menos um serviço e uma apresentação de 40 caracteres.',true);return;}
       }
