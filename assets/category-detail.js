@@ -43,9 +43,9 @@
       return;
     }
     const mysql=window.SQFDataMode==='mysql';
-    const bundle=mysql?(await window.SQFMySQL.category(id,city.id)).data:null;
+    let bundle=null;
     const client=mysql?null:window.getSQFClient();
-    const {data:category,error:e1}=mysql?{data:bundle?.category}:await client.from('categories').select('id,name,description,image_url,status').eq('id',id).eq('status','active').maybeSingle();
+    const {data:category,error:e1}=mysql?{data:(await window.SQFMySQL.categories()).data.find(item=>item.id===id)}:await client.from('categories').select('id,name,description,image_url,status').eq('id',id).eq('status','active').maybeSingle();
     if (e1) throw e1;
     if (!category) { state.textContent = 'Categoria não encontrada ou indisponível.'; return; }
     document.title = `${category.name} | SERÁ QUEM FAZ?`;
@@ -68,9 +68,10 @@
       img.addEventListener('error', missing, { once: true });
       imageBox.replaceChildren(img);
     } else missing();
-    state.hidden = true; content.hidden = false;
     if(mysql){const hint=document.getElementById('sqfNewRequestHint');hint.href='painel-mysql.html#requests';document.getElementById('providersError').textContent='Não foi possível consultar os prestadores. Tente novamente.';}
+    state.hidden = true; content.hidden = false;
     try {
+    if(mysql){bundle=(await window.SQFMySQL.category(id,city.id)).data;if(!bundle)throw new Error('Categoria indisponível');}
     const { data: services, error: e2 } = mysql?{data:bundle.services}:await client.from('provider_services')
       .select('provider_id,service_title,description,is_active').eq('category_id', String(category.id)).eq('is_active',true);
     if (e2) throw e2;
@@ -205,7 +206,7 @@
     for (const pro of profiles) {
       const card = ui.make('article','provider-card');
       const link = ui.make('a','provider-card-link');
-      link.href = `${mysql?'prestador-mysql.html':'prestador.html'}?id=${encodeURIComponent(pro.id)}&cidade=${encodeURIComponent(city.id)}`;
+      link.href = `${mysql?'prestador-mysql.html?id=':'prestador.html?id='}${encodeURIComponent(pro.id)}&cidade=${encodeURIComponent(city.id)}`;
       const top = ui.make('div','provider-card-top');
       if(mysql){const box=ui.make('div','avatar');const img=ui.safeImg(Number(pro.has_avatar)===1?window.SQFMySQL.mediaUrl('avatar',pro.id):'assets/brand/simbolo.png','Foto de '+pro.full_name);box.append(img);top.append(box);}
       else top.append(ui.avatar(client,pro.avatar_path,pro.full_name));
