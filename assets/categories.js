@@ -28,6 +28,9 @@
   const filterClose = document.querySelector('#filterClose');
   const backdrop = document.querySelector('#filterBackdrop');
   const utils = window.SQFUtils;
+  const assistedSearch = window.SQFCategorySearch;
+  const searchAssistance=document.getElementById('searchAssistance');
+  const searchOptions=document.getElementById('searchAssistanceOptions');
   const cityBox = document.getElementById('catalogCity')?.closest('[data-city-picker]');
   const cityPicker = cityBox?.__cityPicker;
   let selectedCity = cityPicker?.getSelected() || null;
@@ -173,6 +176,7 @@
   }
 
   function rank(item, query) {
+    if(assistedSearch)return assistedSearch.rank(item,query);
     const q = normalize(query);
     if (!q) return 0;
     const name = normalize(item.name);
@@ -183,12 +187,31 @@
     return description.includes(q) ? 2 : 0;
   }
 
+  function suggestWhenEmpty(query,found){
+    if(!searchAssistance||!searchOptions)return;
+    searchAssistance.hidden=true;
+    searchOptions.replaceChildren();
+    if(!selectedCity||referenceMode||loading||failure||!query||found>0||!assistedSearch)return;
+    const candidates=assistedSearch.suggest(allCategories,query,3);
+    for(const entry of candidates){
+      const button=document.createElement('button');
+      button.type='button';button.className='button button-outline button-small';
+      button.textContent=String(entry.name||'');
+      button.addEventListener('click',()=>{
+        input.value=String(entry.name||'').slice(0,100);
+        visibleLimit=12;syncUrl();render();
+      });
+      searchOptions.append(button);
+    }
+    searchAssistance.hidden=!candidates.length;
+  }
   function render() {
     const query = input.value.trim();
     const mode = sortSelect.value;
     const letter = initialLetter.value;
-    const filtered = allCategories
-      .filter(item => utils.matchesCategory(item, query))
+    const filtered = (assistedSearch
+      ?assistedSearch.find(allCategories,query)
+      :allCategories.filter(item => utils.matchesCategory(item, query)))
       .filter(item => !withImage.checked || Boolean(safeImage(item)))
       .filter(item => !withDescription.checked || Boolean(String(item.description || '').trim()))
       .filter(item => !letter || normalize(item.name).toUpperCase().startsWith(letter))
@@ -216,6 +239,7 @@
     viewList?.setAttribute('aria-pressed',String(viewMode === 'list'));
     list.setAttribute('aria-busy', String(loading));
     pagination.hidden = true;
+    if(searchAssistance)searchAssistance.hidden=true;
     if (cityHighlight) {
       cityHighlight.hidden=!selectedCity;
       cityHighlight.textContent=selectedCity ? `⌖ Buscando em ${window.SQFCities.format(selectedCity)}` : '';
@@ -276,6 +300,7 @@
     }
     status.textContent = referenceMode ? `${allCategories.length} áreas ilustrativas · banco de dados pendente` : `${allCategories.length} ${allCategories.length === 1 ? 'categoria pública' : 'categorias públicas'} no catálogo`;
     description.textContent = `${filtered.length} ${referenceMode ? 'áreas de referência' : (filtered.length === 1 ? 'categoria encontrada' : 'categorias encontradas')} · ${window.SQFCities.format(selectedCity)}` + (query ? ` · “${query}”` : '');
+    suggestWhenEmpty(query,filtered.length);
     if (!filtered.length) {
       const emptyPanel = panel('Nenhuma categoria encontrada', query || withImage.checked || withDescription.checked || letter ? 'Experimente outro termo ou limpe os filtros para visualizar todas as categorias.' : 'Ainda não há categorias públicas disponíveis.');
       const clear = document.createElement('button'); clear.type='button'; clear.className='button button-outline'; clear.textContent='Limpar filtros e explorar serviços'; clear.addEventListener('click',resetFilters); emptyPanel.append(clear); list.append(emptyPanel);
