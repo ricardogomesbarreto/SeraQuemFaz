@@ -77,3 +77,28 @@ check(sqfPublicProvider($db,$u[1])!==null,'approved provider public detail avail
 sqfToggleService($db,$u[1],$service3,false);
 check(!in_array($service3,array_column(sqfPublicProvider($db,$u[1])['services'],'id'),true),'inactive service excluded from public profile');
 reject(fn()=>sqfToggleService($db,$u[0],$service3,true),'client cannot toggle service');
+
+require __DIR__.'/../../backend/src/Moderation.php';
+$note='Decisão fundamentada para teste de homologação';
+reject(fn()=>sqfReviewCreate($db,$u[1],$id,5,'Comentário do próprio prestador'),'provider cannot review own service');
+reject(fn()=>sqfReviewCreate($db,$u[0],$first,5,'Comentário antes de conclusão'),'unfinished request cannot be reviewed');
+$review=sqfReviewCreate($db,$u[0],$id,5,'Atendimento concluído com qualidade');
+check(strlen($review)===36,'completed client can review');
+reject(fn()=>sqfReviewCreate($db,$u[0],$id,4,'Avaliação duplicada do atendimento'),'duplicate review denied');
+check(count(sqfPublicReviews($db,$u[1]))===0,'pending review not public');
+check(count(sqfOwnReviews($db,$u[0]))===1,'reviewer reads own review');
+check(count(sqfOwnReviews($db,$u[2]))===0,'third party cannot read private review');
+reject(fn()=>sqfReviewModerate($db,$u[0],$review,'published',$note),'normal client cannot moderate');
+execq($db,"INSERT INTO sqf_admin_members(user_id,role,active) VALUES (?,'moderator',1)",[$u[2]]);
+$secret='3132333435363738393031323334353637383930';
+check(sqfTotp(hex2bin($secret),1)==='287082','RFC 6238 TOTP vector');
+$now=1700000000;$code=sqfTotp(hex2bin($secret),intdiv($now,30));
+reject(fn()=>sqfStaffMfa($db,$u[0],$code,$secret,$now),'nonstaff cannot elevate');
+sqfStaffMfa($db,$u[2],$code,$secret,$now);
+reject(fn()=>sqfStaffMfa($db,$u[2],$code,$secret,$now),'TOTP replay denied');
+check(count(sqfStaffQueue($db,$u[2]))===1,'staff can read pending queue');
+sqfReviewModerate($db,$u[2],$review,'published',$note);
+check(count(sqfPublicReviews($db,$u[1]))===1,'published review visible');
+check((int)sqfQuery($db,'SELECT COUNT(*) FROM sqf_staff_decision_log WHERE entity_id=?',[$review])->fetchColumn()===1,'moderation audit persisted');
+execq($db,'UPDATE sqf_admin_members SET active=0 WHERE user_id=?',[$u[2]]);
+reject(fn()=>sqfReviewModerate($db,$u[2],$review,'hidden',$note),'revoked staff cannot moderate');
