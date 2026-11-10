@@ -61,6 +61,14 @@ try{
  await provider.page.reload();await provider.page.locator('#mysqlContent').waitFor({state:'visible'});
  await provider.page.locator('#mysqlRequests').getByText('Solicitação de navegador para validar o fluxo de contratação.',{exact:true}).waitFor();
  console.log('PASS: client finds provider and creates request; provider sees it in independent session');
+ await client.page.goto(origin+'/index.html');
+ await client.page.locator('html[data-sqf-auth="user"]').waitFor();
+ assert.equal(await client.page.locator('.sqf-account-link').first().getAttribute('href'),'painel-mysql.html');
+ await client.page.goto(origin+'/categorias.html?cidade=2111300');
+ await client.page.locator('html[data-sqf-auth="user"]').waitFor();
+ assert.equal(await client.page.locator('.sqf-account-link').first().getAttribute('href'),'painel-mysql.html');
+ await client.page.goto(origin+'/painel-mysql.html');await client.page.locator('#mysqlContent').waitFor({state:'visible'});
+ console.log('PASS: public pages preserve authenticated MySQL navigation');
  await client.page.locator('#mysqlLogout').click();await client.page.waitForURL('**/entrar.html');
  await client.page.goto(origin+'/painel-mysql.html');await client.page.waitForURL('**/entrar.html');
  console.log('PASS: logout prevents dashboard access');
