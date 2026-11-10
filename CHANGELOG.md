@@ -1,3 +1,16 @@
+# v3.11.2 — Consolidação de segurança e estabilidade
+
+- **Supabase / RLS:** removida a política duplicada de leitura de `provider_services` após validar equivalência dos predicados e dos papéis; preserva o catálogo público apenas para serviços ativos de prestadores autorizados.
+- **Catálogo:** falha temporária na consulta de avaliações não impede a listagem de profissionais válidos. Nesse caso, a interface indica avaliações indisponíveis e desabilita o filtro que depende delas.
+- **Ordenação:** datas cadastrais ausentes deixam de gerar comparações `NaN` na ordenação por data.
+- **Navegação:** URLs com hash malformado deixam de interromper a inicialização de uma conta autenticada; rolagem utiliza o comportamento padronizado do navegador.
+- **Solicitações:** aba de mensagens não lidas sincronizada após falhas de carregamento; pesquisa tolera descrições nulas.
+- **Segurança documentada:** funções `SECURITY DEFINER`, tabelas privadas, exigência administrativa de MFA, proteção de senhas e governança de branch, sem alterar contratos públicos necessários.
+- **Regressão:** novos testes automatizados para segurança e resiliência; CI Node 22/24.
+- **Comercial:** Mercado Pago, checkout e hospedagem permanecem fora desta versão.
+
+**Pendências:** a CI não substitui o teste ponta a ponta em navegador com dois usuários; a proteção da `main` depende de permissões administrativas de repositório, e a proteção de senhas vazadas depende de recurso/configuração do Supabase Auth.
+
 # v3.11.1 — Correção de foto duplicada e clareza de publicação
 
 - A foto do perfil na barra lateral utiliza apenas um contêiner circular; eliminado o avatar aninhado que desenhava duas bordas.
