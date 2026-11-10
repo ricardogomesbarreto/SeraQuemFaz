@@ -91,6 +91,13 @@
   const button=$('sqfSaveCategory');if(!button)return;
   const categoryId=new URL(location.href).searchParams.get('id')||'';
   if(!/^[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}$/i.test(categoryId))return;
+  if(window.SQFDataMode==='mysql'){
+   try{const api=window.SQFMySQL,s=await api.session();if(!s.user_id)return;const p=(await api.profile()).data;if(p.account_type!=='cliente')return;
+    let saved=(await api.favoriteCategories()).data.some(x=>x.id===categoryId);button.hidden=false;
+    const sync=()=>{button.textContent=saved?'♥ Categoria salva':'♡ Salvar categoria';button.setAttribute('aria-pressed',String(saved));};sync();
+    button.addEventListener('click',async()=>{button.disabled=true;try{await api.favoriteCategory({category_id:categoryId,saved:!saved});saved=!saved;sync();}catch(e){$('sqfCategorySaveStatus').textContent=e.message;}finally{button.disabled=false;}});
+   }catch(e){$('sqfCategorySaveStatus').textContent='Favoritos indisponíveis.';}return;
+  }
   const client=window.getSQFClient?.();if(!client)return;
   const {data,error}=await client.auth.getUser();if(error||!data?.user)return;
   const user=data.user;
