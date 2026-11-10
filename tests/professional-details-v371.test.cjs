@@ -79,7 +79,9 @@ test('página pública utiliza só dados permitidos e links externos seguros',()
 test('edição de serviço mantém categoria, título, descrição e escopo do proprietário',()=>{
   const account=read('assets/account.js');
   assert.match(account,/Editar serviço/);
-  assert.match(account,/\.update\(\{category_id:categoryId,service_title:title,description\}\)/);
+  assert.match(account,/\.update\(\{category_id:categoryId,service_title:title,description,/);
+  assert.match(account,/\.\.\.money,is_active:isActive\.checked/);
+  assert.match(account,/\.eq\('id',service\.id\)\.eq\('provider_id',user\.id\)/);
   assert.match(account,/\.eq\('id',service\.id\)\.eq\('provider_id',user\.id\)/);
   assert.match(account,/await loadServices\(\);await loadVerification\(\)/);
   assert.match(read('assets/site.css'),/service-inline-editor\[hidden\]/);
