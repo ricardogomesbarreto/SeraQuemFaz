@@ -43,6 +43,24 @@
      if(['proposed','confirmed'].includes(x.status))card.append(button('Cancelar horário',async()=>{await api.appointment({request_id:x.request_id,action:'cancel'});await load();}));agenda.append(card);
    }
    const notes=$('mysqlNotifications');empty(notes,n.data,'Nenhuma notificação.');for(const item of n.data){const c=wrap(item.title);c.append(el('p',item.body));notes.append(c);}
+   const reviewRoot=$('mysqlReviews'), reviewData=await api.reviews();
+   empty(reviewRoot,reviewData.data,'Nenhuma avaliação registrada.');
+   for(const review of reviewData.data){
+     const card=wrap(review.rating+'/5');card.append(el('p',review.comment),el('p','Situação: '+review.moderation_status));
+     if(profile.account_type==='prestador'&&review.moderation_status==='published'){
+       const response=el('textarea');response.placeholder='Resposta ao cliente (mínimo 20 caracteres)';response.maxLength=600;
+       card.append(response,button('Enviar resposta',async()=>{await api.reviewResponse({id:review.id,message:response.value});status('Resposta enviada para moderação.');await load();}));
+       const reason=el('select');for(const [value,label] of [['false_service','Serviço não realizado'],['inaccurate','Informação incorreta'],['harassment','Assédio'],['personal_data','Dados pessoais'],['other','Outro']]){const option=el('option',label);option.value=value;reason.append(option);}
+       const details=el('textarea');details.placeholder='Justifique a contestação (mínimo 30 caracteres)';details.maxLength=1200;
+       card.append(reason,details,button('Contestar avaliação',async()=>{await api.reviewDispute({id:review.id,reason:reason.value,details:details.value});status('Contestação enviada.');await load();}));
+     }
+     reviewRoot.append(card);
+   }
+   if(profile.account_type==='prestador'){
+     const cases=(await api.reviewCases()).data;
+     for(const item of cases.responses)reviewRoot.append(el('p','Resposta: '+item.moderation_status+' — '+item.message));
+     for(const item of cases.disputes)reviewRoot.append(el('p','Contestação: '+item.status+' — '+item.details));
+   }
    const discoverySection=$('mysqlDiscoverySection');
    discoverySection.hidden=profile.account_type!=='cliente';
    if(!discoverySection.hidden&&profile.city_ibge&&!$('mysqlDiscoveryForm').elements.city.value)$('mysqlDiscoveryForm').elements.city.value=profile.city_ibge;
@@ -81,7 +99,7 @@
        const details=el('div');
        card.append(button('Ver serviços',async()=>{
          const [result,reviews]=await Promise.all([api.provider(provider.id),api.publicReviews(provider.id)]);details.replaceChildren();
-         if(reviews.data.length){details.append(el('h4','Avaliações publicadas'));for(const review of reviews.data)details.append(el('p',review.rating+'/5 — '+review.comment));}
+         if(reviews.data.length){details.append(el('h4','Avaliações publicadas'));for(const review of reviews.data){details.append(el('p',review.rating+'/5 — '+review.comment));if(review.response)details.append(el('p','Resposta do profissional: '+review.response));}}
          if(!result.data?.services?.length){details.append(el('p','Nenhum serviço ativo.'));return;}
          const form=el('form'),list=el('select');
          list.required=true;
