@@ -7,8 +7,8 @@ function sqfMediaRoot():string {
     $root=getenv('SQF_PRIVATE_MEDIA_ROOT');
     if(!$root||!is_dir($root)||!is_writable($root))throw new RuntimeException('Armazenamento privado indisponível');
     $resolved=realpath($root);
-    $public=realpath(__DIR__.'/../public');
-    if(!$resolved||($public&&($resolved===$public||str_starts_with($resolved,$public.DIRECTORY_SEPARATOR))))throw new RuntimeException('Diretório privado inseguro');
+    $site=realpath(__DIR__.'/../../');
+    if(!$resolved||($site&&($resolved===$site||str_starts_with($resolved,$site.DIRECTORY_SEPARATOR))))throw new RuntimeException('Diretório privado inseguro');
     return $resolved;
 }
 function sqfImagePayload(string $tmp,int $size):string {
