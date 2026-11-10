@@ -33,13 +33,15 @@ function sqfIssueToken(PDO $db,string $id,string $purpose):string {
     return $token;
 }
 // Raw tokens are returned only to trusted mail-delivery code, never HTTP callers.
-function sqfRegister(PDO $db,string $email,string $password,string $name,string $type):array {
+function sqfRegister(PDO $db,string $email,string $password,string $name,string $type,?string $cityCode=null):array {
     $email=sqfEmail($email);$hash=sqfPassword($password);$name=trim($name);
     if(mb_strlen($name)<2||mb_strlen($name)>120||!in_array($type,['cliente','prestador'],true))throw new DomainException('Perfil inválido');
-    return sqfTxn($db,function()use($db,$email,$hash,$name,$type){
+    return sqfTxn($db,function()use($db,$email,$hash,$name,$type,$cityCode){
         $id=(string)$db->query('SELECT UUID()')->fetchColumn();
         sqfQuery($db,'INSERT INTO sqf_auth_users(id,email,password_hash) VALUES (?,?,?)',[$id,$email,$hash]);
-        sqfQuery($db,'INSERT INTO profiles(id,full_name,account_type) VALUES (?,?,?)',[$id,$name,$type]);
+        $city='';
+        if($cityCode!==null){$m=sqfQuery($db,'SELECT name,uf FROM sqf_ibge_municipalities WHERE code=?',[$cityCode])->fetch(PDO::FETCH_ASSOC);if(!$m)throw new DomainException('Município inválido');$city=$m['name'].' - '.$m['uf'];}
+        sqfQuery($db,'INSERT INTO profiles(id,full_name,account_type,city,city_ibge) VALUES (?,?,?,?,?)',[$id,$name,$type,$city,$cityCode]);
         return ['id'=>$id,'token'=>sqfIssueToken($db,$id,'verify')];
     });
 }
