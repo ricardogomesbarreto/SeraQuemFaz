@@ -14,6 +14,7 @@
  const tell=(id,message,isError=false)=>{const e=$(id);if(e){e.textContent=message;e.dataset.error=String(isError);}};
  const validId=v=>typeof v==='string'&&/^[0-9a-f]{8}-[0-9a-f-]{27}$/i.test(v);
  let client,user,role;
+ let compareCache=[],compareNames=new Map();
  function activity(title,detail,stamp,link){
   const item=make('article','sqf-activity-item');
   const content=make('div');
@@ -109,39 +110,68 @@
    tell('sqfAppointmentStatus','Não foi possível consultar a agenda.',true);
   }
  }
+ function renderComparedQuotes(){
+  const list=$('sqfQuoteCompareList');if(!list||role!=='cliente')return;
+  const status=$('sqfCompareStatus')?.value||'all';
+  const query=($('sqfCompareSearch')?.value||'').slice(0,100);
+  const order=$('sqfCompareOrder')?.value||'lowest';
+  const visible=window.SQFQuoteComparison
+   ?window.SQFQuoteComparison.filter(compareCache,{status,query,order},compareNames)
+   :compareCache.filter(item=>Number.isSafeInteger(item.quote_cents)&&item.quote_cents>=0);
+  list.replaceChildren();
+  tell('sqfCompareCount',visible.length+' de '+compareCache.length+' proposta(s) recebida(s) nesta consulta. O valor é declarado pelo prestador; compare escopo e condições antes de aceitar.');
+  if(!compareCache.length){
+   missing(list,'Nenhum orçamento recebido. Solicite propostas em perfis publicados para começar.');
+   return;
+  }
+  if(!visible.length){
+   missing(list,'Nenhuma proposta corresponde aos filtros. Limpe a busca ou escolha outra situação.');
+   return;
+  }
+  const names={quoted:'Aguardando decisão',accepted:'Aceito',in_progress:'Em atendimento',
+    awaiting_confirmation:'Aguardando confirmação',completed:'Concluído',
+    canceled:'Cancelado',declined:'Recusado',requested:'Solicitado'};
+  for(const item of visible){
+   const card=make('article','sqf-quote-compare-card');
+   const providerName=compareNames.get(item.provider_id)||'Prestador da solicitação';
+   card.append(make('span','sqf-quote-meta',providerName));
+   card.append(make('strong','',fmtMoney(item.quote_cents)));
+   card.append(make('p','',String(item.description||'Descrição não informada.').slice(0,165)));
+   if(item.quote_terms)card.append(make('p','muted','Condições: '+String(item.quote_terms).slice(0,190)));
+   card.append(make('small','', 'Situação: '+(names[item.status]||'A consultar')));
+   if(validId(item.id)){
+    const link=make('a','button button-outline button-small','Ver proposta e conversar');
+    link.href='painel.html?solicitacao='+encodeURIComponent(item.id)+'#sqfRequestPortal';
+    card.append(link);
+   }
+   list.append(card);
+  }
+ }
  async function compareQuotes(){
   const list=$('sqfQuoteCompareList');if(!list||role!=='cliente')return;
+  const button=$('sqfCompareRefresh');if(button)button.disabled=true;
+  tell('sqfCompareCount','Consultando propostas privadas desta conta...');
   try{
    const {data,error}=await client.from('sqf_service_requests')
     .select('id,provider_id,description,quote_cents,quote_terms,status,created_at')
     .eq('client_id',user.id).not('quote_cents','is',null)
-    .order('quote_cents',{ascending:true}).limit(35);
+    .order('created_at',{ascending:false}).limit(60);
    if(error)throw error;
-   list.replaceChildren();
-   if(!data?.length){missing(list,'Nenhum orçamento recebido. Solicite propostas diretamente nos perfis dos profissionais.');return;}
-   const ids=[...new Set(data.map(x=>x.provider_id))];
-   const {data:profiles,error:pe}=await client.from('profiles').select('id,full_name').in('id',ids);
-   const names=new Map((pe?[]:profiles||[]).map(x=>[x.id,x.full_name]));
-   for(const item of data){
-    const card=make('article','sqf-quote-compare-card');
-    card.append(make('span','sqf-quote-meta',names.get(item.provider_id)||'Prestador da solicitação'));
-    card.append(make('strong','',fmtMoney(item.quote_cents)));
-    card.append(make('p','',item.description.slice(0,165)));
-    if(item.quote_terms)card.append(make('p','muted','Condições: '+item.quote_terms.slice(0,190)));
-    card.append(make('small','', 'Situação: '+({
-     quoted:'Aguardando decisão',accepted:'Aceito',in_progress:'Em atendimento',
-     completed:'Concluído',canceled:'Cancelado',declined:'Recusado'
-    }[item.status]||item.status)));
-    if(validId(item.id)){
-     const a=make('a','button button-outline button-small','Ver proposta');
-     a.href='painel.html?solicitacao='+encodeURIComponent(item.id)+'#sqfRequestPortal';
-     card.append(a);
-    }
-    list.append(card);
+   compareCache=Array.isArray(data)?data:[];
+   const ids=[...new Set(compareCache.map(x=>x.provider_id).filter(validId))];
+   compareNames=new Map();
+   if(ids.length){
+    // Nome é opcional; falha do lookup não esconde orçamento legítimo do cliente.
+    const {data:profiles,error:pe}=await client.from('profiles')
+     .select('id,full_name').in('id',ids);
+    if(!pe)compareNames=new Map((profiles||[]).map(x=>[x.id,x.full_name]));
    }
+   renderComparedQuotes();
   }catch{
-   missing(list,'Não foi possível comparar propostas. Confirme sua sessão e tente atualizar.');
-  }
+   compareCache=[];compareNames=new Map();
+   missing(list,'Não foi possível consultar seus orçamentos. Confira a sessão e tente novamente.');
+   tell('sqfCompareCount','A consulta falhou. Nenhum valor foi estimado.',true);
+  }finally{if(button)button.disabled=false;}
  }
  async function performance(){
   if(role!=='prestador')return;
@@ -200,6 +230,10 @@
   $('sqfNotifyRefresh')?.addEventListener('click',()=>void notifications());
   $('sqfAppointmentRefresh')?.addEventListener('click',()=>void appointments());
   $('sqfPerformanceRefresh')?.addEventListener('click',()=>void performance());
+  $('sqfCompareRefresh')?.addEventListener('click',()=>void compareQuotes());
+  for(const id of ['sqfCompareSearch','sqfCompareStatus','sqfCompareOrder']){
+    $(id)?.addEventListener(id==='sqfCompareSearch'?'input':'change',renderComparedQuotes);
+  }
   window.addEventListener('sqf:appointment-updated',()=>void appointments());
   document.addEventListener('visibilitychange',()=>{
    if(!document.hidden)void notifications();
