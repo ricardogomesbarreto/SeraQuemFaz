@@ -39,3 +39,10 @@ Não utilizar o candidato como sistema comercial. Nenhum dado remoto foi alterad
 ## API candidata e autenticação
 
 `backend/public/index.php` expõe somente rotas explícitas. Configure o servidor para servir esse arquivo como `/api/index.php` (alias para backend/public, mantendo backend/src e database fora do document root). Não publicar o repositório inteiro. O cliente candidato `assets/mysql-api-client.js` utiliza a mesma origem e CSRF; as páginas existentes ainda não foram trocadas. `SQF_MAIL_FROM` e um transporte de e-mail funcional são necessários para cadastro, recuperação e confirmação. HTTPS obrigatório; `SQF_ALLOW_INSECURE_LOCAL=1` é exclusivo do teste loopback. As sessões exigem e-mail confirmado, cookies HttpOnly, SameSite Strict e versão de autenticação. MFA administrativo, entrega real de e-mail, migração de identidades, proteção adicional contra abuso e homologação das telas permanecem gates.
+
+## Homologação de interface e dados públicos
+
+- `database/seed/import-public.php`: importar categorias ativas com IDs de origem e o snapshot de municípios do IBGE já versionado. Execute após as duas migrações em ambiente isolado. Não contém contas, fotos ou outros dados pessoais.
+- `assets/backend-mode.js`: definir `mysql` exclusivamente na homologação. Cadastro, login, recuperação e categorias usam a API candidata nesse modo.
+- `painel-mysql.html`: painel temporário dos dois papéis; perfil, solicitações, propostas, mensagens, agenda e notificações. Ainda não equivale ao painel principal: avaliações, portfólio, verificação, favoritos e gestão administrativa não foram portados.
+- A CI testa importação, autenticação, HTTP e lint dos scripts; a homologação visual e entrega real de e-mail ainda são obrigatórias.
