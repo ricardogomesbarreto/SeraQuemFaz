@@ -11,6 +11,8 @@
  const load=async()=>{
    const [p,q,a,n]=await Promise.all([api.profile(),api.requests(),api.appointments(),api.notifications()]);
    profile=p.data;if(!profile)throw new Error('Perfil indisponível');
+   const billingSection=$('mysqlBillingSection');billingSection.hidden=profile.account_type!=='prestador';
+   if(!billingSection.hidden){const data=(await api.billing()).data,s=data.subscription,root=$('mysqlBillingHistory');$('mysqlBillingStatus').textContent=s?(s.active?'Período pago vigente até '+s.paid_until:'Sem período pago confirmado')+' · '+s.state:'Sem assinatura';root.replaceChildren();for(const i of data.invoices){const card=wrap(i.status+' · '+new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(Number(i.amount_cents)/100));card.append(el('p',i.paid_period_end||'Sem vigência confirmada'));root.append(card);}if(!data.invoices.length)root.append(el('p','Nenhuma cobrança registrada.'));}
    const security=(await api.accountSecurity()).data;$('mysqlSecurityEmail').textContent='E-mail: '+security.email+(security.email_confirmed_at?' · confirmado':'');$('mysqlNotificationPreference').elements.email_enabled.checked=Boolean(security.email_enabled);
    const cases=(await api.cases()).data,caseRoot=$('mysqlCases');caseRoot.replaceChildren();for(const item of [...cases.support,...cases.privacy]){const card=wrap(item.topic||item.request_type);card.append(el('p',item.message||item.details),el('p','Situação: '+item.status));caseRoot.append(card);}
    if(!caseRoot.childElementCount)caseRoot.append(el('p','Nenhuma solicitação registrada.'));
