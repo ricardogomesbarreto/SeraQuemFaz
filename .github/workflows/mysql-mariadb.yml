@@ -118,6 +118,13 @@ jobs:
           kill "$WEBHOOK_PID"
           node database/tests/browser-integration.mjs
           php database/tests/integrity.php
+          # Restore only the disposable CI database into a second isolated schema.
+          docker exec ${{ job.services.database.id }} sh -c 'mysqldump -uroot -p"$MYSQL_ROOT_PASSWORD" --single-transaction --skip-lock-tables sqf_test' > /tmp/sqf-ci-backup.sql
+          docker exec ${{ job.services.database.id }} sh -c 'mysql -uroot -p"$MYSQL_ROOT_PASSWORD" -e "CREATE DATABASE sqf_restore CHARACTER SET utf8mb4 COLLATE utf8mb4_bin; GRANT ALL PRIVILEGES ON sqf_restore.* TO sqf_ci;"'
+          docker exec -i ${{ job.services.database.id }} sh -c 'mysql -uroot -p"$MYSQL_ROOT_PASSWORD" sqf_restore' < /tmp/sqf-ci-backup.sql
+          SQF_RESTORE_DSN='mysql:host=127.0.0.1;port=3306;dbname=sqf_restore;charset=utf8mb4' php database/tests/restore-check.php
+          SQF_DB_DSN='mysql:host=127.0.0.1;port=3306;dbname=sqf_restore;charset=utf8mb4' php database/tests/integrity.php
+          rm -f /tmp/sqf-ci-backup.sql
 
       - name: Store isolated candidate package
         uses: actions/upload-artifact@v4
