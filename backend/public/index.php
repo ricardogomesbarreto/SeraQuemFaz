@@ -87,10 +87,15 @@ try {
     if(str_starts_with($route,'staff/')){
       sqfRequireStaff($db,$actor);
       if((int)($_SESSION['staff_mfa_until']??0)<=time())respond(['error'=>'MFA administrativo obrigatório'],403);
+      if($route==='staff/review-cases')respond(['data'=>sqfStaffReviewCases($db,$actor)]);
+      if($route==='staff/review-case/decide'){sqfStaffReviewCaseDecide($db,$actor,required($body,'type'),required($body,'id'),required($body,'status'),required($body,'note'));respond(['ok'=>true]);}
       if($route==='staff/reviews')respond(['data'=>sqfStaffQueue($db,$actor)]);
       if($route==='staff/review/decide'){sqfReviewModerate($db,$actor,required($body,'id'),required($body,'status'),required($body,'note'));respond(['ok'=>true]);}
       respond(['error'=>'Rota administrativa indisponível'],404);
     }
+    if($route==='review-cases')respond(['data'=>sqfOwnReviewCases($db,$actor)]);
+    if($route==='review/response'){sqfReviewResponse($db,$actor,required($body,'id'),required($body,'message'));respond(['ok'=>true]);}
+    if($route==='review/dispute')respond(['data'=>sqfReviewDispute($db,$actor,required($body,'id'),required($body,'reason'),required($body,'details'))]);
     if($route==='reviews')respond(['data'=>sqfOwnReviews($db,$actor)]);
     if($route==='review/create')respond(['data'=>sqfReviewCreate($db,$actor,required($body,'request_id'),number($body,'rating'),required($body,'comment'))]);
     if($route==='services')respond(['data'=>sqfOwnServices($db,$actor)]);
