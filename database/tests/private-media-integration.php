@@ -62,3 +62,7 @@ sqfQuery($db,"UPDATE provider_verifications SET status='suspended' WHERE provide
 forbid(fn()=>sqfPrivateImagePath($db,'','portfolio',$photo),'suspended provider portfolio hidden');
 forbid(fn()=>sqfPrivateImagePath($db,'','avatar',$provider),'suspended provider avatar hidden');
 sqfQuery($db,"UPDATE provider_verifications SET status='approved' WHERE provider_id=?",[$provider]);
+
+// Create a genuine PNG fixture for the HTTP upload test, outside the web root.
+$png=imagecreatetruecolor(8,8);imagefill($png,0,0,imagecolorallocate($png,12,34,56));
+imagepng($png,sqfMediaRoot().'/test-upload.png');imagedestroy($png);
