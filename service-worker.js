@@ -1,6 +1,6 @@
 'use strict';
 // Only a generic offline page and immutable public brand images; never API or user data.
-const CACHE='sqf-public-v3.14.0-rc.11';
+const CACHE='sqf-public-v3.14.0-rc.13';
 const ASSETS=['./offline.html','./assets/brand/icone-192.png','./assets/brand/icone-512.png','./assets/brand/logo-horizontal.png'];
 const scope=new URL(self.registration.scope);
 self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS)).then(()=>self.skipWaiting())));
