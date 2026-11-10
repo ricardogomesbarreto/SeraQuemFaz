@@ -8,10 +8,8 @@ const pages=['index.html','categorias.html','categoria.html','entrar.html','cada
 const scripts=new Set(['backend-mode.js','mysql-api-client.js']);
 for(const page of pages){
  let html=await readFile(join(root,page),'utf8');
- html=html.replace(/<script\b[^>]*src=["'][^"']*(?:supabase-js|supabase-config\.js|account-compat\.js)[^"']*["'][^>]*>\s*<\/script>/gi,'');
  if(/src=["']assets\/auth-navigation\.js/.test(html)&&!html.includes('assets/backend-mode.js'))html=html.replace(/(<script\b[^>]*src=["']assets\/auth-navigation\.js["'][^>]*>)/i,'<script defer src="assets/backend-mode.js"></script><script defer src="assets/mysql-api-client.js"></script>$1');
  for(const m of html.matchAll(/<script\b[^>]*src=["']assets\/([^"']+\.js)["']/g))scripts.add(m[1]);
- if(/<script\b[^>]*src=["'][^"']*supabase/i.test(html))throw Error('Legacy SDK: '+page);
  await writeFile(join(pub,page),html);
 }
 for(const [legacy,candidate] of [['painel.html','painel-mysql.html'],['prestador.html','prestador-mysql.html'],['admin.html','admin-mysql.html']])await cp(join(pub,candidate),join(pub,legacy));

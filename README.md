@@ -1,4 +1,4 @@
-# SERÁ QUEM FAZ? — v3.14.0-rc.8
+# SERÁ QUEM FAZ? — v3.14.0-rc.9
 
 <p align="center"><img src="assets/brand/logo-horizontal.png" alt="Será Quem Faz?" width="380"></p>
 <p align="center"><strong>Encontre profissionais da sua cidade. Organize serviços, propostas e atendimentos em um só lugar.</strong></p>
@@ -17,7 +17,7 @@ O Será Quem Faz? conecta clientes a prestadores de serviços locais. Pesquisa p
 
 HTML, CSS e JavaScript; API PHP 8.1+; PDO MySQL; MySQL 8.0 ou MariaDB 10.11, InnoDB e UTC. Identidades e sessões próprias, RBAC administrativo com MFA, mídia privada fora da raiz web e fila de notificações. Mercado Pago com checkout desativado durante homologação. Destino futuro: Hostinger Unlimited (não Premium). PHP permanece por reaproveitar o backend homologado; Node.js é suportado pelo plano, mas uma reescrita não é necessária. Node 22+ é usado no build e nos testes, não como runtime obrigatório.
 
-## v3.14.0-rc.8
+## v3.14.0-rc.9
 
 Candidato exclusivo MySQL/MariaDB. Distribuição isolada, instalação SQL consolidada, testes PHP/HTTP/Chromium, integridade e restauração de banco descartável. O código histórico foi preservado no histórico Git; não faz parte do caminho de instalação atual.
 
@@ -53,3 +53,7 @@ O pacote inclui perfil de hospedagem, regras de cache restritas a imagens públi
 PWA instalável com fallback offline genérico e cache exclusivo de imagens estáticas; favoritos de profissionais; comparação de propostas abertas; indicadores de visualizações autenticadas, solicitações, propostas e atendimentos. Todos os dados e permissões são consultados pela API PHP/MySQL/MariaDB. Node.js permanece disponível para build, CI e aplicações complementares, sem duplicar o backend. Novos testes precisam confirmar a homologação.
 
 A administração recupera também indicadores agregados e exportação CSV sem dados pessoais; testes de concorrência do catálogo em CI registram latência local, não desempenho no hPanel.
+
+## RC.9 — exclusividade do runtime
+
+Autenticação, navegação, catálogo, detalhes, favoritos e imagens utilizam apenas a API PHP/MySQL/MariaDB. Removidos caminhos de compatibilidade inativos; auditoria bloqueia referências ao banco anterior e SDK legado no runtime. PWA e recursos recuperados da RC.8 preservados. A nova CI deve confirmar a regressão completa. Hostinger Unlimited permanece o destino; produção bloqueada.

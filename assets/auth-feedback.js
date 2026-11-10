@@ -17,15 +17,15 @@
   function message(error, context = 'signup') {
     switch (classify(error)) {
       case 'email-limit':
-        return 'O serviço de e-mail do Supabase atingiu o limite de envios (HTTP 429). Não tente enviar o cadastro repetidamente: aguarde a liberação do limite. O administrador deve configurar SMTP próprio antes de liberar novos cadastros.';
+        return 'O serviço de e-mail do serviço de e-mail atingiu o limite de envios (HTTP 429). Não tente enviar o cadastro repetidamente: aguarde a liberação do limite. O administrador deve configurar SMTP próprio antes de liberar novos cadastros.';
       case 'email-unauthorized':
-        return 'Este projeto do Supabase não está autorizado a enviar mensagens para esse endereço. O administrador precisa configurar um provedor SMTP próprio para permitir cadastros públicos.';
+        return 'Este ambiente de homologação não está autorizado a enviar mensagens para esse endereço. O administrador precisa configurar um provedor SMTP próprio para permitir cadastros públicos.';
       case 'rate-limit':
         return 'Muitas solicitações foram enviadas em pouco tempo (HTTP 429). Evite repetir as tentativas e tente mais tarde; se persistir, consulte o administrador.';
       case 'signup-disabled':
-        return 'Novos cadastros estão desativados neste projeto do Supabase. Contate a administração.';
+        return 'Novos cadastros estão desativados neste ambiente de homologação. Contate a administração.';
       case 'email-unconfirmed':
-        return 'Confirme seu e-mail antes de entrar. Se não recebeu a mensagem, aguarde e verifique o limite de envio do Supabase.';
+        return 'Confirme seu e-mail antes de entrar. Se não recebeu a mensagem, aguarde e verifique o limite de envio do serviço de e-mail.';
       case 'weak-password':
         return 'A senha não atende às exigências de segurança do servidor. Utilize uma senha mais longa e difícil de adivinhar.';
       default:

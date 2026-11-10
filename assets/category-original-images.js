@@ -1,7 +1,7 @@
 'use strict';
 /* Registro de recuperação das 51 URLs públicas image_url de public.categories,
    consultado em 2026-11-04. São URLs EXTERNAS, NÃO arquivos no Storage.
-   A consulta ao Supabase sempre tem prioridade sobre este instantâneo. */
+   A consulta à API MySQL sempre tem prioridade sobre este instantâneo. */
 (function(scope) {
   const URLS = Object.freeze({
   "Advogado": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTn7J3PBBaeXv0AVe13oVkVYxRbm_HzQYdSP8CWdXvxHg&s=10",
