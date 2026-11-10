@@ -9,7 +9,7 @@
 <link href="assets/site.css" rel="stylesheet"/>
 <script defer="" src="assets/site.js"></script><script defer="" src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script defer="" src="assets/supabase-config.js"></script><script defer src="assets/account-compat.js"></script><script defer src="assets/auth-navigation.js"></script><script defer="" src="assets/utils.js"></script><script defer="" src="assets/profile-ui.js"></script><script defer src="assets/portrait.js"></script><script defer src="assets/professional-details.js"></script><script defer src="assets/cities.js"></script><script defer="" src="assets/client-dashboard.js"></script><script defer src="assets/billing-config.js"></script><script defer src="assets/billing.js"></script><script defer src="assets/account-fallback-ui.js"></script><script defer="" src="assets/account.js"></script>
-<script defer src="assets/request-media.js"></script><script defer src="assets/appointment-ui.js"></script><script defer src="assets/request-portal.js"></script><script defer src="assets/marketplace-hub.js"></script><script defer src="assets/client-category-favorites.js"></script><script defer src="assets/dashboard-router.js"></script><script defer src="assets/account-security.js"></script>
+<script defer src="assets/request-media.js"></script><script defer src="assets/appointment-ui.js"></script><script defer src="assets/request-portal.js"></script><script defer src="assets/quote-comparison.js"></script><script defer src="assets/marketplace-hub.js"></script><script defer src="assets/client-category-favorites.js"></script><script defer src="assets/dashboard-router.js"></script><script defer src="assets/account-security.js"></script>
 <link rel="manifest" href="manifest.webmanifest"/></head>
 <body class="legal-page sqf-dashboard-page">
 <a class="skip-link" href="#conteudo">Pular para o conteúdo</a><header class="site-header">
@@ -192,7 +192,14 @@
 </section>
 <section class="dashboard-card sqf-modern-card" id="sqfQuoteCompare" hidden aria-labelledby="sqfQuoteCompareHeading">
   <span class="section-kicker">DECISÃO INFORMADA</span><h2 id="sqfQuoteCompareHeading">Comparar orçamentos recebidos</h2>
-  <p class="muted">Compare valores e condições das suas solicitações. Serviços e escopos diferentes não são diretamente equivalentes.</p>
+  <p class="muted">Compare propostas recebidas, leia as condições e confira os detalhes antes de decidir. Valores de serviços e escopos distintos não são diretamente equivalentes.</p>
+  <div class="sqf-compare-controls">
+    <div class="form-field"><label for="sqfCompareSearch">Buscar nas propostas</label><input id="sqfCompareSearch" type="search" maxlength="100" autocomplete="off" placeholder="Profissional, descrição ou condições"/></div>
+    <div class="form-field"><label for="sqfCompareStatus">Situação</label><select id="sqfCompareStatus"><option value="all">Todas as propostas</option><option value="quoted">Aguardando decisão</option><option value="active">Aceitas / em atendimento</option><option value="completed">Concluídas</option><option value="closed">Recusadas / canceladas</option></select></div>
+    <div class="form-field"><label for="sqfCompareOrder">Ordenação</label><select id="sqfCompareOrder"><option value="lowest">Menor valor declarado</option><option value="highest">Maior valor declarado</option><option value="recent">Proposta mais recente</option></select></div>
+    <button id="sqfCompareRefresh" type="button" class="button button-outline button-small">Atualizar propostas</button>
+  </div>
+  <p id="sqfCompareCount" class="muted" role="status" aria-live="polite">Buscando propostas...</p>
   <div id="sqfQuoteCompareList" class="sqf-compare-grid" aria-live="polite"></div>
 </section>
 <section class="dashboard-card sqf-modern-card" id="sqfPerformanceHub" hidden aria-labelledby="sqfPerformanceHeading">
