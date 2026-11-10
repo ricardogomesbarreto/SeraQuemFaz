@@ -55,6 +55,26 @@
        await api.staffDocumentDecide({id:item.id,status:select.value,note:note.value});await load();status.textContent='Análise de documento registrada sem aprovação automática.';
      }catch(error){status.textContent=error.message;}finally{submit.disabled=false;}});
    }
+   queue.append(el('h2','Verificação de prestadores'));
+   for(const item of (await api.staffProviders()).data){
+     const card=el('article');card.className='card';card.append(el('h3',item.full_name),el('p',item.city+' · '+item.status+' · Identidade aceita: '+Number(item.accepted_identity)));
+     const decision=el('form'),select=el('select'),note=el('textarea');note.required=true;note.minLength=20;note.maxLength=1000;
+     for(const [value,label] of [['approved','Aprovar'],['rejected','Rejeitar'],['suspended','Suspender']]){const o=el('option',label);o.value=value;select.append(o);}
+     const submit=el('button','Registrar decisão');submit.type='submit';submit.className='button button-primary';decision.append(select,note,submit);card.append(decision);queue.append(card);
+     decision.addEventListener('submit',async e=>{e.preventDefault();submit.disabled=true;try{if(!confirm('Confirmar decisão cadastral?'))return;await api.staffProviderDecide({id:item.id,status:select.value,note:note.value});await load();}catch(error){status.textContent=error.message;}finally{submit.disabled=false;}});
+   }
+   try{
+     const cases=(await api.staffCases()).data;
+     for(const [kind,items] of [['privacy',cases.privacy],['support',cases.support]]){
+       queue.append(el('h2',kind==='privacy'?'Solicitações de privacidade':'Chamados de suporte'));
+       for(const item of items){const card=el('article');card.className='card';card.append(el('h3',item.request_type||item.topic),el('p',item.details||item.message),el('p','Situação: '+item.status));
+         const decision=el('form'),select=el('select'),note=el('textarea');note.required=true;note.minLength=20;note.maxLength=1000;
+         for(const [value,label] of [['reviewing','Em análise'],['resolved','Resolver']]){const o=el('option',label);o.value=value;select.append(o);}
+         const submit=el('button','Registrar decisão');submit.type='submit';submit.className='button button-primary';decision.append(select,note,submit);card.append(decision);queue.append(card);
+         decision.addEventListener('submit',async e=>{e.preventDefault();submit.disabled=true;try{if(!confirm('Confirma a atualização? Resolver não executa exclusão ou exportação de dados.'))return;await api.staffCaseDecide({kind,id:item.id,status:select.value,note:note.value});await load();}catch(error){status.textContent=error.message;}finally{submit.disabled=false;}});
+       }
+     }
+   }catch(error){if(!/Somente administradores/.test(error.message))throw error;}
    form.hidden=true;status.textContent='Fila de moderação carregada.';
  }
  form.addEventListener('submit',async event=>{event.preventDefault();const submit=form.querySelector('button');submit.disabled=true;try{await api.staffMfa(form.elements.code.value);form.reset();await load();}catch(e){status.textContent=e.message;}finally{submit.disabled=false;}});
