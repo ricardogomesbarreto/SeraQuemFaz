@@ -17,7 +17,18 @@ putenv('SQF_MP_CHECKOUT_ENABLED=1');putenv('SQF_SITE_URL=https://example.invalid
 sqfQuery($db,'UPDATE sqf_billing_settings SET checkout_enabled=1 WHERE singleton=1');
 try{
     reject(fn()=>sqfCreateCheckout($db,$client,'monthly',$remote),'client cannot subscribe as provider');
-    $a=sqfCreateCheckout($db,$provider,'monthly',$remote);
+    // The first request has committed its reservation but is still awaiting the remote response.
+    // A second connection must reject a competing checkout without invoking the payment transport.
+    $competingCalls=0;
+    $overlap=function(string $method,string $path,array $data)use($db,$provider,$remote,&$competingCalls):array{
+        if($method==='POST'){
+            $other=sqfDatabase();
+            reject(fn()=>sqfCreateCheckout($other,$provider,'monthly',function()use(&$competingCalls){$competingCalls++;throw new RuntimeException('duplicate remote checkout');}),'in-flight checkout rejects competing request');
+            check($competingCalls===0,'competing request never calls payment transport');
+        }
+        return $remote($method,$path,$data);
+    };
+    $a=sqfCreateCheckout($db,$provider,'monthly',$overlap);
     check(sqfCreateCheckout($db,$provider,'monthly',$remote)===$a&&$remoteCalls===1,'checkout retry reuses existing link');
     $s=sqfQuery($db,'SELECT id FROM sqf_billing_subscriptions WHERE user_id=?',[$provider])->fetchColumn();
     $start=gmdate('Y-m-d H:i:s',time()-60);$end=gmdate('Y-m-d H:i:s',time()+86400);
@@ -32,6 +43,9 @@ try{
     reject(fn()=>sqfCreateCheckout($db,$provider,'monthly',$remote),'renewal respects requested cycle');
     sqfCreateCheckout($db,$provider,'yearly',$remote);
     check((int)sqfQuery($db,'SELECT COUNT(*) FROM sqf_billing_subscriptions WHERE user_id=?',[$provider])->fetchColumn()===2,'historical subscription preserved');
+    try{sqfQuery($db,'UPDATE sqf_billing_subscriptions SET is_current=1 WHERE id=?',[$s]);throw new RuntimeException('historical promotion accepted');}
+    catch(PDOException $e){check($e->getCode()==='23000','database rejects promotion of historical contract while current exists');}
+    check((int)sqfQuery($db,'SELECT COUNT(*) FROM sqf_billing_subscriptions WHERE user_id=? AND is_current=1',[$provider])->fetchColumn()===1,'exactly one current contract after rejected promotion');
     $billing=sqfOwnBilling($db,$provider);
     check($billing['subscription']['cycle']==='yearly'&&count($billing['invoices'])===1&&$billing['invoices'][0]['cycle']==='monthly','new cycle and old invoice retained');
     check($billing['cycle_request']===null,'confirmed new checkout consumes cycle request');
