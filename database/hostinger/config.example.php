@@ -8,3 +8,8 @@ putenv('SQF_PRIVATE_MEDIA_ROOT='.__DIR__.'/media');
 putenv('SQF_MAIL_FROM='); // Set verified sender after mail transport validation.
 putenv('SQF_ALLOW_INSECURE_LOCAL=0');
 // Configure SQF_STAFF_TOTP_SECRETS only with securely provisioned unique secrets.
+
+// Sandbox-only webhook; keep disabled until explicit homologation.
+putenv('SQF_MP_WEBHOOK_ENABLED=0');
+putenv('SQF_MP_ACCESS_TOKEN=');
+putenv('SQF_MP_WEBHOOK_SECRET=');
