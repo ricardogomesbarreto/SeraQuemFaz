@@ -10,7 +10,9 @@ function sqfMediaRoot():string {
     $site=realpath(__DIR__.'/../../');
     $docroot=isset($_SERVER['DOCUMENT_ROOT'])&&$_SERVER['DOCUMENT_ROOT']!==''?realpath($_SERVER['DOCUMENT_ROOT']):false;
     if($resolved&&$docroot&&($resolved===$docroot||str_starts_with($resolved,$docroot.DIRECTORY_SEPARATOR)))throw new RuntimeException('Diretório privado inseguro');
-    if(!$resolved||($site&&($resolved===$site||str_starts_with($resolved,$site.DIRECTORY_SEPARATOR))))throw new RuntimeException('Diretório privado inseguro');
+    // Source checkout contains public assets; packaged sqf-private does not.
+    // Allow its dedicated media subdirectory, but never a real document root.
+    if(!$resolved||($site&&($resolved===$site||(is_dir($site.'/assets')&&str_starts_with($resolved,$site.DIRECTORY_SEPARATOR)))))throw new RuntimeException('Diretório privado inseguro');
     return $resolved;
 }
 function sqfImagePayload(string $tmp,int $size):string {
