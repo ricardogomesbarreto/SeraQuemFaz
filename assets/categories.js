@@ -370,6 +370,11 @@
   });
 
   async function queryLiveCategories() {
+    if(window.SQFDataMode==='mysql'){
+      const result=await window.SQFMySQL.categories();
+      if(!Array.isArray(result.data))throw new Error('Resposta inválida da API MySQL');
+      return result.data;
+    }
     let clientError;
     try {
       const client=window.getSQFClient();
