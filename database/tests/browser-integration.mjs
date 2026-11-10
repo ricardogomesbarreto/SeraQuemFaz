@@ -11,7 +11,8 @@ async function makePage(){
    return url.origin===origin?route.continue():route.abort();
  });
  const page=await context.newPage();
- page.on('pageerror',e=>faults.push(e.message));
+ page.on('pageerror',e=>{faults.push(e.message);console.error('Browser page error:',e.message);});
+ page.on('response',r=>{if(r.url().includes('/api/index.php')&&r.status()>=400)console.error('API failure:',r.status(),new URL(r.url()).searchParams.get('route'));});
  return {context,page};
 }
 async function widthCheck(page,label){
@@ -24,9 +25,13 @@ async function widthCheck(page,label){
 }
 async function login(page,email,password){
  await page.goto(origin+'/entrar.html');
+ await page.locator('html[data-sqf-auth="guest"]').waitFor();
+ assert.equal(await page.evaluate(()=>window.SQFDataMode),'mysql');
  await page.locator('#email').fill(email);
  await page.locator('#password').fill(password);
+ const responsePromise=page.waitForResponse(r=>new URL(r.url()).searchParams.get('route')==='login');
  await page.locator('#submitBtn').click();
+ const response=await responsePromise;assert.equal(response.status(),200,'login response: '+await response.text());
  await page.waitForURL('**/painel-mysql.html');
  await page.locator('#mysqlContent').waitFor({state:'visible'});
 }
