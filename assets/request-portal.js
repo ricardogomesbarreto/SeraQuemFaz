@@ -115,15 +115,16 @@
  }
  function drawList(){
    const control=$('sqfRequestFilter');
-   document.querySelectorAll('[data-request-filter]').forEach(button=>{
-     button.setAttribute('aria-pressed',String(button.dataset.requestFilter===control.value));
-   });
    const unreadOption=control.querySelector('option[value="unread"]');
    if(unreadOption)unreadOption.disabled=!unread;
    if(!unread&&control.value==='unread')control.value='all';
+   document.querySelectorAll('[data-request-filter]').forEach(button=>{
+     button.setAttribute('aria-pressed',String(button.dataset.requestFilter===control.value));
+     if(button.dataset.requestFilter==='unread')button.disabled=!unread;
+   });
    const normalize=value=>value.normalize('NFD').replace(/\p{M}/gu,'').toLocaleLowerCase('pt-BR');
    const term=normalize(($('sqfRequestSearch')?.value||'').trim());
-   const view=requests.filter(item=>matches(item,control.value)&&normalize(item.description).includes(term));
+   const view=requests.filter(item=>matches(item,control.value)&&normalize(String(item.description||'')).includes(term));
    $('sqfRequestCount').textContent=`${view.length} de ${requests.length} solicitações recentes exibidas (até 40)`;
    const list=$('sqfRequestList');list.replaceChildren();
    if(!view.length){list.append(create('p','muted',requests.length?'Nenhuma solicitação neste filtro.':'Ainda não há solicitações. Explore os perfis para pedir orçamento.'));return;}
