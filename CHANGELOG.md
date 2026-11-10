@@ -1,3 +1,17 @@
+# v3.12.0 — Pesquisa assistida e comparação de orçamentos
+
+- **Catálogo:** busca assistida em português, com termos cotidianos relacionados às categorias reais ativas (ex.: faxina → Limpeza, notebook → Técnico de Informática, vazamento → Encanador). Os destinos só aparecem se estiverem efetivamente cadastrados; não são inventados prestadores ou categorias.
+- **Grafia:** sugestões de até três categorias já existentes quando a consulta não encontra correspondência e se parece com nomes de profissões; seleção por botão preenche a busca.
+- **Relevância:** correspondências exatas e por nome prevalecem sobre descrições e sinônimos; cidade continua obrigatória, com dados oriundos do Supabase.
+- **Orçamentos do cliente:** interface de comparação com pesquisa por prestador/descrição/condições, filtro por situação e ordenação por valor declarado (menor/maior) ou data.
+- **Segurança:** as propostas são consultadas somente na conta do cliente, sujeitas às políticas RLS; valores inválidos não aparecem no comparador.
+- **Transparência:** aviso de que preços de escopos diferentes não são diretamente equivalentes; sem cálculos especulativos de economia.
+- **Responsividade:** controles de comparação e sugestões ajustados para celular.
+- **Qualidade:** novos testes de sinônimos, sugestões e filtros, CI Node 22/24, atualização dos pacotes.
+- **Operação comercial:** não altera Mercado Pago, preço de assinatura ou hospedagem.
+
+**Gate pendente:** aprovação cadastral dos prestadores de teste e homologação ponta a ponta (solicitações, orçamentos, mensagens, agenda e avaliações) no navegador continuam necessárias antes da liberação comercial.
+
 # v3.11.2 — Consolidação de segurança e estabilidade
 
 - **Supabase / RLS:** removida a política duplicada de leitura de `provider_services` após validar equivalência dos predicados e dos papéis; preserva o catálogo público apenas para serviços ativos de prestadores autorizados.

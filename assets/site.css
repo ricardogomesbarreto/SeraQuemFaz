@@ -1508,3 +1508,21 @@ body{min-width:320px}
 .sqf-preview-notice strong{display:block;color:#8e491a;font-size:1.06rem}
 .sqf-preview-notice p{font-size:.86rem;line-height:1.65;color:#73533b}
 .sqf-preview-notice[hidden]{display:none!important}
+
+/* v3.12.0 — Busca assistida e propostas comparáveis */
+.sqf-search-assistance{display:flex;gap:16px;align-items:center;justify-content:space-between;flex-wrap:wrap;margin:0 0 18px;padding:17px 20px;background:#f4f8fb;border:1px solid #bfd5e2;border-left:4px solid #ed8338;border-radius:14px}
+.sqf-search-assistance[hidden]{display:none!important}
+.sqf-search-assistance h3{margin:4px 0;color:#123b57;font-size:1.04rem}
+.sqf-search-assistance .muted{font-size:.81rem;line-height:1.5;margin:0}
+.sqf-search-assistance-options{display:flex;gap:9px;flex-wrap:wrap;justify-content:flex-start}
+.sqf-search-assistance-options .button{white-space:normal;text-align:left;min-height:39px;font-weight:700}
+.sqf-compare-controls{display:grid;grid-template-columns:minmax(0,1.6fr) repeat(2,minmax(140px,1fr));align-items:end;gap:12px;margin:18px 0}
+.sqf-compare-controls .form-field{min-width:0}
+.sqf-compare-controls input,.sqf-compare-controls select{width:100%;background:#fff;border:1px solid #cfdce6;border-radius:10px;padding:11px 12px;min-height:43px;font:inherit;color:#153e5b}
+.sqf-compare-controls label{display:block;margin:0 0 7px;color:#153e5b;font-weight:750;font-size:.81rem}
+.sqf-compare-controls #sqfCompareRefresh{justify-self:start;grid-column:1 / -1}
+#sqfCompareCount{background:#eef5f9;border-radius:10px;padding:10px 14px;font-size:.83rem;line-height:1.5}
+.sqf-quote-compare-card{align-content:start}
+.sqf-quote-compare-card:focus-within{outline:2px solid #e97e36;outline-offset:2px}
+@media(max-width:860px){.sqf-compare-controls{grid-template-columns:repeat(2,minmax(0,1fr))}.sqf-compare-controls .form-field:first-child{grid-column:1/-1}}
+@media(max-width:540px){.sqf-compare-controls{grid-template-columns:minmax(0,1fr)}.sqf-compare-controls .form-field:first-child{grid-column:auto}.sqf-search-assistance{padding:14px}.sqf-search-assistance-options{width:100%}}
