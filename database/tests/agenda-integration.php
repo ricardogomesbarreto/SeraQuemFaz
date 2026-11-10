@@ -8,7 +8,7 @@ function reject(callable $f,string $m):void { try { $f(); } catch (DomainExcepti
 function execq(PDO $db,string $s,array $a):void {$q=$db->prepare($s);$q->execute($a);}
 $u=['00000000-0000-4000-8000-000000000001','00000000-0000-4000-8000-000000000002','00000000-0000-4000-8000-000000000003'];
 foreach($u as $i=>$id){execq($db,'INSERT INTO sqf_auth_users(id,email) VALUES (?,?)',[$id,"fixture$i@example.invalid"]);execq($db,'INSERT INTO profiles(id,full_name,account_type) VALUES (?,?,?)',[$id,"Fixture $i",$i===1?'prestador':'cliente']);}
-execq($db,'INSERT INTO sqf_ibge_municipalities(code,name,uf,ibge_uf) VALUES (?,?,?,?)',['2111300','São Luís','MA',21]);
+execq($db,'INSERT INTO sqf_ibge_municipalities(code,name,uf,ibge_uf) VALUES (?,?,?,?) ON DUPLICATE KEY UPDATE code=VALUES(code)',['2111300','São Luís','MA',21]);
 $service='00000000-0000-4000-8000-000000000010';
 execq($db,'INSERT INTO provider_services(id,provider_id,category_id,service_title) VALUES (?,?,?,?)',[$service,$u[1],'fixture','Serviço de teste']);
 $requests=['00000000-0000-4000-8000-000000000011','00000000-0000-4000-8000-000000000012'];
