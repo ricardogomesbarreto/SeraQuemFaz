@@ -42,15 +42,19 @@ function sqfReconcileVerifiedInvoice(PDO $db,string $subscription,string $invoic
         if(!$s||$amount!==(int)$s['price_cents']||$currency!==$s['currency'])throw new DomainException('Pagamento não corresponde ao plano');
         $existing=sqfQuery($db,'SELECT mp_invoice_id FROM sqf_billing_invoices WHERE mp_payment_id=? FOR UPDATE',[$payment])->fetchColumn();
         if($existing!==false&&$existing!==$invoice)throw new DomainException('Pagamento já vinculado a outra fatura');
+        $attempt=sqfQuery($db,'SELECT invoice_id FROM sqf_billing_payment_attempts WHERE payment_id=? FOR UPDATE',[$payment])->fetchColumn();
+        if($attempt!==false&&$attempt!==$invoice)throw new DomainException('Tentativa já vinculada a outra fatura');
         $old=sqfQuery($db,'SELECT subscription_id,mp_payment_id,status,paid_at,paid_period_end FROM sqf_billing_invoices WHERE mp_invoice_id=? FOR UPDATE',[$invoice])->fetch(PDO::FETCH_ASSOC);
-        if($old&&($old['subscription_id']!==$subscription||$old['mp_payment_id']!==$payment))throw new DomainException('Fatura vinculada a outro pagamento');
+        if($old&&$old['subscription_id']!==$subscription)throw new DomainException('Fatura vinculada a outra assinatura');
+        if($old&&$old['mp_payment_id']!==$payment&&(!in_array($old['status'],['pending','rejected'],true)||$attempt!==false))throw new DomainException('Substituição de pagamento indisponível');
         if($old&&in_array($old['status'],['refunded','charged_back'],true)&&!in_array($state,['refunded','charged_back'],true))throw new DomainException('Estorno ou contestação não pode reativar pagamento');
         if($old&&$old['status']==='approved'&&$state==='approved'){
             if(substr((string)$old['paid_at'],0,19)!==$paidAt||substr((string)$old['paid_period_end'],0,19)!==$periodEnd)throw new DomainException('Período aprovado não pode ser alterado');
         }
         if($old&&$old['status']==='approved'&&in_array($state,['pending','rejected'],true))throw new DomainException('Estado anterior não substitui pagamento aprovado');
-        if($old)sqfQuery($db,'UPDATE sqf_billing_invoices SET status=?,paid_at=?,paid_period_end=?,verified_at=UTC_TIMESTAMP(6) WHERE mp_invoice_id=?',[$state,$paidAt,$periodEnd,$invoice]);
+        if($old)sqfQuery($db,'UPDATE sqf_billing_invoices SET mp_payment_id=?,status=?,paid_at=?,paid_period_end=?,verified_at=UTC_TIMESTAMP(6) WHERE mp_invoice_id=?',[$payment,$state,$paidAt,$periodEnd,$invoice]);
         else sqfQuery($db,'INSERT INTO sqf_billing_invoices(subscription_id,mp_invoice_id,mp_payment_id,status,amount_cents,currency,paid_at,paid_period_end) VALUES (?,?,?,?,?,?,?,?)',[$subscription,$invoice,$payment,$state,$amount,$currency,$paidAt,$periodEnd]);
+        if($attempt===false)sqfQuery($db,'INSERT INTO sqf_billing_payment_attempts(payment_id,invoice_id) VALUES (?,?)',[$payment,$invoice]);
         sqfQuery($db,"UPDATE sqf_billing_subscriptions SET paid_until=(SELECT MAX(paid_period_end) FROM sqf_billing_invoices WHERE subscription_id=? AND status='approved' AND currency=? AND amount_cents=? AND paid_at<=UTC_TIMESTAMP(6)),last_verified_at=UTC_TIMESTAMP(6),updated_at=UTC_TIMESTAMP(6) WHERE id=?",[$subscription,$currency,$amount,$subscription]);
     });
 }
