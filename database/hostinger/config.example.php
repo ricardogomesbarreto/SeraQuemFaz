@@ -13,3 +13,7 @@ putenv('SQF_ALLOW_INSECURE_LOCAL=0');
 putenv('SQF_MP_WEBHOOK_ENABLED=0');
 putenv('SQF_MP_ACCESS_TOKEN=');
 putenv('SQF_MP_WEBHOOK_SECRET=');
+
+// Private CLI worker: enable only after mail delivery is verified.
+putenv('SQF_NOTIFICATIONS_ENABLED=0');
+putenv('SQF_SITE_URL=');
