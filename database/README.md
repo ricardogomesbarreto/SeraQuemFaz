@@ -73,3 +73,9 @@ A tela candidata `painel-mysql.html` permite ao prestador enviar e consultar seu
 ### Moderação documental com MFA
 
 A equipe ativa com MFA recente consulta `staff/documents` e decide via `staff/document/decide` (id, status `accepted` ou `rejected`, justificativa de 20–1000 caracteres). Cada operação bloqueia a linha, impede segunda decisão, rejeita decisão pelo proprietário e grava auditoria em `sqf_staff_decision_log`. A fila de `admin-mysql.html` expõe o arquivo somente através da rota privada com autenticação e MFA. Aceitar o documento **não altera** `provider_verifications.status`; não existe aprovação automática de prestadores. A análise jurídica/operacional dos documentos, LGPD, retenção e verificação da pessoa no mundo real continuam pendentes.
+
+### Portfólio, avatar e anexos — nova etapa
+
+O mesmo armazenamento externo serve avatar (contexto `self`), portfólio (UUID de serviço pertencente ao prestador) e anexos (UUID de solicitação). Upload por sessão e CSRF, WebP até 5 MB. O avatar do cliente fica restrito ao proprietário. Avatar de prestador e foto de portfólio são públicos apenas quando o profissional satisfaz a regra de publicação; portfólio exige também serviço ativo. A leitura resolve o caminho real dentro da raiz privada e não retorna caminhos físicos. Os metadados públicos são fornecidos por `provider`; `media/read` permite anonimato somente para avatar e portfólio elegíveis.
+
+O painel candidato oferece foto de perfil, portfólio, anexos de atendimento e visualização do portfólio na busca do cliente. `database/tests/private-media-integration.php` inclui cenários de isolamento, desativação de serviços e suspensão de prestadores. Permanecem pendentes a conversão automática de formatos comuns para WebP, gestão completa de exclusão/capa e retenção de arquivos antigos, limites por conta, migração do Storage legado e homologação responsiva em navegador.
