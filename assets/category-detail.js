@@ -74,14 +74,23 @@
     if (e2) throw e2;
     const ids = [...new Set((services || []).map(item => item.provider_id))];
     results.replaceChildren();
-    let profiles = [], reviews = [];
+    let profiles = [], reviews = [], reviewsAvailable = true;
     if (ids.length) {
       const [{ data: pro, error: ep }, { data: rev, error: er }] = await Promise.all([
         client.from('profiles').select('id,full_name,city,city_ibge,bio,avatar_path,created_at').in('id',ids).eq('account_type','prestador').eq('is_public',true).eq('city_ibge',city.id),
         client.rpc('sqf_public_reviews', { p_provider_ids: ids })
       ]);
-      if (ep || er) throw ep || er;
-      profiles = pro || []; reviews = rev || [];
+      if(ep)throw ep;
+      profiles = pro || [];
+      if(er){
+        // Uma falha no endpoint de avaliações não pode esconder profissionais
+        // publicados ou transformar indisponibilidade temporária em nota zero.
+        reviewsAvailable=false;
+        reviews=[];
+        console.warn('Avaliações temporariamente indisponíveis; mostrando somente perfis publicados.');
+      }else{
+        reviews = rev || [];
+      }
     }
     const details = new Map();
     if(ids.length){
@@ -110,6 +119,11 @@
     const sortControl=document.getElementById('sqfProviderSort');
     const photoControl=document.getElementById('sqfOnlyPortfolio');
     const reviewControl=document.getElementById('sqfOnlyReviews');
+    if(reviewControl && !reviewsAvailable){
+      reviewControl.checked=false;
+      reviewControl.disabled=true;
+      reviewControl.title='Filtro de avaliações indisponível temporariamente.';
+    }
     const emptyState=document.getElementById('sqfCategoryNoResults');
     const applyFilter=()=>{
       const query=window.SQFUtils.normalize(specialtyFilter.value);
@@ -132,7 +146,10 @@
         if(order==='reviews')return b.reviewCount-a.reviewCount||byName;
         if(order==='services')return b.serviceCount-a.serviceCount||byName;
         if(order==='complete')return b.completeness-a.completeness||byName;
-        if(order==='recent')return Date.parse(b.profile.created_at||0)-Date.parse(a.profile.created_at||0)||byName;
+        if(order==='recent'){
+          const timestamp=p=>Number.isFinite(Date.parse(p.created_at))?Date.parse(p.created_at):0;
+          return timestamp(b.profile)-timestamp(a.profile)||byName;
+        }
         return byName;
       });
       for(const entry of ordered)results.append(entry.card);
@@ -194,7 +211,9 @@
       const verificationNote=ui.make('span','provider-verification-note','Perfil público · identidade não certificada');
       verificationNote.title='Um perfil público não comprova identidade civil, idoneidade ou qualificação profissional.';
       link.append(verificationNote);
-      link.append(ui.ratingLine(reviews.filter(r => r.provider_id === pro.id)));
+      link.append(reviewsAvailable
+        ?ui.ratingLine(reviews.filter(r => r.provider_id === pro.id))
+        :ui.make('p','muted','Avaliações temporariamente indisponíveis.'));
       link.append(ui.make('p','provider-card-bio', pro.bio || 'Este profissional ainda não incluiu uma apresentação.'));
       const servicesForPro = services.filter(s => s.provider_id === pro.id).map(s => s.service_title).slice(0,3);
       const tags = ui.make('div','service-tags');
@@ -202,7 +221,7 @@
       link.append(speciality);
       servicesForPro.forEach(title => tags.append(ui.make('span','service-tag',title)));
       link.append(tags,ui.make('span','profile-link-label','Ver perfil, fotos e feedback →'));
-      const publicReviews=reviews.filter(r=>r.provider_id===pro.id);
+      const publicReviews=reviewsAvailable?reviews.filter(r=>r.provider_id===pro.id):[];
       const rating=publicReviews.length
         ?publicReviews.reduce((total,r)=>total+Number(r.rating||0),0)/publicReviews.length:0;
       const serviceCount=services.filter(s=>s.provider_id===pro.id).length;
