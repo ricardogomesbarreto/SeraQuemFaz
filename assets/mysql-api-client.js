@@ -22,6 +22,14 @@
     if(typeof data.csrf==='string')csrf=data.csrf;
     return data;
   }
+  async function uploadMedia(kind,context,file,caption=''){
+    if(!csrf)await session();
+    const url=new URL(endpoint,scope.location.origin);url.searchParams.set('route','media/upload');
+    const form=new FormData();form.append('kind',kind);form.append('context',context);form.append('caption',caption);form.append('file',file);
+    const response=await fetch(url,{method:'POST',credentials:'same-origin',cache:'no-store',headers:{'X-CSRF-Token':csrf,Accept:'application/json'},body:form});
+    const result=await response.json();if(!response.ok)throw new Error(result.error||'Falha ao enviar arquivo');return result;
+  }
+  const mediaUrl=(kind,id)=>{const url=new URL(endpoint,scope.location.origin);url.searchParams.set('route','media/read');url.searchParams.set('kind',kind);url.searchParams.set('id',id);return url.pathname+url.search;};
   const session=()=>call('session');
   scope.SQFMySQL=Object.freeze({
     session,
@@ -49,6 +57,9 @@
     staffReviews:()=>call('staff/reviews',{}),
     staffReviewDecide:body=>call('staff/review/decide',body),
     categories:()=>call('categories'),
+    mediaList:(kind,request_id)=>call('media/list',{kind,...(request_id?{request_id}:{})}),
+    uploadMedia,
+    mediaUrl,
     provider:id=>call('provider',undefined,{id}),
     services:()=>call('services',{}),
     saveService:body=>call('service/save',body),
