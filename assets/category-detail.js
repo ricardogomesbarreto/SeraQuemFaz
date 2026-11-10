@@ -162,8 +162,24 @@
         applyFilter();
       });
     }
-    document.getElementById('categoryProviderCount').textContent = `${profiles.length} ${profiles.length === 1 ? 'prestador' : 'prestadores'}`;
-    if (!profiles.length) ui.state(results,'Nenhum profissional nesta cidade','Ainda não há prestadores com perfil público e esta categoria de serviço em '+ window.SQFCities.format(city) +'.');
+    document.getElementById('categoryProviderCount').textContent = `${profiles.length} ${profiles.length === 1 ? 'profissional publicado' : 'profissionais publicados'}`;
+    if(!profiles.length){
+      // Não revelar cadastros privados, nomes de prestadores nem quantidades
+      // de verificações pendentes para visitantes do catálogo.
+      const empty=document.getElementById('sqfCategoryNoResults');
+      if(empty){
+        const heading=empty.querySelector('h3'),description=empty.querySelector('p');
+        if(heading)heading.textContent='Nenhum profissional publicado nesta categoria';
+        if(description)description.textContent='Não há perfis aprovados e disponíveis para esta área em '+window.SQFCities.format(city)+'. Um prestador pode visualizar seu próprio perfil antes da aprovação, mas ele só fica visível para clientes após análise cadastral e autorização de publicação.';
+        const reset=document.getElementById('sqfResetProviderFilters');
+        if(reset)reset.hidden=true;
+        const change=empty.querySelector('a[href]');
+        if(change)change.href='categorias.html?cidade='+encodeURIComponent(city.id);
+        empty.hidden=false;
+      }else{
+        ui.state(results,'Nenhum profissional publicado nesta categoria','Só aparecem profissionais com análise cadastral aprovada e perfil disponível.');
+      }
+    }
     for (const pro of profiles) {
       const card = ui.make('article','provider-card');
       const link = ui.make('a','provider-card-link');
