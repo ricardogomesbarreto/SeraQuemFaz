@@ -11,6 +11,7 @@ require_once __DIR__.'/../src/Professional.php';
 require_once __DIR__.'/../src/AccountCases.php';
 require_once __DIR__.'/../src/AccountSecurity.php';
 require_once __DIR__.'/../src/Billing.php';
+require_once __DIR__.'/../src/MercadoPago.php';
 
 header('Content-Type: application/json; charset=utf-8');
 header('Cache-Control: no-store');
@@ -35,6 +36,24 @@ function deliver(string $email,string $token,string $purpose):void {
 try {
     $local=getenv('SQF_ALLOW_INSECURE_LOCAL')==='1'&&in_array($_SERVER['REMOTE_ADDR']??'',['127.0.0.1','::1'],true);
     if(($_SERVER['HTTPS']??'')!=='on'&&!$local)respond(['error'=>'HTTPS obrigatório'],403);
+    // Provider-to-server callback: HMAC authentication instead of browser cookies/CSRF.
+    if(($_GET['route']??'')==='billing/webhook'){
+      if(getenv('SQF_MP_WEBHOOK_ENABLED')!=='1')respond(['error'=>'Integração desativada'],503);
+      if(($_SERVER['REQUEST_METHOD']??'')!=='POST')respond(['error'=>'Método indisponível'],405);
+      $params=sqfMpWebhookQuery($_SERVER['QUERY_STRING']??'');
+      $id=$params['data.id'];$signature=(string)($_SERVER['HTTP_X_SIGNATURE']??'');$request=(string)($_SERVER['HTTP_X_REQUEST_ID']??'');
+      $secret=getenv('SQF_MP_WEBHOOK_SECRET')?:'';
+      if(!sqfMpWebhookValid($signature,$id,$request,$secret,time()))respond(['error'=>'Assinatura inválida'],401);
+      $raw=file_get_contents('php://input',false,null,0,65537);
+      if(strlen($raw)>65536)respond(['error'=>'Requisição muito grande'],413);
+      $event=json_decode($raw,true,32,JSON_THROW_ON_ERROR|JSON_BIGINT_AS_STRING);
+      if(!is_array($event)||($event['type']??'')!==$params['type']||(string)($event['data']['id']??'')!==$id)respond(['error'=>'Evento divergente'],400);
+      // No production traffic is accepted in the candidate.
+      if(($event['live_mode']??null)!==false)respond(['error'=>'Somente homologação'],403);
+      try{sqfMpSyncInvoice(sqfDatabase(),$id,'sqfMpGet');}
+      catch(Throwable $e){error_log('SQF webhook reconciliation pending: '.get_class($e));respond(['error'=>'Reconciliação pendente'],503);}
+      respond(['ok'=>true]);
+    }
     ini_set('session.use_strict_mode','1');ini_set('session.use_only_cookies','1');
     session_name('SQFSESSION');session_set_cookie_params(['lifetime'=>0,'path'=>'/','secure'=>!$local,'httponly'=>true,'samesite'=>'Strict']);session_start();
     if(!isset($_SESSION['csrf']))$_SESSION['csrf']=bin2hex(random_bytes(32));
