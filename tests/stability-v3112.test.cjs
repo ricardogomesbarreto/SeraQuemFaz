@@ -42,10 +42,10 @@ test('hash inválido não impede inicialização de painel autenticado',()=>{
   assert.match(js,/catch\{return 'visao-geral';\}/);
   assert.match(js,/scrollIntoView\(\{block:'start',behavior:'auto'\}\)/);
 });
-test('versão 3.11.2 não altera checkout nem expõe chaves secretas',()=>{
+test('versão de distribuição sincronizada e sem chaves secretas no código',()=>{
   const pkg=JSON.parse(read('package.json'));
-  assert.equal(pkg.version,'3.11.2');
-  assert.equal(read('version.txt').trim(),'3.11.2');
+  assert.match(pkg.version,/^3\\.\\d+\\.\\d+$/);
+  assert.equal(read('version.txt').trim(),pkg.version);
   const jsFiles=['assets/category-detail.js','assets/dashboard-router.js','assets/request-portal.js'];
   for(const file of jsFiles){
     const js=read(file);
