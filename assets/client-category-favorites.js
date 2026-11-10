@@ -19,7 +19,10 @@
    sessionStorage.setItem(storageKey,JSON.stringify([{q,city},...existing].slice(0,6)));
   }catch{/* Desativar histórico em navegadores que não o permitem. */}
  }
- if(document.querySelector('#catalogSidebar'))rememberSearch();
+ if(document.querySelector('#catalogSidebar')){
+  rememberSearch();
+  document.querySelector('#categorySearch')?.addEventListener('submit',()=>queueMicrotask(rememberSearch));
+ }
  async function init(){
   if(!$('sqfCategoryFavoritesList')&&!$('sqfSaveCategory'))return;
   const client=window.getSQFClient?.();if(!client)return;
