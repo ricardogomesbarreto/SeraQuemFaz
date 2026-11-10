@@ -61,4 +61,5 @@ jobs:
           node --check assets/auth.js
           node --check assets/auth-navigation.js
           node --check assets/mysql-dashboard.js
+          node --check assets/mysql-admin.js
           node database/tests/http-integration.mjs
