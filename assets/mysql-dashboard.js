@@ -145,6 +145,7 @@
    }catch(error){status(error.message);submit.disabled=false;}
  });
  $('mysqlNotificationPreference').addEventListener('submit',async e=>{e.preventDefault();try{await api.notificationPreference(e.currentTarget.elements.email_enabled.checked);status('Preferência salva.');}catch(error){status(error.message);}});
+ $('mysqlPrivacyExport').addEventListener('click',async()=>{const b=$('mysqlPrivacyExport');b.disabled=true;try{const result=(await api.privacyExport()).data;const url=URL.createObjectURL(new Blob([JSON.stringify(result,null,2)],{type:'application/json'}));const link=el('a');link.href=url;link.download='meus-dados-sqf.json';link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);status('Resumo dos dados exportado.');}catch(e){status(e.message);}finally{b.disabled=false;}});
  $('mysqlLogout').addEventListener('click',async()=>{try{await api.logout();location.replace('entrar.html');}catch(e){status(e.message);}});
  $('mysqlDiscoveryForm').addEventListener('submit',async e=>{
    e.preventDefault();const form=e.currentTarget,city=String(form.elements.city.value).trim(),target=$('mysqlDiscoveryResults');

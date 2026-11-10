@@ -61,3 +61,5 @@ Autenticação, navegação, catálogo, detalhes, favoritos e imagens utilizam a
 ## RC.10 — consolidação operacional
 
 SMTP autenticado Hostinger com TLS; checkout inicial e cancelamento via API de teste, desativados por padrão; solicitação de mudança de ciclo preserva vigência sem cobrança imediata (renovação automática ainda pendente). Migration 007: índices e solicitação de ciclo. Importador privado de snapshot normalizado com contagem, FK, hashes de mídia e rollback; persistência apenas em staging explicitamente habilitado. Testes simulados e restauração de arquivos em CI. Nenhum dado real importado ou pagamento/e-mail enviado. CI e homologação real obrigatórias.
+
+Exportação resumida dos dados da própria conta e [plano de recuperação e corte](database/hostinger/RECOVERY.md) adicionados. A resposta integral a direitos do titular e o ensaio de rollback real ainda exigem validação.

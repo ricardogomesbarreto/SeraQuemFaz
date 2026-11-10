@@ -43,3 +43,10 @@ sqfNotificationPreference($db,$u['id'],true);
 check(sqfAccountSecurity($db,$u['id'])['email_enabled']===true,'email preference stored');
 sqfNotificationPreference($db,$u['id'],false);
 check(sqfAccountSecurity($db,$u['id'])['email_enabled']===false,'email preference opt-out stored');
+
+require_once __DIR__.'/../../backend/src/PrivacyExport.php';
+$exportId=(string)sqfQuery($db,'SELECT id FROM sqf_auth_users WHERE email=?',['auth-fixture@example.invalid'])->fetchColumn();
+$export=sqfOwnPrivacyExport($db,$exportId);
+if($export['identity']['id']!==$exportId||$export['identity']['email']!=='auth-fixture@example.invalid')throw new RuntimeException('Privacy export owner mismatch');
+if(isset($export['identity']['password_hash'])||isset($export['identity']['auth_version']))throw new RuntimeException('Privacy export contains credentials');
+echo "PASS: self-service export excludes password hashes and auth version\n";

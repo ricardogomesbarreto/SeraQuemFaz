@@ -15,6 +15,7 @@ require_once __DIR__.'/../src/MercadoPago.php';
 require_once __DIR__.'/../src/Engagement.php';
 require_once __DIR__.'/../src/Mail.php';
 require_once __DIR__.'/../src/SubscriptionActions.php';
+require_once __DIR__.'/../src/PrivacyExport.php';
 
 header('Content-Type: application/json; charset=utf-8');
 header('Cache-Control: no-store');
@@ -162,6 +163,7 @@ try {
     if($route==='billing/cancel'){sqfAuthLimit($db,'billing:'.$actor,5,900);sqfCancelSubscription($db,$actor,'sqfMpWrite');respond(['ok'=>true]);}
     if($route==='billing/cycle'){if(getenv('SQF_MP_CHECKOUT_ENABLED')!=='1')throw new DomainException('Operação desativada');respond(['data'=>sqfRequestCycle($db,$actor,required($body,'cycle'))]);}
     if($route==='billing')respond(['data'=>sqfOwnBilling($db,$actor)]);
+    if($route==='account/export'){sqfAuthLimit($db,'privacy-export:'.$actor,3,3600);respond(['data'=>sqfOwnPrivacyExport($db,$actor)]);}
     if($route==='account/security')respond(['data'=>sqfAccountSecurity($db,$actor)]);
     if(in_array($route,['account/password','account/revoke-sessions'],true)){
       sqfAuthLimit($db,'account-security:'.$actor,5,900);

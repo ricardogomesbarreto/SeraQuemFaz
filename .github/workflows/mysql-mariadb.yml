@@ -89,6 +89,7 @@ jobs:
           php -l backend/src/Mail.php
           php -l backend/src/SubscriptionActions.php
           php -l backend/src/ImportSnapshot.php
+          php -l backend/src/PrivacyExport.php
           php -l backend/bin/import-snapshot.php
           php database/tests/mail-unit.php
           php -l backend/public/index.php

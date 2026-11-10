@@ -73,6 +73,7 @@
     requestCycle:cycle=>call('billing/cycle',{cycle}),
     staffMetrics:()=>call('staff/metrics',{}),
     staffBilling:()=>call('staff/billing',{}),
+    privacyExport:()=>call('account/export',{}),
     accountSecurity:()=>call('account/security',{}),
     changePassword:body=>call('account/password',body),
     revokeSessions:body=>call('account/revoke-sessions',body),

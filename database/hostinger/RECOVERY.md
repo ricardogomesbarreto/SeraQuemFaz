@@ -1,0 +1,9 @@
+# Plano de recuperação e corte — Hostinger Unlimited
+**Candidato; não autoriza implantação.**
+
+1. Homologar RC.10 em subdomínio isolado e banco novo; executar CI e preflight. Conferir limites, TLS, SMTP e sandbox. Definir responsáveis, janela e critérios de aceite.
+2. Inventariar e exportar dados autorizados, normalizar tipos, preservar UUIDs e preparar mídia privada. Não exportar senhas, tokens, segredos ou sessões. Registrar contagens, hashes e exclusões justificadas; proteger os arquivos com criptografia e acesso restrito.
+3. Fazer backup consistente do banco e mídia da origem e testar restauração isolada. Congelar escritas durante o corte, executar importador dry-run e comparar contagens, vínculos e hashes; somente depois importar em staging. Confirmar redefinição de senhas, análise de publicação, moderação e pagamentos. Não alterar fonte.
+4. Antes de qualquer liberação, revisar LGPD: base legal, retenção, direitos do titular, acesso integral e exclusão sob obrigação legal, tratamento de documentos, registro de incidentes, responsáveis e teste de isolamento. Exportação resumida não substitui atendimento integral.
+5. Critério de rollback: falha de integridade, mídia faltante, autenticação, cobrança, privacidade, desempenho ou erro crítico. Interromper escritas no destino, preservar logs e registros novos, retornar tráfego à origem intacta; reconciliar escritas feitas após o corte antes de reabrir. Nunca sobrescrever origem com dump novo sem validação. Se não houver forma segura de reconciliar, manter manutenção e não liberar produção.
+6. Ensaiar restauração de SQL e mídia em ambiente descartável, com hashes e testes de login e fluxos. Registrar RPO/RTO medidos; backups do painel não substituem ensaio. Até aprovação integral, checkout, webhook, cron real e publicação permanecem desativados.
