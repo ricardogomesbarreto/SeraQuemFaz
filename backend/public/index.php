@@ -34,6 +34,7 @@ try {
     $method=$_SERVER['REQUEST_METHOD']??'GET';
     $route=trim((string)($_GET['route']??''),'/');
     if($method==='GET'&&$route==='session')respond(['user_id'=>sqfSessionUser($db,$_SESSION),'csrf'=>$_SESSION['csrf']]);
+    if($method==='GET'&&$route==='categories')respond(['data'=>sqfQuery($db,"SELECT id,name,description,image_url,status,created_at FROM categories WHERE status='active' ORDER BY name,id")->fetchAll(PDO::FETCH_ASSOC)]);
     if($method==='GET'&&$route==='catalog')respond(['data'=>sqfCatalog($db,(string)($_GET['city']??''))]);
     if($method!=='POST')respond(['error'=>'Rota indisponível'],404);
     if(!hash_equals($_SESSION['csrf'],(string)($_SERVER['HTTP_X_CSRF_TOKEN']??'')))respond(['error'=>'CSRF inválido'],403);
