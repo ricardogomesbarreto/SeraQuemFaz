@@ -22,7 +22,7 @@
   document.querySelectorAll('[data-year]').forEach((el) => { el.textContent = new Date().getFullYear(); });
   // PWA opcional: instalar somente em contexto seguro. Service Worker não
   // armazena páginas autenticadas nem respostas privadas da API.
-  if(typeof navigator!=='undefined'&&typeof window!=='undefined'&&
+  if(window.SQFDataMode!=='mysql'&&typeof navigator!=='undefined'&&typeof window!=='undefined'&&
     'serviceWorker' in navigator &&
     (location.protocol==='https:'||['localhost','127.0.0.1'].includes(location.hostname))){
     window.addEventListener('load',()=>{

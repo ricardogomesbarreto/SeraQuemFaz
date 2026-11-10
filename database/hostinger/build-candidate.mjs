@@ -30,5 +30,5 @@ await cp(join(root,'backend/public/index.php'),join(priv,'backend/public/index.p
 await cp(join(root,'database/hostinger/config.example.php'),join(priv,'config.example.php'));
 await mkdir(join(pub,'api'),{recursive:true});await cp(join(root,'database/hostinger/api-entry.example.php'),join(pub,'api/index.php'));
 await cp(join(root,'dist/hostinger'),join(dest,'database'),{recursive:true});
-await writeFile(join(dest,'README.txt'),'CANDIDATO DE HOMOLOGAÇÃO — NÃO IMPLANTAR EM PRODUÇÃO.\npublic_html: arquivos públicos; sqf-private: fora da raiz web, config.php a provisionar localmente.\nSQL: database/01-instalar-banco.sql. Sem SDK Supabase, checkout desativado.\n');
-console.log('MySQL candidate generated: '+scripts.size+' public scripts; no legacy SDK or production credentials.');
+await writeFile(join(dest,'README.txt'),'CANDIDATO DE HOMOLOGAÇÃO — NÃO IMPLANTAR EM PRODUÇÃO.\npublic_html: arquivos públicos; sqf-private: fora da raiz web, config.php a provisionar localmente.\nSQL: database/01-instalar-banco.sql. MySQL/MariaDB; checkout desativado.\n');
+console.log('MySQL candidate generated: '+scripts.size+' public scripts; no production credentials.');

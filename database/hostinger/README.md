@@ -1,49 +1,7 @@
-# Hostinger — instalação MySQL/MariaDB (homologação)
+# Hostinger — MySQL/MariaDB (homologação)
 
-**Não é uma release de produção.** O banco antigo e a operação Supabase permanecem intactos.
+Não implantar em produção. Gere `npm run build:dist` na raiz. O pacote `dist/mysql-candidate` contém public_html, sqf-private e database. Importe database/01-instalar-banco.sql em um banco novo e vazio no hPanel/phpMyAdmin; confira SHA256SUMS e execute 02-verificar-banco.sql. Matriz testada: MySQL 8.0 e MariaDB 10.11; confira a versão contratada.
 
-## Arquivo de importação
+PHP 8.1+, PDO MySQL, mbstring, GD/WebP, fileinfo, cURL, Argon2id e HTTPS. Copie public_html para a raiz pública; mantenha sqf-private fora dela. Copie config.example.php para config.php no diretório privado e configure DSN mysql:, usuário, senha e mídia privada. Não exponha SQL, arquivos de configuração ou snapshots. Checkout, webhook e notificações desativados por padrão.
 
-Na raiz do repositório execute:
-
-```bash
-node database/hostinger/build-install.mjs
-```
-
-Resultado: `dist/hostinger/01-instalar-banco.sql`, `02-verificar-banco.sql`, `SHA256SUMS`, este guia e os exemplos de configuração/entrada PHP. A CI também gera um artefato para baixar. O SQL consolida 001 a 006 e os dados públicos de categorias e municípios; sem contas reais, dados privados, criação/exclusão de banco, GRANT ou DEFINER. O checksum permite conferir o arquivo. Não editar o arquivo gerado: modificar as migrations e gerar novamente.
-
-## hPanel — passo a passo
-
-1. Sites → Gerenciar → Bancos de dados → Gerenciamento. Crie um banco **novo e vazio** para homologação e um usuário próprio, usando os nomes completos exibidos no painel.
-2. Abra phpMyAdmin no banco novo. Importe somente `01-instalar-banco.sql`. Alternativamente, use Importar banco de dados no hPanel quando disponível.
-3. Confirme se a importação terminou sem erros. Não reimporte em banco parcialmente criado. Se falhar, investigue e use outro banco vazio.
-4. Confirme a versão com `SELECT VERSION();`. Matriz suportada nesta homologação: MySQL 8.0 e MariaDB 10.11. Não presumir a versão do servidor contratado.
-5. Confira `SELECT COUNT(*) FROM categories WHERE status='active';` (51), `SELECT COUNT(*) FROM sqf_ibge_municipalities;` (mais de 5.500), `SELECT COUNT(*) FROM sqf_auth_users;` (0 no banco recém-instalado). Execute também `02-verificar-banco.sql` no phpMyAdmin (somente leitura). Confira os logs de importação e a integridade.
-6. Nunca importe SQL ou arquivos de configuração em public_html; o arquivo SQL é enviado ao phpMyAdmin, não ao gerenciador de arquivos.
-
-## Configuração segura da aplicação candidata
-
-Use PHP 8.1+ com PDO MySQL, mbstring, GD com WebP, fileinfo, cURL, Argon2id e HTTPS. O endereço do banco, nome e usuário devem ser copiados do hPanel; não adivinhar o prefixo da conta.
-
-```text
-diretorio-do-dominio/
-  public_html/             HTML, assets e api/index.php (entrada)
-  sqf-private/             fora do acesso HTTP
-    backend/               src/ e public/index.php do repositório
-    config.php             credenciais reais (não versionar)
-    media/                 imagens e documentos privados
-```
-
-Copie `database/hostinger/config.example.php` para `sqf-private/config.php` e preencha os campos no servidor. Copie a pasta `backend/` para `sqf-private/backend/`. Copie `database/hostinger/api-entry.example.php` como `public_html/api/index.php`. A entrada deve carregar `dirname(__DIR__, 2).'/sqf-private/config.php'` e depois `dirname(__DIR__, 2).'/sqf-private/backend/public/index.php'`. Ajuste caminhos se o layout real do hPanel for diferente. O backend usa variáveis de ambiente, não o navegador. Crie `media/` com permissões restritas ao processo PHP; jamais usar public_html.
-
-Gere a distribuição isolada com `node database/hostinger/build-install.mjs` e `node database/hostinger/build-candidate.mjs`. O resultado `dist/mysql-candidate/` contém public_html, sqf-private e database, sem SDK Supabase, sem painel legado e sem credenciais. O modo MySQL já está fixado. Não usar o ZIP estático legado como pacote MySQL. A versão principal continua Supabase até todos os gates passarem. Configure transporte de e-mail real, MFA administrativo individual e backups; não use credenciais de exemplo. Não habilite checkout real.
-
-## Validação e corte
-
-O instalador é testado em banco descartável nos dois engines, com conta limitada ao banco e sem privilégios globais. Os testes PHP/HTTP/Chromium e de integridade referencial continuam gates. A conta real, dados pessoais, objetos do Storage, autenticação de origem, reconciliacão, SMTP, backup/restauração e todas as páginas ainda precisam de homologação. Não executar fixtures de teste em banco comercial.
-
-Referência oficial: https://www.hostinger.com/br/support/1884149-como-importar-um-banco-de-dados-com-o-phpmyadmin-no-hostinger/
-
-## CLI privados (RC.6)
-
-O pacote inclui backend/bin/notifications.php (avisos) e backend/bin/preflight-identities.php (pré-validação). Não mover para public_html. Configure remetente e SQF_SITE_URL por meio do arquivo privado; SQF_NOTIFICATIONS_ENABLED=0 até homologação do transporte de e-mail. Depois de homologar, programar execução periódica do PHP CLI no hPanel, respeitando o plano contratado. Não ativar agora. O preflight recebe um JSON privado normalizado e sempre desfaz as inserções; executar somente em banco novo de homologação, com variáveis de ambiente de teste. Consulte database/README.md no repositório para formato e limites. Não enviar exportações pessoais ao GitHub.
+O CLI de notificações e a pré-validação de identidades ficam em sqf-private/backend/bin. Testar somente em ambiente descartável. A implantação comercial depende dos gates descritos no README principal.

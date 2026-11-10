@@ -1,4 +1,4 @@
--- Candidate schema generated from public PostgreSQL catalog metadata (no user records).
+-- MySQL/MariaDB schema for clean installation; no personal records.
 -- MySQL 8.0.16+ / MariaDB 10.6+. UTC database sessions required.
 SET time_zone = '+00:00';
 -- MySQL disallows referential actions on columns used in CHECK constraints.
