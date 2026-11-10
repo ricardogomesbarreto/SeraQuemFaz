@@ -57,6 +57,8 @@
     staffReviews:()=>call('staff/reviews',{}),
     staffReviewDecide:body=>call('staff/review/decide',body),
     categories:()=>call('categories'),
+    staffDocuments:()=>call('staff/documents',{}),
+    staffDocumentDecide:body=>call('staff/document/decide',body),
     mediaList:(kind,request_id)=>call('media/list',{kind,...(request_id?{request_id}:{})}),
     uploadMedia,
     mediaUrl,
