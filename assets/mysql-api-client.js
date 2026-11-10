@@ -63,6 +63,8 @@
     category:(id,city)=>call('category',undefined,{id,city}),
     favoriteCategories:()=>call('favorites/categories',{}),
     favoriteCategory:body=>call('favorite/category',body),
+    billing:()=>call('billing',{}),
+    staffBilling:()=>call('staff/billing',{}),
     accountSecurity:()=>call('account/security',{}),
     changePassword:body=>call('account/password',body),
     revokeSessions:body=>call('account/revoke-sessions',body),
