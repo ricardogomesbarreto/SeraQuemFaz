@@ -10,7 +10,8 @@ async function call(route,body,token=csrf){
  const result=await response.json();if(result.csrf)csrf=result.csrf;
  return {status:response.status,result};
 }
-let x=await call('session');assert.equal(x.status,200);assert.equal(x.result.user_id,null);assert.ok(csrf);
+let x=await call('categories');assert.equal(x.status,200);assert.ok(Array.isArray(x.result.data));
+x=await call('session');assert.equal(x.status,200);assert.equal(x.result.user_id,null);assert.ok(csrf);
 assert.equal((await call('request/messages',{request_id:'test'})).status,401);
 assert.equal((await call('login',{email:'auth-fixture@example.invalid',password:'new-fixture-password-5678'},'wrong')).status,403);
 x=await call('login',{email:'auth-fixture@example.invalid',password:'new-fixture-password-5678'});assert.equal(x.status,200);assert.ok(x.result.user_id);
