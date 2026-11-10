@@ -1,4 +1,4 @@
-import { readFile, mkdir, writeFile } from 'node:fs/promises';
+import { readFile, mkdir, writeFile, copyFile } from 'node:fs/promises';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createHash } from 'node:crypto';
@@ -38,6 +38,7 @@ if(forbidden.test(sql))throw new Error('SQL incompatível com importação compa
 await mkdir(out,{recursive:true});
 const filename='01-instalar-banco.sql';
 await writeFile(resolve(out,filename),sql,'utf8');
+for(const name of ['README.md','config.example.php','api-entry.example.php','02-verificar-banco.sql'])await copyFile(resolve(root,'database/hostinger',name),resolve(out,name));
 const digest=createHash('sha256').update(sql).digest('hex');
 await writeFile(resolve(out,'SHA256SUMS'),digest+'  '+filename+'\n');
 console.log('SQL Hostinger: '+filename+' | '+categories.length+' categorias | '+cities.length+' municípios | SHA256 '+digest);
