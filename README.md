@@ -3,215 +3,168 @@
 <p align="center">
   <img src="assets/brand/logo-horizontal.png" alt="Logomarca do Será Quem Faz?" width="380">
 </p>
-
 <p align="center">
-  <img src="https://img.shields.io/badge/Frontend-HTML%2FCSS%2FJS-e34f26" alt="Frontend HTML, CSS e JavaScript">
-  <img src="https://img.shields.io/badge/Banco-PostgreSQL-4169e1?logo=postgresql&logoColor=white" alt="Banco PostgreSQL">
-  <img src="https://img.shields.io/badge/Backend-Supabase-3ecf8e?logo=supabase&logoColor=white" alt="Backend Supabase">
-  <a href="https://github.com/ricardogomesbarreto/SeraQuemFaz/releases"><img src="https://img.shields.io/badge/vers%C3%A3o-v3.13.1-8b3a45" alt="Versão v3.13.1"></a>
-  <a href="https://github.com/ricardogomesbarreto/SeraQuemFaz/actions/workflows/ci.yml"><img src="https://github.com/ricardogomesbarreto/SeraQuemFaz/actions/workflows/ci.yml/badge.svg?branch=main" alt="Status da integração contínua"></a>
+  <strong>Encontre profissionais da sua cidade. Organize serviços, propostas e atendimentos em um só lugar.</strong>
+</p>
+<p align="center">
+  <a href="https://github.com/ricardogomesbarreto/SeraQuemFaz/releases/latest"><img src="https://img.shields.io/github/v/release/ricardogomesbarreto/SeraQuemFaz?label=release" alt="Última release"></a>
+  <a href="https://github.com/ricardogomesbarreto/SeraQuemFaz/actions/workflows/ci.yml"><img src="https://github.com/ricardogomesbarreto/SeraQuemFaz/actions/workflows/ci.yml/badge.svg?branch=main" alt="CI"></a>
+  <img src="https://img.shields.io/badge/Frontend-HTML%2FCSS%2FJS-e34f26" alt="HTML CSS JavaScript">
+  <img src="https://img.shields.io/badge/PostgreSQL-4169e1?logo=postgresql&logoColor=white" alt="PostgreSQL">
+  <img src="https://img.shields.io/badge/Supabase-3ecf8e?logo=supabase&logoColor=white" alt="Supabase">
+  <img src="https://img.shields.io/badge/Node-22%20%7C%2024-339933" alt="Node 22 e 24">
+</p>
+<p align="center">
+  <a href="#proposta-de-valor">Sobre</a> · <a href="#funcionalidades-e-estágio-atual">Funcionalidades</a> · <a href="#executar-localmente">Executar</a> · <a href="#arquitetura">Arquitetura</a> · <a href="#roadmap-proposto">Roadmap</a>
 </p>
 
 ## Proposta de valor
 
-O **Será Quem Faz?** conecta quem precisa contratar um serviço a profissionais da sua região. O catálogo com sidebar permite pesquisar por município e categoria, consultar perfis e solicitar orçamentos. Clientes e prestadores conversam pelo painel e acompanham cada atendimento até a conclusão. O projeto começou em Santa Inês (MA) e usa o cadastro nacional de municípios do IBGE.
+O **Será Quem Faz?** aproxima clientes e prestadores de serviços locais. O projeto começou em Santa Inês (MA) e utiliza um cadastro nacional de municípios para facilitar a descoberta de profissionais. O catálogo com sidebar permite pesquisar cidade e categoria, consultar perfis publicados, serviços, portfólio e avaliações. O cliente solicita orçamento, acompanha a conversa e a agenda; o prestador organiza propostas e atendimentos no seu painel.
+
+A plataforma não presta o serviço, não certifica idoneidade ou qualificação e não garante preços ou resultados. A publicação depende de análise administrativa. A operação comercial ainda não foi homologada.
 
 ## Última versão · v3.13.1
 
-- Restrições de exclusão GiST impedem sobreposição de horários confirmados do mesmo prestador ou cliente, inclusive sob concorrência.
-- Propostas não reservam horário; confirmação conflitante mantém a proposta e retorna mensagem sem expor dados de terceiros. Horários consecutivos e cancelamento são permitidos.
-- CI PostgreSQL 16 isolado testa duas sessões concorrentes, conflito do cliente, adjacência, cancelamento e autorização. Node 22/24 preservados.
-- Migração `20261110_20_appointment_no_overlap.sql`; não altera RLS, aprovação de prestadores, Mercado Pago ou hospedagem.
+A v3.13.1 acrescenta proteção transacional contra sobreposição de atendimentos confirmados, por cliente e por prestador. Propostas não reservam horários; duas confirmações concorrentes não podem ocupar o mesmo intervalo. A CI executa Node 22, Node 24 e um teste PostgreSQL 16 com sessões concorrentes.
 
-### Versão anterior · v3.13.0
+**[Notas da release](docs/versoes/RELEASE-NOTES-v3.13.1.md)** · [Histórico completo](CHANGELOG.md) · [Todas as releases](https://github.com/ricardogomesbarreto/SeraQuemFaz/releases)
 
-- Agenda: filtros de próximos horários, histórico, situação e data; aviso de sobreposição entre horários carregados, sem bloqueio transacional no servidor.
-- Portfólio: agrupamento por serviço, capas primeiro, filtro exclusivo de capas e contador real.
-- Desempenho e administração: percentual histórico de atendimentos concluídos por solicitações, sem confundir com conversão comercial; valores ausentes aparecem como indisponíveis, inclusive no CSV.
-- Layout responsivo e testes automatizados. RLS e RPCs existentes preservadas; sem migração.
-- Sem Mercado Pago, SMTP ou hospedagem. A homologação multiusuário e a prevenção transacional de conflitos continuam pendentes.
-
-### Versão anterior · v3.12.0
-
-- **Pesquisa assistida:** sinônimos de serviços ligados exclusivamente às categorias realmente ativas. Termos como **notebook**, **faxina** e **vazamento** passam a encontrar profissões correspondentes.
-- **Sugestões de grafia:** em pesquisas sem resultados, a interface sugere até três nomes de categoria existentes, com botões para reaplicar a busca.
-- **Orçamentos:** cliente filtra propostas por situação, pesquisa por descrição, condições e prestador, e ordena por valor ou data. Valores provêm das solicitações privadas, sem previsão fictícia.
-- **Design:** painéis e catálogo com controles responsivos azul-marinho e laranja.
-- **Qualidade:** testes Node 22 e 24 com novos cenários. Banco e regras RLS preservados; não há migração nesta versão.
-- **Gate:** verificar os fluxos reais com prestador aprovado, cliente e administrador antes de considerar o sistema pronto para produção.
-
-### Versão anterior · v3.11.2
-
-- Removida política de leitura RLS duplicada em serviços, sem publicar perfis ainda não aprovados.
-- Catálogo resiliente quando as avaliações ficam temporariamente indisponíveis: mantém profissionais visíveis e evita notas fictícias.
-- Corrigidos estados de abas de mensagens, ordenação de datas e navegação por URLs incompletas ou inválidas.
-- Atualizados testes automatizados Node 22/24, migração segura e [matriz de segurança e homologação](docs/operacao/SEGURANCA-ESTABILIDADE-v3.11.2.md).
-- Permanecem pendentes a homologação entre usuários, a configuração de segurança do Supabase Auth e a proteção administrativa da `main`.
-
-### Versão anterior · v3.11.1
-
-- **Foto do perfil:** uma única moldura circular na sidebar; removida a montagem de outro avatar com borda por dentro, corrigindo a aparência de duas fotos sobrepostas.
-- **Visibilidade de prestadores:** o catálogo continua exibindo somente contas com aprovação e publicação autorizadas. Foi corrigida a mensagem quando ainda não há profissionais publicados, sem expor cadastros pendentes.
-- **Estado da verificação:** o perfil agora diferencia “Análise não solicitada” de “Aguardando análise”; inclui indicação explícita e atalho para solicitar avaliação.
-- **Prévia privada:** ao visualizar seu próprio perfil antes da aprovação, o prestador recebe aviso de que essa página ainda não está disponível para clientes.
-- **Sem mudanças de RLS:** a correção não aprova automaticamente cadastros, não libera informações privadas nem altera as condições comerciais.
-- **Qualidade:** testes para borda única do avatar, fila de verificação e indicação de visibilidade. A aprovação administrativa continua exigida.
-
-### Versão anterior · v3.11.0
-
-- **Painéis separados por telas** para cliente e prestador: sidebar unificada, informações específicas por perfil e navegação `painel.html?pagina=cliente/atividades` ou `painel.html?pagina=prestador/servicos`, preservando a sessão sem rolagem interminável.
-- **Perfil de prestador:** serviços com disponibilidade/estimativas de preço, portfólio por serviço com capa, agenda e indicadores em telas específicas.
-- **Perfil de cliente:** resumo, edição, atividades, favoritos (profissionais e categorias), agenda e configurações com alteração de senha.
-- **Landing e catálogo:** busca protagonista, jornadas por perfil, informações de confiança, mais filtros e mensagens para ausência de resultados.
-- **Privacidade:** categorias favoritas têm RLS própria; buscas recentes só ficam na sessão desta aba. Não há métricas fictícias.
-- **Banco:** atualização aditiva `supabase/migrations/20261109_18_paineis_servicos_portfolio.sql`. A capa é controlada por RPC autorizada; serviços inativos não são expostos no catálogo.
-- **Qualidade:** testes e CI Node 22/24. Ver [homologação da interface v3.11.0](docs/operacao/HOMOLOGACAO-PAINEIS-v3.11.0.md).
-
-[Histórico de versões](CHANGELOG.md)
-
-## Pacote de testes e uso local
-
-Após uma execução bem-sucedida da **CI na branch `main`**, os dois arquivos ZIP estarão disponíveis por 30 dias em [GitHub Actions → CI → Artefatos](https://github.com/ricardogomesbarreto/SeraQuemFaz/actions/workflows/ci.yml): o pacote do site estático e o pacote de código completo. Essa distribuição não equivale a release comercial.
-
-Para avaliar a interface, prefira servir a pasta do site em `http://localhost` (por exemplo, `python -m http.server 8000`) em vez de abrir páginas por `file://`. A instalação como PWA exige HTTPS ou localhost e conexão para todos os dados da conta. A leitura da central de ajuda e da landing page é pública; **solicitações, mensagens, perfis privados e administração não são disponibilizados offline**.
+| Download | Finalidade |
+| --- | --- |
+| [Site v3.13.1](https://github.com/ricardogomesbarreto/SeraQuemFaz/releases/download/v3.13.1/SeraQuemFaz_site_v3.13.1.zip) | Frontend estático para testar ou hospedar |
+| [Código v3.13.1](https://github.com/ricardogomesbarreto/SeraQuemFaz/releases/download/v3.13.1/SeraQuemFaz_codigo_v3.13.1.zip) | Desenvolvimento, SQL, testes, CI e documentação |
 
 ## Funcionalidades e estágio atual
 
-| Área | O que fazer |
+| Módulo | Recursos | Estado |
+| --- | --- | --- |
+| Catálogo | Busca por município/categoria, sinônimos, sugestões, filtros, avaliações e portfólio | Implementado; depende de perfis aprovados |
+| Cliente | Perfil, favoritos, atividades, comparação de orçamentos, agenda, configurações e LGPD | Implementado; homologação multiusuário pendente |
+| Prestador | Perfil, serviços ativos e estimativas, portfólio por serviço, verificação, propostas e métricas | Implementado; publicação depende de análise |
+| Contratação | Solicitações, conversas, anexos privados, orçamento, eventos, aceite e conclusão | Implementado; ciclo completo pendente |
+| Agenda | Propor, confirmar, recusar, cancelar; filtros e conflito transacional | Migração aplicada; teste concorrente isolado aprovado |
+| Confiança | Avaliações moderadas, respostas, contestação, documentos privados e suporte | Implementado; operação administrativa pendente |
+| Administração | Filas de moderação, decisões, MFA, indicadores e CSV | Implementado; designação de operador pendente |
+| PWA | Manifesto, instalação em HTTPS/localhost, cache de conteúdo público | Implementação básica; atualização/offline a homologar |
+| Notificações | Avisos internos, preferências e fila de e-mail | Estrutura disponível; envio externo desativado |
+| Assinaturas | Fluxos e regras de Mercado Pago, faturamento e reconciliação | Checkout desativado; homologação financeira pendente |
+
+### Como funciona
+
+**Cliente:** escolher município e categoria → consultar perfil publicado → solicitar orçamento → conversar e comparar propostas → aceitar → agendar → confirmar conclusão → avaliar.
+
+**Prestador:** criar conta → preencher perfil e cadastrar serviços → enviar documentação/análise quando exigida → aprovação administrativa → receber solicitações → propor orçamento → acompanhar atendimento.
+
+**Administração:** acessar `admin.html` com uma conta designada e MFA, revisar solicitações de publicação, moderação, suporte e indicadores. O frontend não concede privilégios administrativos por si só.
+
+## Estado técnico — auditoria de 10/11/2026
+
+- 16 releases oficiais (v3.9.11–v3.13.1), 32 arquivos ZIP; CI da main aprovada com 226 testes Node e o teste PostgreSQL de agenda.
+- Supabase: 40 tabelas públicas com RLS habilitada, 51 categorias ativas e 5.571 municípios. Há 2 clientes, 2 prestadores, nenhum profissional elegível para publicação e nenhuma solicitação registrada.
+- Não há membros administrativos designados nem Edge Functions implantadas. A cobrança obrigatória está desativada.
+- RLS e CI não equivalem a homologação real. Ainda são necessários testes com contas distintas, revisão de privilégios, proteção da main e operação administrativa.
+
+A evidência, os riscos e os critérios de conclusão estão no [relatório de auditoria e roadmap](docs/operacao/AUDITORIA-ROADMAP-20261110.md).
+
+## Arquitetura
+
+| Camada | Tecnologia e responsabilidade |
 | --- | --- |
-| Catálogo | Escolha o município e a categoria. Abra o perfil publicado para consultar serviços, portfólio e avaliações moderadas. |
-| Central do cliente | Encontre profissionais, salve favoritos, consulte orçamentos, acompanhe atendimentos e avalie serviços confirmados. |
-| Central do prestador | Cadastre serviços, atualize o portfólio, acompanhe a análise cadastral, responda a solicitações e envie orçamentos. |
-| Administração | Modere cadastros e avaliações com uma conta administrativa designada e MFA. |
+| Interface | HTML, CSS, JavaScript modular; páginas estáticas e navegação por tela em `painel.html` |
+| Identidade | Supabase Auth, confirmação de e-mail e MFA administrativo |
+| Dados | PostgreSQL, RLS, RPCs, constraints e transações |
+| Arquivos | Supabase Storage; buckets privados para conta, cliente, anexos e documentos |
+| Integrações | Edge Functions TypeScript para Mercado Pago e notificações; segredos exclusivamente no servidor |
+| Qualidade | GitHub Actions, Node 22/24, testes Node, fixture PostgreSQL e testes browser existentes |
+| Distribuição | ZIP do site e ZIP do código; hospedagem estática em HTTPS |
 
-Depois do login, `painel.html` apresenta atalhos conforme o tipo de conta. A caixa de solicitações permite filtrar por situação ou mensagens não lidas e pesquisar por palavras da descrição nas 40 solicitações mais recentes. Os indicadores de solicitações usam toda a atividade que a conta pode consultar. Se o resumo estiver indisponível, a caixa ainda pode exibir as solicitações recentes.
+O navegador usa chave **publicável** do Supabase; autorização e regras decisivas ficam no banco, não no JavaScript. A chave service_role, tokens de pagamento e segredos de webhook jamais devem integrar o frontend. A arquitetura estática é intencional: não exige servidor Node para servir as páginas.
 
-As conversas e os anexos de solicitações ficam restritos aos participantes. Envie apenas as informações necessárias ao atendimento. A publicação de um perfil profissional depende da análise cadastral.
+## Executar localmente
 
-## Supabase e estágio da implantação
-
-A interface é estática, com HTML, CSS e JavaScript. O Supabase fornece autenticação, PostgreSQL, Storage e regras de acesso por linha (RLS). A tabela `sqf_account_settings` guarda configurações privadas. O banco consolidado já contém 5.571 municípios IBGE, 51 categorias ativas e estruturas de prestação de serviços, avaliações e mensagens.
-
-A migração incremental `sqf_dashboard_request_summary` foi aplicada ao banco conectado. A função usa as permissões do usuário autenticado e a RLS da tabela de solicitações. A verificação no banco executou a função com papel autenticado simulado e confirmou o bloqueio para visitantes.
-
-**Não repita o histórico SQL** de `supabase/migrations/` no projeto consolidado. A migração histórica 03 tem uma assinatura incompatível com a versão instalada de `sqf_request_verification()`. Consulte o [guia do Supabase](supabase/README.md) e o [relatório da implantação anterior](docs/operacao/STATUS-SUPABASE-v3.9.8.md).
-
-A homologação ponta a ponta com contas reais de cliente, prestador e administrador está pendente. O checkout permanece desativado e a cobrança real depende da homologação do Mercado Pago.
-
-## Mensalidade e expiração
-
-A mensalidade é do prestador. Clientes podem continuar usando o catálogo, a conta e os atendimentos. A cobrança está desativada e o bloqueio abaixo passa a valer quando o controle comercial for ativado após homologação.
-
-| Ação | Prestador sem vigência paga, com a cobrança obrigatória ativa |
-| --- | --- |
-| Aparecer no catálogo, abrir perfil, serviços, portfólio e avaliações pela vitrine | Indisponível ao público. Fotos em buckets públicos podem continuar acessíveis por links diretos já conhecidos. |
-| Receber novas solicitações de orçamento | Bloqueado pelo banco. |
-| Aceitar um orçamento ainda pendente | Bloqueado até regularizar a assinatura. |
-| Iniciar ou finalizar um serviço com orçamento já aceito | Permitido ao prestador com perfil público e aprovado. O cliente pode confirmar a conclusão. |
-| Entrar, editar a conta, preparar serviços e portfólio | Disponível ao titular. |
-| Acessar conversas, orçamentos e atendimentos existentes | Disponível aos participantes, sujeito às regras de cada atendimento. |
-| Consultar cobranças e regularizar a assinatura | Disponível quando a integração financeira estiver operante. |
-
-O período mensal começa na aprovação do pagamento e vence no horário registrado no servidor, um mês calendário depois. Um pagamento pendente ou recusado não prorroga a vigência. Cancelar a renovação automática preserva o período já pago. Estornos e contestações retiram a vigência da fatura afetada quando reconciliados. Após novo pagamento confirmado, o perfil volta ao catálogo se continuar aprovado e marcado como público.
-
-## Executar no Ubuntu ou em outro ambiente de desenvolvimento
-
-Requer navegador moderno, **Node.js 22 ou 24** para testes e **Python 3** opcional para o servidor local.
+Requisitos: navegador moderno, Git, Node.js 22 ou 24, Python 3 para servidor HTTP e zip/unzip para empacotar.
 
 ```bash
+git clone https://github.com/ricardogomesbarreto/SeraQuemFaz.git
+cd SeraQuemFaz
 python3 -m http.server 8080 --bind 127.0.0.1
 ```
 
-Abra `http://127.0.0.1:8080/`. Não abra as páginas diretamente com `file://`, pois a autenticação por e-mail e o retorno do Supabase podem falhar. `localhost` no celular aponta para o próprio telefone; para testar em aparelhos externos, use **um endereço HTTPS válido** com redirecionamentos permitidos no Supabase.
+Abra `http://127.0.0.1:8080/`. No Windows, execute `py -m http.server 8080 --bind 127.0.0.1`. Se baixar o ZIP do site, entre na pasta extraída que contém `index.html`. Não abra por file://: login, redirecionamentos e PWA dependem de um contexto HTTP/HTTPS adequado.
+
+**Atenção:** a configuração atual aponta para o Supabase conectado. Para desenvolvimento, use um projeto de homologação separado, ajuste URL/chave publicável em `assets/supabase-config.js` e configure as URLs autorizadas do Auth. Não use dados pessoais reais para testes.
+
+### Testes e empacotamento
 
 ```bash
-npm run verify       # Sintaxe dos scripts e suíte Node
-npm test             # Somente os testes Node
+npm run verify       # Sintaxe e testes Node
+npm test             # Suíte Node
+npm run build:dist   # Dois arquivos ZIP
 ```
 
-Por padrão, `assets/supabase-config.js` aponta para o projeto conectado. Para homologação isolada, configure a URL e a chave publicável do projeto de testes. No Supabase Auth, defina a URL HTTPS do site e autorize a rota de retorno usada pela aplicação. Use credenciais privadas apenas no servidor ou nas Edge Functions.
+O job PostgreSQL executa `bash tests/postgres/appointment-concurrency.sh` em banco descartável; **não execute a fixture no banco conectado**. Os testes browser em Python/Playwright precisam de ambiente próprio e não fazem parte da CI atual. Veja [homologação](docs/operacao/HOMOLOGACAO-v3.12.0.md) e [CI](https://github.com/ricardogomesbarreto/SeraQuemFaz/actions/workflows/ci.yml).
 
-## Organização das pastas
+Os ZIPs são versionados a partir de package.json; somente o pacote do site deve ir para o diretório público. O build não implanta serviços, migra o Supabase ou ativa pagamentos.
+
+## Organização do repositório
 
 ```text
-SeraQuemFaz-v3.9.16/
-├── index.html                 # Landing page
-├── cadastro.html / entrar.html
-├── painel.html / admin.html
-├── categorias.html / categoria.html / prestador.html
-├── termos.html / privacidade.html
-├── assets/
-│   ├── brand/                 # Logotipos, ícones e favicon
-│   ├── images/                # Imagens da interface
-│   ├── category-fallbacks/    # Ilustrações locais de contingência
-│   ├── site.css               # Estilos unificados
-│   └── *.js                   # Módulos carregados pelos caminhos HTML existentes
-├── docs/
-│   ├── contas/ catalogo/ financeiro/ interface/
-│   ├── seguranca/ operacao/
-│   ├── relatorios/ versoes/
-│   └── README.md              # Índice da documentação
-├── scripts/                   # Rotinas de manutenção, municípios e GitHub
+SeraQuemFaz/
+├── index.html, categorias.html, categoria.html, prestador.html
+├── cadastro.html, entrar.html, painel.html, admin.html
+├── ajuda.html, termos.html, privacidade.html
+├── assets/           # JS, CSS, marcas, imagens e cadastro municipal
 ├── supabase/
-│   ├── migrations/            # SQL histórico, NÃO executar indiscriminadamente
-│   ├── applied/ bootstrap/ diagnostics/
-│   └── functions/             # Edge Functions de pagamentos
-├── tests/                     # Testes Node e Playwright
-├── .github/workflows/         # CI, release e conciliação desativada
-└── package.json
+│   ├── migrations/   # Histórico SQL incremental
+│   ├── applied/      # Registros de consolidação já aplicada
+│   ├── diagnostics/  # Diagnósticos de leitura
+│   ├── functions/    # Integrações server-side
+│   └── tests/        # Testes SQL
+├── tests/            # Node, browser e PostgreSQL isolado
+├── scripts/          # Build, municípios e publicação
+├── docs/             # Guias, relatórios, versões, roadmap
+├── .github/workflows/
+├── manifest.webmanifest, service-worker.js
+└── package.json, version.txt
 ```
 
-**Por que HTML e JavaScript continuam nesses caminhos?** A aplicação usa arquivos estáticos e links `categorias.html`, `assets/*.js` em produção. Movê-los sem uma etapa separada de migração de rotas quebraria sites, bookmarks e testes. A reorganização concentra-se no histórico e nos artefatos descartáveis, sem regressão funcional.
+## Banco de dados e privacidade
 
-Os relatórios, notas antigas e guias estão indexados em [docs/README.md](docs/README.md). As imagens de testes de interface são geradas em `.artifacts/previews/` e **não fazem parte do código publicado**.
+O banco consolidado inclui perfis, `sqf_account_settings`, serviços, verificações, solicitações, mensagens, agenda, avaliações, suporte e faturamento. **Não repita o histórico SQL** de migrations/ no projeto consolidado. A migração histórica 03 possui assinatura incompatível de `sqf_request_verification()`; novas mudanças devem partir de um diff do banco, backup e ambiente de homologação. Consulte [Supabase](supabase/README.md).
 
+- RLS protege dados por papel e titularidade; funções privilegiadas exigem auditoria de autorização por objeto.
+- Fotos de cliente/conta e anexos/documentos são privados. Avatares profissionais e portfólio possuem buckets públicos: links diretos conhecidos podem continuar acessíveis independentemente da publicação no catálogo. Não armazenar documentos pessoais nesses buckets.
+- LGPD: fluxos de acesso, correção e exclusão de dados; definir retenção, responsáveis e operação de atendimento antes do lançamento.
+- O cadastro municipal versionado contém 5.571 registros; origem e SHA-256 em `assets/municipios-br.meta.json`. `npm run cities:update` consulta o IBGE; não significa sincronização contínua. Revisar mudanças antes de publicar.
+- As imagens externas históricas exigem auditoria: direitos de uso não estão garantidos. Confirmar licenças e substituir recursos quando necessário.
+- A PWA não disponibiliza contas, mensagens, anexos ou administração offline.
 
-## Empacotar para hospedagem e GitHub
+Leia [SECURITY.md](SECURITY.md), [segurança administrativa](docs/seguranca/PAINEL-ADMINISTRATIVO-SEGURANCA.md) e [auditoria de imagens](docs/catalogo/AUDITORIA-IMAGENS-CATALOGO.md).
 
-```bash
-npm run verify
-npm run build:dist
-```
+## Modelo comercial
 
-- **`dist/SeraQuemFaz_site_v3.9.16.zip`** — publicar somente os arquivos HTML e `assets/` no servidor, junto dos cabeçalhos aplicáveis.
-- **`dist/SeraQuemFaz_codigo_v3.9.16.zip`** — documentação, testes, CI e migrações para desenvolvimento/GitHub.
+O modelo prevê mensalidade do prestador, mantendo a conta do cliente e o acompanhamento de contratações. **Nenhuma cobrança real está ativada.** Quando habilitada após homologação, a vigência verificada condicionará novas oportunidades e publicação, preservando o acesso autorizado a atendimentos existentes. Cancelar renovação preserva o período pago; estornos e contestações requerem reconciliação.
 
-A separação evita expor SQL, testes e relatórios no diretório público da hospedagem. O script não altera o Supabase, não habilita pagamento e não executa deploy.
-
-Para enviar o código ao GitHub, use `bash scripts/publicar-github.sh` com o GitHub CLI autenticado na conta `ricardogomesbarreto`. O script valida o código, usa o repositório `SeraQuemFaz` e cria o destino como privado se ele ainda não existir. O ZIP do site serve para hospedagem estática. Configure a URL HTTPS e os redirecionamentos de autenticação antes de abrir o cadastro ao público.
-
-## Segurança, privacidade e operação
-
-- LGPD: clientes e prestadores podem registrar pedidos de acesso, correção ou exclusão de dados pela central autenticada.
-
-- Supabase Auth e RLS: operar com credenciais publicáveis no cliente, testar isolamento de usuários no banco real.
-- Fotografias privadas: `sqf-account-photos` está configurado como bucket privado, com caminhos por usuário.
-- O catálogo usa links externos históricos: disponibilidade, qualidade e direitos de uso **não estão garantidos**. Substitua-os progressivamente por imagens próprias/licenciadas.
-- Avaliações, aprovação de prestadores e mensagens dependem das migrações e de uma operação de moderação real.
-- **Cobranças permanecem desabilitadas** até testes reais de Webhooks, cancelamentos, estornos e reconciliação.
-
-Consulte [SECURITY.md](SECURITY.md), [autenticação por e-mail](docs/contas/AUTENTICACAO-EMAIL-v3.9.5.md), [auditoria de imagens](docs/catalogo/AUDITORIA-IMAGENS-CATALOGO.md), [integração financeira](docs/financeiro/INTEGRACAO-MERCADO-PAGO-v3.8.0.md) e [publicação no GitHub](docs/operacao/PUBLICACAO-GITHUB.md).
+O checkout, os webhooks, a conciliação, o envio automático de e-mail e a hospedagem definitiva ficam para a etapa final. Consulte [homologação financeira](docs/financeiro/HOMOLOGACAO-FINANCEIRA-v3.9.0.md).
 
 ## Roadmap proposto
 
-1. **Consolidar Supabase:** validar as políticas RLS com clientes, prestadores e administradores; compatibilizar dados legados sem perder registros.
-2. **Homologar solicitações e mensagens:** autorização por participante, anexos privados, auditoria e confirmação bilateral do atendimento.
-3. **Homologar pagamentos:** credenciais privadas, testes Mercado Pago, Webhooks e reconciliação antes de habilitar a cobrança.
-4. **Melhorar distribuição e operação:** revisar imagens com direitos de uso, SEO, acessibilidade e monitoramento; publicar uma release versionada após aprovação.
+| Versão | Prioridade |
+| --- | --- |
+| v3.13.2 | Baseline de banco reproduzível, governança, segurança e contas de homologação |
+| v3.14.0 | Contratação ponta a ponta, propostas detalhadas e testes multiusuário |
+| v3.14.1 | Disponibilidade semanal, bloqueios e reagendamento sem perder reserva confirmada |
+| v3.15.0 | Busca regional, portfólio, acessibilidade, responsividade e PWA |
+| v3.16.0 | Suporte, notificações em sandbox, métricas, monitoramento e recuperação |
+| v3.17.0 | Mercado Pago em sandbox e homologação financeira |
+| v4.0.0-rc.1 | Candidata em staging HTTPS, segurança e aceite formal |
+| v4.0.0 | Liberação comercial condicionada aos gates anteriores |
 
-## Desenvolvimento e histórico
+O [roadmap detalhado](docs/operacao/AUDITORIA-ROADMAP-20261110.md) define evidências e critérios de aceite. Estas versões são propostas de planejamento, não releases existentes. Não promover a v4.0.0 apenas porque o código passou na CI.
 
-- [Como contribuir](CONTRIBUTING.md)
-- [Histórico resumido](CHANGELOG.md)
-- [Notas por versão](docs/versoes/)
-- [Validações e diagnóstico do Supabase](docs/relatorios/)
+## Documentação e contribuição
 
-**Licenciamento:** antes de tornar público o código ou imagens de terceiros, confirmar a licença de cada recurso e o direito de distribuição. Não presuma que URLs de buscadores concedem licença de uso.
+[Índice da documentação](docs/README.md) · [Como contribuir](CONTRIBUTING.md) · [Segurança](SECURITY.md) · [Notas por versão](docs/versoes/) · [Histórico](CHANGELOG.md)
 
-## Cadastro municipal versionado
-
-O código IBGE de sete dígitos identifica cada cidade. `assets/municipios-br.json` inclui 5.571 registros copiados do cadastro do projeto, cuja origem registrada é “IBGE (espelho público)”, importado em 05/11/2026. A API oficial estava indisponível durante o empacotamento: esta versão não afirma uma nova sincronização oficial. O arquivo `.meta.json` registra origem, data, quantidade e SHA-256.
-
-Execute `npm run cities:update` com acesso à API oficial para atualizar a lista. O processo verifica códigos únicos, correspondência entre código e UF e presença das 27 UFs antes de substituir o arquivo. Revise e publique juntos os dados e seus metadados. O navegador valida cache e arquivo local; usa a API oficial como alternativa, com limite de tempo e opção de tentar novamente. A cópia local permite selecionar cidades quando o IBGE está fora do ar; os serviços e contas continuam dependendo da conexão com o backend.
-
-Esta versão melhora a descoberta de serviços e não altera tabelas, pagamentos ou regras de acesso. Modernizações adicionais dos painéis e dos cartões de profissionais continuam como próximas etapas.
+**Licenciamento:** a licença do código e os direitos de distribuição das imagens devem ser formalizados pelo mantenedor. Repositório público não significa licença aberta automática.
