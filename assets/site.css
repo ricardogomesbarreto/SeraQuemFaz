@@ -1325,3 +1325,94 @@ body{min-width:320px}
 /* Categorias: recarregar sem bloquear o resto do perfil. */
 .sqf-dashboard-page #reloadCategories{display:inline-flex;margin-top:9px;max-width:100%;font-size:.79rem}
 .sqf-dashboard-page #reloadCategories[disabled]{opacity:.6;cursor:progress}
+
+/* v3.11.0 — Painel por telas independentes, shell compartilhado */
+.sqf-dashboard-page.sqf-routed-dashboard .dashboard-main{max-width:1240px;padding-block:17px 55px}
+.sqf-routed-dashboard .sqf-dashboard-hero{
+  max-width:none!important;min-height:0!important;margin:0 0 12px!important;
+  padding:16px 23px!important;border-radius:16px!important;
+  background:linear-gradient(113deg,#123a58,#174a5d)!important;
+}
+.sqf-routed-dashboard .sqf-dashboard-hero h1{font-size:clamp(1.25rem,2.1vw,1.62rem)!important;letter-spacing:-.02em!important;margin:4px 0 3px!important}
+.sqf-routed-dashboard .sqf-dashboard-hero p{font-size:.8rem!important;line-height:1.45!important;margin:0!important}
+.sqf-routed-dashboard .sqf-dashboard-hero .section-kicker{font-size:.63rem}
+.sqf-routed-dashboard #accountStatus{margin:0 0 12px;padding:10px 14px;font-size:.79rem}
+.sqf-routed-dashboard #accountToolbar{display:none!important}
+.sqf-routed-dashboard #accountSharedGrid{display:grid!important;grid-template-columns:minmax(212px,245px) minmax(0,1fr)!important;gap:18px!important;align-items:start}
+.sqf-routed-dashboard #accountSharedGrid>.dashboard-aside{grid-column:1!important;grid-row:1!important;position:sticky;top:92px;min-width:0}
+.sqf-routed-dashboard #accountSharedGrid>.dashboard-main-col{grid-column:2!important;grid-row:1!important;min-width:0;display:block!important;max-width:none}
+.sqf-routed-dashboard .sqf-unified-sidebar{display:flex!important;flex-direction:column!important;gap:12px!important;background:linear-gradient(153deg,#143d5e,#092b44)!important;color:#fff!important;padding:18px 13px!important;margin:0!important;border:0!important;border-radius:19px!important;box-shadow:0 16px 35px #0d35502b!important}
+.sqf-routed-dashboard .sqf-unified-sidebar[hidden]{display:none!important}
+.sqf-routed-dashboard .sqf-unified-sidebar .sqf-sidebar-identity{display:flex;flex-direction:column;text-align:center;align-items:center;gap:4px;border-bottom:1px solid #ffffff30;padding:9px 7px 17px;min-width:0}
+.sqf-routed-dashboard .sqf-unified-sidebar .sqf-sidebar-avatar{height:72px;width:72px;border:3px solid #f48d45;border-radius:50%;overflow:hidden;flex:none}
+.sqf-routed-dashboard .sqf-unified-sidebar .sqf-sidebar-eyebrow{font-size:.65rem;color:#f8b984}
+.sqf-routed-dashboard .sqf-unified-sidebar .sqf-sidebar-role{font-size:.79rem;font-weight:700;color:#d3e6f2;line-height:1.35}
+.sqf-routed-dashboard .sqf-unified-sidebar .sqf-sidebar-status{display:inline-block;padding:4px 9px;border-radius:25px;background:#ffffff19;color:#e5eef5;font-size:.68rem;line-height:1.4;max-width:100%}
+.sqf-routed-dashboard .sqf-unified-sidebar .sqf-client-side-nav{display:grid!important;grid-template-columns:minmax(0,1fr)!important;gap:3px;max-height:min(60vh,660px);overflow-y:auto;scrollbar-width:thin;scrollbar-color:#577991 transparent}
+.sqf-routed-dashboard .sqf-unified-sidebar .sqf-client-side-nav a{display:flex!important;gap:11px;align-items:center;min-height:42px;padding:10px 12px!important;border-radius:10px;font-size:.83rem!important;text-decoration:none;color:#e1ecf4!important;white-space:normal;line-height:1.4;transition:background .12s}
+.sqf-routed-dashboard .sqf-unified-sidebar .sqf-client-side-nav a span{flex:none;width:23px;text-align:center;color:#f4a36c;font-size:1.08rem}
+.sqf-routed-dashboard .sqf-unified-sidebar .sqf-client-side-nav a[aria-current="page"]{background:#f4863d!important;color:#fff!important;font-weight:800}
+.sqf-routed-dashboard .sqf-unified-sidebar .sqf-client-side-nav a[aria-current="page"] span{color:#fff}
+.sqf-routed-dashboard .sqf-unified-sidebar .sqf-client-side-nav a:is(:hover,:focus-visible):not([aria-current="page"]){background:#ffffff21!important;color:#fff!important}
+.sqf-routed-dashboard .sqf-unified-sidebar .sqf-sidebar-exit{padding-top:13px;border-top:1px solid #ffffff30}
+.sqf-routed-dashboard .sqf-unified-sidebar #logoutButton{display:block;width:100%;color:#fff;border:1px solid #ffffff66;border-radius:10px;padding:11px;background:transparent}
+.sqf-routed-dashboard .sqf-unified-sidebar #logoutButton:hover{background:#ffffff1c}
+.sqf-routed-dashboard .sqf-unified-sidebar .sqf-sidebar-help{color:#bdd1e1;font-size:.72rem;line-height:1.6;margin:0}
+.sqf-routed-dashboard .sqf-view-header{margin:0 0 13px;padding:16px 20px;background:#fff;border:1px solid #e2ebf0;border-radius:15px;box-shadow:0 6px 20px #0c35500a}
+.sqf-routed-dashboard .sqf-view-header .section-kicker{font-size:.68rem}
+.sqf-routed-dashboard .sqf-view-header h2{margin:4px 0 3px;color:#113c59;font:800 clamp(1.3rem,2.2vw,1.85rem) Manrope,sans-serif;letter-spacing:-.035em}
+.sqf-routed-dashboard .sqf-view-header .muted{margin:0;color:#60798a;line-height:1.45;font-size:.82rem}
+.sqf-routed-dashboard .sqf-route[hidden]{display:none!important}
+.sqf-routed-dashboard .sqf-route{min-width:0;scroll-margin-top:93px}
+.sqf-routed-dashboard .sqf-route-modules{display:grid;grid-template-columns:minmax(0,1fr);gap:13px}
+.sqf-routed-dashboard .sqf-route-modules>.dashboard-card,.sqf-routed-dashboard .sqf-route-modules>.sqf-provider-module,.sqf-routed-dashboard .sqf-route-modules>.client-dashboard{margin:0!important;max-width:none!important;min-width:0}
+.sqf-routed-dashboard .sqf-route-modules>.dashboard-card{padding:clamp(16px,2.3vw,25px);border-radius:16px}
+.sqf-routed-dashboard .sqf-route-modules>.sqf-provider-module{padding:clamp(17px,2.3vw,26px);background:#fff;border:1px solid #e0e8ee;border-radius:17px;box-shadow:0 8px 26px #1239500e}
+.sqf-routed-dashboard .sqf-route-modules>.sqf-provider-module h2{font-size:1.35rem;margin:5px 0}
+.sqf-routed-dashboard .sqf-route-modules .client-dashboard-grid{display:block;columns:unset}
+.sqf-routed-dashboard .sqf-route-modules .client-dashboard-grid>div{display:contents}
+.sqf-routed-dashboard .sqf-route-modules .client-stat-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px}
+.sqf-routed-dashboard .client-dashboard .dashboard-section-nav,.sqf-routed-dashboard .sqf-provider-overview .dashboard-section-nav{display:none!important}
+.sqf-routed-dashboard .client-dashboard .client-welcome{margin:0 0 12px}
+.sqf-routed-dashboard .sqf-provider-overview-actions{display:flex;flex-wrap:wrap;gap:8px;margin:13px 0}
+.sqf-routed-dashboard .sqf-provider-overview-actions .button{min-height:39px;padding:9px 14px;font-size:.8rem}
+.sqf-routed-dashboard #accountSummaryCard .sqf-account-heading{align-items:start}
+.sqf-routed-dashboard #accountSummaryCard dl{display:grid;grid-template-columns:minmax(95px,135px) minmax(0,1fr);gap:11px 16px}
+.sqf-routed-dashboard #accountSummaryCard dl dt{font-weight:800;color:#5c7384;font-size:.8rem}
+.sqf-routed-dashboard #accountSummaryCard dl dd{min-width:0;overflow-wrap:anywhere;font-size:.87rem;color:#123c59}
+.sqf-routed-dashboard .sqf-summary-role{display:block;margin-top:5px;color:#bf672c;font-size:.75rem;font-weight:800}
+.sqf-routed-dashboard #accountSummaryCard .actions{display:flex;flex-wrap:wrap;gap:8px}
+.sqf-routed-dashboard #accountSummaryCard .actions .button{font-size:.8rem;padding:10px 13px}
+.sqf-routed-dashboard #providerEditor{display:none!important}
+.sqf-routed-dashboard #providerServicesSection .inset-form,.sqf-routed-dashboard #providerPortfolioSection .inset-form{border-radius:14px;background:#f7fafc}
+.sqf-routed-dashboard .sqf-route:focus-within{scroll-margin-top:95px}
+.sqf-routed-dashboard .sqf-view-header h2:focus-visible{outline:3px solid #ef813c;outline-offset:4px}
+.sqf-routed-dashboard .sqf-route-modules .sqf-settings-panel>summary{min-height:50px}
+.sqf-routed-dashboard [hidden]{display:none!important}
+@media(max-width:920px){
+ .sqf-routed-dashboard #accountSharedGrid{grid-template-columns:minmax(185px,215px) minmax(0,1fr)!important;gap:12px!important}
+ .sqf-routed-dashboard .sqf-route-modules .client-stat-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .sqf-routed-dashboard .sqf-unified-sidebar .sqf-client-side-nav{max-height:none}
+}
+@media(max-width:740px){
+ .sqf-routed-dashboard #accountSharedGrid{grid-template-columns:minmax(0,1fr)!important}
+ .sqf-routed-dashboard #accountSharedGrid>.dashboard-aside{grid-column:1!important;grid-row:1!important;position:static}
+ .sqf-routed-dashboard #accountSharedGrid>.dashboard-main-col{grid-column:1!important;grid-row:2!important}
+ .sqf-routed-dashboard .sqf-unified-sidebar{padding:12px!important;gap:10px}
+ .sqf-routed-dashboard .sqf-unified-sidebar .sqf-sidebar-identity{display:grid;grid-template-columns:55px minmax(0,1fr);text-align:left;justify-content:start;gap:2px 11px;padding:3px 5px 10px;align-items:center}
+ .sqf-routed-dashboard .sqf-unified-sidebar .sqf-sidebar-avatar{width:52px;height:52px;grid-row:span 4}
+ .sqf-routed-dashboard .sqf-unified-sidebar .sqf-sidebar-eyebrow{margin:0}
+ .sqf-routed-dashboard .sqf-unified-sidebar .sqf-client-side-nav{grid-template-columns:repeat(3,minmax(0,1fr))!important;max-height:none}
+ .sqf-routed-dashboard .sqf-unified-sidebar .sqf-client-side-nav a{min-height:41px;padding:9px 8px!important;font-size:.72rem!important;gap:6px}
+ .sqf-routed-dashboard .sqf-unified-sidebar .sqf-client-side-nav a span{width:14px}
+ .sqf-routed-dashboard .sqf-unified-sidebar .sqf-sidebar-exit{display:none}
+ .sqf-routed-dashboard .sqf-unified-sidebar .sqf-sidebar-help{display:none}
+}
+@media(max-width:480px){
+ .sqf-routed-dashboard .sqf-unified-sidebar .sqf-client-side-nav{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+ .sqf-routed-dashboard #accountSummaryCard dl{grid-template-columns:85px minmax(0,1fr)}
+ .sqf-routed-dashboard .sqf-route-modules .client-stat-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .sqf-routed-dashboard .sqf-dashboard-hero{padding:12px 16px!important}
+ .sqf-routed-dashboard .sqf-view-header{padding:13px 16px}
+}
+@media(prefers-reduced-motion:reduce){.sqf-routed-dashboard .sqf-unified-sidebar .sqf-client-side-nav a{transition:none}}
