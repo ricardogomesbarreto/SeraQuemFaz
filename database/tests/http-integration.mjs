@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import {readFile} from 'node:fs/promises';
 const base='http://127.0.0.1:8080/index.php';
 let cookie='',csrf='';
 async function call(route,body,token=csrf){
@@ -37,6 +38,13 @@ assert.equal((await call('profile',{})).result.data.full_name,'Perfil de teste')
 assert.equal((await call('profile/update',{full_name:'Perfil de teste',bio:'',city_ibge:'0000000'})).status,400);
 for(const route of ['requests','appointments','notifications'])assert.deepEqual((await call(route,{})).result.data,[]);
 assert.equal((await call('request/messages',{request_id:'00000000-0000-4000-8000-000000000011'})).status,400);
+const png=await readFile(process.env.SQF_PRIVATE_MEDIA_ROOT+'/test-upload.png');
+const avatarForm=new FormData();avatarForm.append('kind','avatar');avatarForm.append('context','self');avatarForm.append('file',new Blob([png],{type:'image/png'}),'avatar.png');
+const uploaded=await fetch(base+'?route=media/upload',{method:'POST',headers:{Cookie:cookie,'X-CSRF-Token':csrf},body:avatarForm});
+assert.equal(uploaded.status,201);
+const myAvatar=await fetch(base+'?route=media/read&kind=avatar&id='+me,{headers:{Cookie:cookie}});
+assert.equal(myAvatar.status,200);assert.equal(myAvatar.headers.get('content-type'),'image/webp');
+assert.equal((await fetch(base+'?route=media/read&kind=avatar&id='+me)).status,400);
 assert.equal((await call('logout',{})).status,200);
 assert.equal((await call('session')).result.user_id,null);
 console.log('PASS: HTTP session, CSRF, login, third-party rejection, logout');
