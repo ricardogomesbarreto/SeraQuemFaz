@@ -29,6 +29,9 @@ function sqfRequestRow(PDO $db,string $actor,string $id): array {
     if (!$r || !in_array($actor,[$r['client_id'],$r['provider_id']],true)) throw new DomainException('Acesso negado');
     return $r;
 }
+function sqfNotify(PDO $db,string $recipient,string $kind,string $title,string $body,string $request):void {
+    sqfQuery($db,'INSERT INTO sqf_notifications(recipient_id,kind,title,body,request_id) VALUES (?,?,?,?,?)',[$recipient,$kind,$title,$body,$request]);
+}
 function sqfEvent(PDO $db,string $request,string $actor,string $action,?string $from,string $to,?int $cents=null):void {
     sqfQuery($db,'INSERT INTO sqf_request_events(request_id,actor_id,action,from_status,to_status,amount_cents) VALUES (?,?,?,?,?,?)',[$request,$actor,$action,$from,$to,$cents]);
 }
@@ -50,7 +53,7 @@ function sqfCreateRequest(PDO $db,string $actor,string $provider,string $service
         if(sqfQuery($db,"SELECT 1 FROM sqf_service_requests WHERE client_id=? AND provider_id=? AND service_id=? AND status NOT IN ('completed','declined','canceled') AND created_at>UTC_TIMESTAMP(6)-INTERVAL 48 HOUR LIMIT 1",[$actor,$provider,$service])->fetchColumn())throw new DomainException('Solicitação aberta existente');
         $id=(string)$db->query('SELECT UUID()')->fetchColumn();
         sqfQuery($db,'INSERT INTO sqf_service_requests(id,client_id,provider_id,service_id,city_ibge,description,desired_date) VALUES (?,?,?,?,?,?,?)',[$id,$actor,$provider,$service,$city,$description,$date]);
-        sqfEvent($db,$id,$actor,'create',null,'requested'); return $id;
+        sqfEvent($db,$id,$actor,'create',null,'requested'); sqfNotify($db,$provider,'request','Nova solicitação de orçamento','Consulte a central de solicitações.',$id); return $id;
     });
 }
 function sqfSendQuote(PDO $db,string $actor,string $id,int $amount,string $terms):string {
@@ -60,7 +63,7 @@ function sqfSendQuote(PDO $db,string $actor,string $id,int $amount,string $terms
         $r=sqfRequestRow($db,$actor,$id);
         if($actor!==$r['provider_id']||!in_array($r['status'],['requested','quoted'],true)||!sqfProviderPublic($db,$actor))throw new DomainException('Prestador indisponível');
         sqfQuery($db,"UPDATE sqf_service_requests SET status='quoted',quote_cents=?,quote_terms=?,quote_sent_at=UTC_TIMESTAMP(6),updated_at=UTC_TIMESTAMP(6) WHERE id=?",[$amount,$terms,$id]);
-        sqfEvent($db,$id,$actor,'quote',$r['status'],'quoted',$amount); return 'quoted';
+        sqfEvent($db,$id,$actor,'quote',$r['status'],'quoted',$amount); sqfNotify($db,$r['client_id'],'request_status','Orçamento recebido','Consulte a proposta.',$id); return 'quoted';
     });
 }
 function sqfRequestAction(PDO $db,string $actor,string $id,string $action):string {
@@ -82,6 +85,27 @@ function sqfRequestAction(PDO $db,string $actor,string $id,string $action):strin
             $eng=sqfQuery($db,'SELECT id FROM service_engagements WHERE client_id=? AND provider_id=?',[$r['client_id'],$r['provider_id']])->fetchColumn();
             sqfQuery($db,'UPDATE sqf_service_requests SET status=?,updated_at=UTC_TIMESTAMP(6),completed_at=UTC_TIMESTAMP(6),engagement_id=? WHERE id=?',[$next,$eng,$id]);
         }else sqfQuery($db,'UPDATE sqf_service_requests SET status=?,updated_at=UTC_TIMESTAMP(6) WHERE id=?',[$next,$id]);
-        sqfEvent($db,$id,$actor,$action,$status,$next,$r['quote_cents']===null?null:(int)$r['quote_cents']);return $next;
+        sqfEvent($db,$id,$actor,$action,$status,$next,$r['quote_cents']===null?null:(int)$r['quote_cents']);sqfNotify($db,$client?$r['provider_id']:$r['client_id'],'request_status','Atendimento atualizado','Consulte os detalhes na central de solicitações.',$id);return $next;
+    });
+}
+
+function sqfMessages(PDO $db,string $actor,string $id):array {
+    return sqfTxn($db,function()use($db,$actor,$id){
+      sqfRequestRow($db,$actor,$id);
+      return sqfQuery($db,'SELECT id,sender_id,body,created_at FROM sqf_request_messages WHERE request_id=? ORDER BY created_at DESC,id DESC LIMIT 100',[$id])->fetchAll(PDO::FETCH_ASSOC);
+    });
+}
+function sqfSendMessage(PDO $db,string $actor,string $id,string $body):string {
+    $body=trim($body);
+    if(mb_strlen($body)<2||mb_strlen($body)>2000)throw new DomainException('Mensagem inválida');
+    return sqfTxn($db,function()use($db,$actor,$id,$body){
+      $r=sqfRequestRow($db,$actor,$id);
+      if(!in_array($r['status'],['requested','quoted','accepted','in_progress','awaiting_confirmation'],true))throw new DomainException('Atendimento encerrado');
+      if(!sqfQuery($db,'SELECT id FROM sqf_auth_users WHERE id=? FOR UPDATE',[$actor])->fetchColumn())throw new DomainException('Identidade indisponível');
+      if((int)sqfQuery($db,'SELECT COUNT(*) FROM sqf_request_messages WHERE sender_id=? AND created_at>UTC_TIMESTAMP(6)-INTERVAL 1 HOUR',[$actor])->fetchColumn()>=40)throw new DomainException('Limite de mensagens excedido');
+      $message=(string)$db->query('SELECT UUID()')->fetchColumn();
+      sqfQuery($db,'INSERT INTO sqf_request_messages(id,request_id,sender_id,body) VALUES (?,?,?,?)',[$message,$id,$actor,$body]);
+      sqfNotify($db,$actor===$r['client_id']?$r['provider_id']:$r['client_id'],'message','Nova mensagem privada','Abra a conversa para ler a mensagem.',$id);
+      return $message;
     });
 }
