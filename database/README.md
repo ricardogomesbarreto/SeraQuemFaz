@@ -2,6 +2,7 @@
 
 ## Estrutura
 
+- `mysql/migrations/002_auth.sql`: identidade local, tokens e limitação de tentativas.
 - `mysql/migrations/001_schema.sql`: instalação limpa em MySQL 8.0.16+ e MariaDB 10.11; candidato, não executar sobre o banco atual.
 - `legacy/supabase-contracts.json`: inventário de RPCs e políticas RLS do PostgreSQL, sem dados pessoais.
 - `tests/agenda-integration.php`: fixtures sintéticas e testes de integração da agenda, catálogo e contratação.
@@ -11,9 +12,9 @@ O diretório legado `supabase/` permanece intacto até o corte de produção. O 
 
 ## Instalação isolada
 
-Criar um banco vazio e um usuário próprio. Importar `mysql/migrations/001_schema.sql` pelo cliente mysql/mariadb ou painel de administração. Nunca importar sobre o banco de produção. Usar UTF-8 e UTC. No ambiente PHP, definir `SQF_DB_DSN=mysql:host=127.0.0.1;dbname=sqf_test;charset=utf8mb4`, `SQF_DB_USER` e `SQF_DB_PASSWORD` apenas no servidor. PHP 8.1+, PDO MySQL e mbstring.
+Criar um banco vazio e um usuário próprio. Importar `mysql/migrations/001_schema.sql` e depois `mysql/migrations/002_auth.sql` pelo cliente mysql/mariadb ou painel de administração. Nunca importar sobre o banco de produção. Usar UTF-8 e UTC. No ambiente PHP, definir `SQF_DB_DSN=mysql:host=127.0.0.1;dbname=sqf_test;charset=utf8mb4`, `SQF_DB_USER` e `SQF_DB_PASSWORD` apenas no servidor. PHP 8.1+, PDO MySQL, Argon2id e mbstring.
 
-Executar `php database/tests/agenda-integration.php` exclusivamente em banco de testes vazio. A CI usa MySQL 8.0 e MariaDB 10.11.
+Executar `php database/tests/agenda-integration.php` e `php database/tests/auth-integration.php` exclusivamente em banco de testes vazio. A CI usa MySQL 8.0 e MariaDB 10.11.
 
 ## Decisões de compatibilidade
 
@@ -34,3 +35,7 @@ Executar `php database/tests/agenda-integration.php` exclusivamente em banco de 
 6. Backup, restauração, teste de rollback, revisão LGPD e aceite formal. Só então desativar Supabase e publicar a versão.
 
 Não utilizar o candidato como sistema comercial. Nenhum dado remoto foi alterado.
+
+## API candidata e autenticação
+
+`backend/public/index.php` expõe somente rotas explícitas. Configure o servidor para servir esse arquivo como `/api/index.php` (alias para backend/public, mantendo backend/src e database fora do document root). Não publicar o repositório inteiro. O cliente candidato `assets/mysql-api-client.js` utiliza a mesma origem e CSRF; as páginas existentes ainda não foram trocadas. `SQF_MAIL_FROM` e um transporte de e-mail funcional são necessários para cadastro, recuperação e confirmação. HTTPS obrigatório; `SQF_ALLOW_INSECURE_LOCAL=1` é exclusivo do teste loopback. As sessões exigem e-mail confirmado, cookies HttpOnly, SameSite Strict e versão de autenticação. MFA administrativo, entrega real de e-mail, migração de identidades, proteção adicional contra abuso e homologação das telas permanecem gates.
