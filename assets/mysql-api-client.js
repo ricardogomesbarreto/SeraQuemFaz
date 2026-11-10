@@ -26,7 +26,11 @@
   scope.SQFMySQL=Object.freeze({
     session,
     login:(email,password)=>call('login',{email,password}),
-    register:(email,password,name,account_type)=>call('register',{email,password,name,account_type}),
+    register:(email,password,name,account_type,city_ibge)=>call('register',{email,password,name,account_type,city_ibge}),
+    profile:()=>call('profile',{}),
+    requests:()=>call('requests',{}),
+    appointments:()=>call('appointments',{}),
+    notifications:()=>call('notifications',{}),
     verify:token=>call('verify',{token}),
     resendVerification:email=>call('resend-verification',{email}),
     requestReset:email=>call('request-reset',{email}),
