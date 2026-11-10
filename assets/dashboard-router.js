@@ -177,7 +177,11 @@
   for(const page of definitions)createScreen(page,root);
   const header=document.createElement('header');
   header.className='sqf-view-header';
-  header.innerHTML='<span class="section-kicker">MINHA CONTA</span><h2 id="sqfViewTitle" tabindex="-1"></h2><p id="sqfViewDescription" class="muted"></p>';
+  const eyebrow=document.createElement('span');eyebrow.className='section-kicker';
+  eyebrow.textContent='ÁREA '+(role==='prestador'?'DO PRESTADOR':'DO CLIENTE');
+  const title=document.createElement('h2');title.id='sqfViewTitle';title.tabIndex=-1;
+  const description=document.createElement('p');description.id='sqfViewDescription';description.className='muted';
+  header.append(eyebrow,title,description);
   main.prepend(header);
   // Não mostrar novamente a tela gigante antiga; ela servia apenas como
   // contêiner de blocos do prestador agora movidos.
