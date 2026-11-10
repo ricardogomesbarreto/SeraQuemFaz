@@ -136,3 +136,16 @@ test('serviços pausados não são expostos; preços exigem limites completos',(
  assert.match(provider,/\.eq\('is_active',true\)/);
  assert.match(account,/\.eq\('is_active',true\)\.limit\(1\)/);
 });
+
+test('resumo do prestador usa métricas reais sem inventar contagens',()=>{
+ const html=read('painel.html'),portal=read('assets/request-portal.js');
+ for(const id of ['providerRequestsOpen','providerQuotesSent','providerRequestsOngoing','providerUnreadMessages'])
+  assert.match(html,new RegExp('id="'+id+'"'));
+ assert.match(portal,/sqf_dashboard_request_summary/);
+ assert.match(portal,/sqf_request_unread_counts/);
+ assert.match(portal,/providerRequestsOpen:totals\?\.active_count/);
+ assert.match(portal,/providerQuotesSent:totals\?\.quote_count/);
+ assert.match(portal,/providerRequestsOngoing:totals\?\.ongoing_count/);
+ assert.match(portal,/providerUnreadMessages:unreadTotal/);
+ assert.match(portal,/value!==null&&value!==undefined/);
+});
