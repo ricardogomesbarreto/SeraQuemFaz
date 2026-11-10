@@ -66,3 +66,20 @@ sqfQuery($db,"UPDATE provider_verifications SET status='approved' WHERE provider
 // Create a genuine PNG fixture for the HTTP upload test, outside the web root.
 $png=imagecreatetruecolor(8,8);imagefill($png,0,0,imagecolorallocate($png,12,34,56));
 imagepng($png,sqfMediaRoot().'/test-upload.png');imagedestroy($png);
+
+require_once __DIR__.'/../../backend/src/Professional.php';
+$details=['professional_title'=>'Técnico','specialties'=>'Redes e manutenção','experience_years'=>5,'service_mode'=>'hibrido','coverage_area'=>'Santa Inês','workdays'=>['seg','sex'],'work_period'=>'flexivel','quote_policy'=>'sob_consulta','professional_website'=>'https://example.invalid'];
+sqfSaveProfessionalDetails($db,$provider,$details);
+verify(sqfProfessionalDetails($db,$provider)['specialties']==='Redes e manutenção','professional details persisted');
+verify(sqfPublicProvider($db,$provider)['professional']['service_mode']==='hibrido','public professional details exposed');
+forbid(fn()=>sqfSaveProfessionalDetails($db,$client,$details),'client cannot edit professional details');
+forbid(fn()=>sqfSaveProfessionalDetails($db,$provider,array_replace($details,['experience_years'=>61])),'invalid experience rejected');
+forbid(fn()=>sqfSaveProfessionalDetails($db,$provider,array_replace($details,['professional_website'=>'javascript:alert(1)'])),'unsafe website rejected');
+$second=sqfSavePrivateImage($db,$provider,'portfolio',$service,$bytes,'Outra foto');
+sqfManagePortfolio($db,$provider,$photo,'cover');sqfManagePortfolio($db,$provider,$second,'cover');
+verify((int)sqfQuery($db,'SELECT COUNT(*) FROM portfolio_photos WHERE provider_id=? AND is_cover=1',[$provider])->fetchColumn()===1,'only one portfolio cover');
+forbid(fn()=>sqfManagePortfolio($db,$client,$second,'delete'),'client cannot delete portfolio');
+$oldPath=sqfPrivateImagePath($db,$provider,'portfolio',$second);
+sqfManagePortfolio($db,$provider,$second,'delete');
+forbid(fn()=>sqfPrivateImagePath($db,$provider,'portfolio',$second),'deleted photo no longer accessible');
+verify(!is_file($oldPath),'deleted generated file removed');
