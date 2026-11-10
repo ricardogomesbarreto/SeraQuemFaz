@@ -115,3 +115,9 @@ Inventário da revisão: árvore Git completa da branch de migração, 343 entra
 - Faturamento/assinaturas, conciliação e e-mail: workflows legados e Edge Functions Supabase não foram substituídos; não ativar checkout ou serviços reais.
 - Migração de identidades/dados/arquivos reais, reconciliação, testes de restauração e rollback, LGPD operacional e revisão de segurança.
 - CI PostgreSQL e fontes legadas permanecem por compatibilidade durante homologação. Não removê-las antes do corte e validação de paridade; nenhum deploy na Hostinger até 100% de conversão.
+
+## v3.14.0-rc.1 — segurança da conta e notificações
+
+Versão candidata de homologação, identificada em `candidate-version.json`; não é release de produção. `backend/src/AccountSecurity.php` fornece leitura de e-mail confirmado, alteração de senha com verificação da senha atual, revogação de todas as sessões por incremento de auth_version, preferências de e-mail e marcação de notificações próprias como lidas. As operações de senha têm limite de tentativas; hashes Argon2id, tokens de recuperação invalidados na troca de senha e novo login obrigatório. O painel MySQL integra os formulários. A preferência de e-mail não ativa entrega real; SMTP e notificações assíncronas seguem pendentes.
+
+A CI #289 aprovou integralmente a etapa anterior, incluindo a auditoria geral. Os testes novos de PHP e Chromium devem ser aprovados nos dois bancos. A versão do frontend legado permanece inalterada. Nenhum deploy, tag comercial ou corte de produção antes de 100% de conversão e homologação.
