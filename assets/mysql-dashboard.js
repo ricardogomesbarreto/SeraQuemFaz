@@ -41,9 +41,10 @@
      const target=$('mysqlServices');empty(target,services.data,'Nenhum serviço cadastrado.');
      for(const service of services.data){
        const card=wrap(service.service_title);
-       card.append(el('p',(service.is_active?'Ativo':'Inativo')+' · '+(service.description||'Sem descrição')));
-       card.append(button(service.is_active?'Desativar serviço':'Ativar serviço',async()=>{
-         await api.toggleService({id:service.id,is_active:!Boolean(service.is_active)});
+       const active=Number(service.is_active)===1;
+       card.append(el('p',(active?'Ativo':'Inativo')+' · '+(service.description||'Sem descrição')));
+       card.append(button(active?'Desativar serviço':'Ativar serviço',async()=>{
+         await api.toggleService({id:service.id,is_active:!active});
          await load();
        }));
        target.append(card);
