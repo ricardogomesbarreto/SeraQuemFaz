@@ -673,16 +673,15 @@
       $('reloadCategories')?.addEventListener('click',()=>void reloadActiveCategories());
       // Falhas parciais em portfólio, avaliações ou serviços não devem impedir
       // o prestador de usar as demais páginas do seu painel.
-      const loadTasks=[
-        ['categorias',reloadActiveCategories],
-        ['serviços',loadServices]
-      ];
-      for(const [label,loader] of loadTasks){
-        try{await loader();}
-        catch(error){
-          console.warn('Carregamento parcial do painel ('+label+'): '+(error?.message||'indisponível'));
-          announce('serviceMessage','Uma parte do perfil não carregou. Use Recarregar categorias ou atualize a página.',true);
-        }
+      try{await reloadActiveCategories();}
+      catch(error){
+        console.warn('Carregamento parcial das categorias:',error?.message||'indisponível');
+        announce('serviceMessage','Categorias não disponíveis. Use Recarregar categorias.',true);
+      }
+      try{await loadServices();}
+      catch(error){
+        console.warn('Carregamento parcial dos serviços:',error?.message||'indisponível');
+        announce('serviceMessage','Serviços não disponíveis. Atualize a página para tentar novamente.',true);
       }
       const sections=await Promise.allSettled([
         loadPhotos(),loadOwnReviews(),loadVerification(),loadPendingEngagements(),loadProfessionalExtras()
