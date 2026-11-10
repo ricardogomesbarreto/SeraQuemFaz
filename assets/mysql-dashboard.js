@@ -11,6 +11,9 @@
  const load=async()=>{
    const [p,q,a,n]=await Promise.all([api.profile(),api.requests(),api.appointments(),api.notifications()]);
    profile=p.data;if(!profile)throw new Error('Perfil indisponível');
+   const cases=(await api.cases()).data,caseRoot=$('mysqlCases');caseRoot.replaceChildren();for(const item of [...cases.support,...cases.privacy]){const card=wrap(item.topic||item.request_type);card.append(el('p',item.message||item.details),el('p','Situação: '+item.status));caseRoot.append(card);}
+   if(!caseRoot.childElementCount)caseRoot.append(el('p','Nenhuma solicitação registrada.'));
+   if(profile.account_type==='prestador'){const v=(await api.verification()).data;$('mysqlVerificationStatus').textContent='Situação cadastral: '+v.status;}
    $('mysqlTitle').textContent=(profile.account_type==='prestador'?'Painel do prestador — ':'Painel do cliente — ')+profile.full_name;
    const avatar=$('mysqlAvatar');avatar.hidden=Number(profile.has_avatar)!==1;if(!avatar.hidden)avatar.src=api.mediaUrl('avatar',user)+'&v='+Date.now();
    const form=$('mysqlProfile');form.elements.full_name.value=profile.full_name;form.elements.bio.value=profile.bio||'';form.elements.city_ibge.value=profile.city_ibge||'';
@@ -113,6 +116,7 @@
    }
    $('mysqlContent').hidden=false;status('Dados carregados.');
  };
+ for(const [id,kind] of [['mysqlSupportForm','support'],['mysqlPrivacyForm','privacy']])$(id).addEventListener('submit',async e=>{e.preventDefault();const form=e.currentTarget,submit=form.querySelector('[type=submit]');submit.disabled=true;try{await api.createCase({kind,type:form.elements.type.value,message:form.elements.message.value});form.reset();await load();status('Solicitação registrada.');}catch(error){status(error.message);}finally{submit.disabled=false;}});
  $('mysqlLogout').addEventListener('click',async()=>{try{await api.logout();location.replace('entrar.html');}catch(e){status(e.message);}});
  $('mysqlDiscoveryForm').addEventListener('submit',async e=>{
    e.preventDefault();const form=e.currentTarget,city=String(form.elements.city.value).trim(),target=$('mysqlDiscoveryResults');
