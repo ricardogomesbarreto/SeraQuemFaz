@@ -131,6 +131,21 @@ try{
  await provider.page.locator('#mysqlNotifications').getByText('Lida',{exact:true}).first().waitFor();
  await widthCheck(client.page,'account security and notifications');
  console.log('PASS: notification preference persists and provider marks notification read');
+ // Ordinary accounts must never see administrative queues or MFA controls.
+ for(const [actor,label] of [[client,'client'],[provider,'provider']]){
+   await actor.page.goto(origin+'/admin-mysql.html');
+   await actor.page.locator('#staffStatus').getByText('Acesso administrativo negado',{exact:true}).waitFor();
+   assert.equal(await actor.page.locator('#staffMfa').isVisible(),false);
+   assert.equal(await actor.page.locator('#staffQueue').locator('article').count(),0);
+   await widthCheck(actor.page,label+' denied admin page');
+ }
+ const guest=await makePage();
+ await guest.page.goto(origin+'/admin-mysql.html');
+ await guest.page.waitForURL('**/entrar.html');
+ await guest.context.close();
+ console.log('PASS: guest, client and provider cannot access administrative queues');
+ await client.page.goto(origin+'/painel-mysql.html');
+ await client.page.locator('#mysqlContent').waitFor({state:'visible'});
  await client.page.locator('#mysqlLogout').click();await client.page.waitForURL('**/entrar.html');
  await client.page.goto(origin+'/painel-mysql.html');await client.page.waitForURL('**/entrar.html');
  console.log('PASS: logout prevents dashboard access');
