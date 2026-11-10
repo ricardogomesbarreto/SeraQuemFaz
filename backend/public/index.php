@@ -6,6 +6,7 @@ require_once __DIR__.'/../src/Agenda.php';
 require_once __DIR__.'/../src/Services.php';
 require_once __DIR__.'/../src/Moderation.php';
 require_once __DIR__.'/../src/PrivateMedia.php';
+require_once __DIR__.'/../src/Category.php';
 
 header('Content-Type: application/json; charset=utf-8');
 header('Cache-Control: no-store');
@@ -40,6 +41,7 @@ try {
     if($method==='GET'&&$route==='categories')respond(['data'=>sqfQuery($db,"SELECT id,name,description,image_url,status,created_at FROM categories WHERE status='active' ORDER BY name,id")->fetchAll(PDO::FETCH_ASSOC)]);
     if($method==='GET'&&$route==='reviews/public')respond(['data'=>sqfPublicReviews($db,(string)($_GET['id']??''))]);
     if($method==='GET'&&$route==='provider')respond(['data'=>sqfPublicProvider($db,(string)($_GET['id']??''))]);
+    if($method==='GET'&&$route==='category')respond(['data'=>sqfCategoryPage($db,(string)($_GET['id']??''),(string)($_GET['city']??''))]);
     if($method==='GET'&&$route==='catalog')respond(['data'=>sqfCatalog($db,(string)($_GET['city']??''))]);
     if($method==='GET'&&$route==='media/read'){
       $actor=sqfSessionUser($db,$_SESSION);
@@ -122,6 +124,8 @@ try {
     if($route==='reviews')respond(['data'=>sqfOwnReviews($db,$actor)]);
     if($route==='review/create')respond(['data'=>sqfReviewCreate($db,$actor,required($body,'request_id'),number($body,'rating'),required($body,'comment'))]);
     if($route==='media/list')respond(['data'=>sqfListPrivateMedia($db,$actor,required($body,'kind'),isset($body['request_id'])?required($body,'request_id'):null)]);
+    if($route==='favorites/categories')respond(['data'=>sqfFavoriteCategories($db,$actor)]);
+    if($route==='favorite/category'){if(!isset($body['saved'])||!is_bool($body['saved']))throw new DomainException('Estado inválido');sqfFavoriteCategory($db,$actor,required($body,'category_id'),$body['saved']);respond(['ok'=>true]);}
     if($route==='services')respond(['data'=>sqfOwnServices($db,$actor)]);
     if($route==='service/save'){
       $id=isset($body['id'])?required($body,'id'):null;
