@@ -118,6 +118,7 @@ try {
     if($route==='review/dispute')respond(['data'=>sqfReviewDispute($db,$actor,required($body,'id'),required($body,'reason'),required($body,'details'))]);
     if($route==='reviews')respond(['data'=>sqfOwnReviews($db,$actor)]);
     if($route==='review/create')respond(['data'=>sqfReviewCreate($db,$actor,required($body,'request_id'),number($body,'rating'),required($body,'comment'))]);
+    if($route==='media/list')respond(['data'=>sqfListPrivateMedia($db,$actor,required($body,'kind'),isset($body['request_id'])?required($body,'request_id'):null)]);
     if($route==='services')respond(['data'=>sqfOwnServices($db,$actor)]);
     if($route==='service/save'){
       $id=isset($body['id'])?required($body,'id'):null;
