@@ -218,9 +218,21 @@
       if(retry)retry.disabled=false;
     }
   }
+  // Preços exibidos são estimativas declaradas, nunca cobranças ou orçamento final.
+  const brl=amount=>new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'})
+    .format(Number(amount)/100);
+  const centsFor=(min,max)=>{
+    const emptyMin=min.trim()==='',emptyMax=max.trim()==='';
+    if(emptyMin&&emptyMax)return {price_min_cents:null,price_max_cents:null};
+    const a=Number(min),b=Number(max);
+    if(emptyMin||emptyMax||!Number.isFinite(a)||!Number.isFinite(b)||
+       a<0||b<a||b>1000000||Math.round(a*100)!==a*100||Math.round(b*100)!==b*100)
+      throw new Error('Informe os dois valores em reais, com até duas casas decimais, ou deixe ambos vazios.');
+    return {price_min_cents:Math.round(a*100),price_max_cents:Math.round(b*100)};
+  };
   async function loadServices() {
     const list = $('myServices');list.replaceChildren();
-    const {data,error}=await client.from('provider_services').select('id,category_id,service_title,description').eq('provider_id',user.id).order('service_title');
+    const {data,error}=await client.from('provider_services').select('id,category_id,service_title,description,price_min_cents,price_max_cents,is_active').eq('provider_id',user.id).order('service_title');
     if(error) throw error;
     providerServicesCache=data||[];
     currentServiceCount=data?.length||0;updateReadiness();
@@ -244,6 +256,11 @@
       text.append(ui.make('strong','',service.service_title));
       const cat=categories.find(c=>String(c.id)===service.category_id);
       text.append(ui.make('p','muted', `${cat?.name || 'Categoria'}${service.description ? ` · ${service.description}` : ''}`));
+      text.append(ui.make('span','sqf-service-state'+(service.is_active?'':' is-inactive'),
+        service.is_active?'Disponível para publicação':'Serviço pausado'));
+      if(service.price_min_cents!==null && service.price_max_cents!==null)
+        text.append(ui.make('p','sqf-price-note',
+          'Estimativa declarada: '+brl(service.price_min_cents)+' a '+brl(service.price_max_cents)));
       const del=ui.make('button','button button-outline button-small','Remover');del.type='button';del.setAttribute('aria-label',`Remover serviço ${service.service_title}`);
       del.addEventListener('click', async()=>{
         if(!confirm('Remover este serviço do seu perfil?')) return;
@@ -274,6 +291,18 @@
       const editDescLabel=ui.make('label','','Descrição (opcional)');
       const editDesc=ui.make('textarea');editDesc.value=service.description||'';
       editDesc.rows=3;editDesc.maxLength=500;editDescLabel.append(editDesc);
+      const prices=ui.make('div','sqf-inline-prices');
+      const priceMinLabel=ui.make('label','','Mínimo estimado (R$)');
+      const priceMin=ui.make('input');priceMin.type='number';priceMin.min='0';priceMin.max='1000000';priceMin.step='0.01';
+      priceMin.value=service.price_min_cents===null?'':String(service.price_min_cents/100);
+      priceMinLabel.append(priceMin);
+      const priceMaxLabel=ui.make('label','','Máximo estimado (R$)');
+      const priceMax=ui.make('input');priceMax.type='number';priceMax.min='0';priceMax.max='1000000';priceMax.step='0.01';
+      priceMax.value=service.price_max_cents===null?'':String(service.price_max_cents/100);
+      priceMaxLabel.append(priceMax);prices.append(priceMinLabel,priceMaxLabel);
+      const isActiveLabel=ui.make('label','sqf-service-toggle');
+      const isActive=ui.make('input');isActive.type='checkbox';isActive.checked=Boolean(service.is_active);
+      isActiveLabel.append(isActive,document.createTextNode(' Serviço disponível no catálogo'));
       const save=ui.make('button','button button-primary button-small','Salvar edição');save.type='submit';
       const cancel=ui.make('button','button button-outline button-small','Cancelar');cancel.type='button';
       const editMsg=ui.make('p','form-feedback');editMsg.setAttribute('role','status');
@@ -288,20 +317,23 @@
         }
         save.disabled=true;
         try{
+          const money=centsFor(priceMin.value,priceMax.value);
           const {error:saveError}=await client.from('provider_services')
-            .update({category_id:categoryId,service_title:title,description})
+            .update({category_id:categoryId,service_title:title,description,
+              ...money,is_active:isActive.checked})
             .eq('id',service.id).eq('provider_id',user.id);
           if(saveError)throw saveError;
           announce('serviceMessage','Serviço atualizado. Uma nova análise cadastral poderá ser necessária.');
           await loadServices();await loadVerification();
-        }catch{
-          editMsg.textContent='Não foi possível editar. Verifique se a categoria está ativa e se o serviço já existe.';
+        }catch(error){
+          editMsg.textContent=error?.message?.startsWith('Informe os dois valores')
+            ?error.message:'Não foi possível editar. Verifique a categoria e a faixa de preço.';
           save.disabled=false;
         }
       });
       const editActions=ui.make('div','service-row-actions');editActions.append(edit,del);
       const formActions=ui.make('div','service-row-actions');formActions.append(save,cancel);
-      editForm.append(editCatLabel,editTitleLabel,editDescLabel,formActions,editMsg);
+      editForm.append(editCatLabel,editTitleLabel,editDescLabel,prices,isActiveLabel,formActions,editMsg);
       item.append(text,editActions,editForm);list.append(item);
     }
     return data;
@@ -797,12 +829,18 @@
       const categoryId=$('newServiceCategory').value;
       const title=$('newServiceTitle').value.trim();
       const description=$('newServiceDescription').value.trim();
+      let money;
+      try{money=centsFor($('newServicePriceMin').value,$('newServicePriceMax').value);}
+      catch(error){announce('serviceMessage',error.message,true);return;}
       if(!ui.validId(categoryId)||title.length<3||title.length>100||description.length>500){announce('serviceMessage','Escolha uma categoria válida e informe um título de 3 a 100 caracteres.',true);return;}
       const btn=$('addServiceBtn');btn.disabled=true;
       try{
-        const {error}=await client.from('provider_services').insert({provider_id:user.id,category_id:categoryId,service_title:title,description});
+        const {error}=await client.from('provider_services').insert({provider_id:user.id,category_id:categoryId,service_title:title,description,
+          ...money,is_active:$('newServiceActive').checked});
         if(error)throw error;
         $('newServiceTitle').value='';$('newServiceDescription').value='';
+        $('newServicePriceMin').value='';$('newServicePriceMax').value='';
+        $('newServiceActive').checked=true;
         announce('serviceMessage','Serviço adicionado. A aprovação anterior pode precisar de nova análise.');await loadServices();await loadVerification();
       }catch(error){console.warn(error?.message);announce('serviceMessage','Não foi possível adicionar. Verifique se o serviço já existe.',true);}
       finally{btn.disabled=false;}
