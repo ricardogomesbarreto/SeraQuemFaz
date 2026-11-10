@@ -70,3 +70,16 @@ function sqfPrivateImagePath(PDO $db,string $actor,string $kind,string $id,bool 
     if(!is_file($path)||is_link($path))throw new DomainException('Arquivo indisponível');
     return $path;
 }
+
+function sqfListPrivateMedia(PDO $db,string $actor,string $kind,?string $request=null):array {
+    if($kind==='verification'){
+        if(sqfQuery($db,'SELECT account_type FROM profiles WHERE id=?',[$actor])->fetchColumn()!=='prestador')throw new DomainException('Somente prestadores');
+        return sqfQuery($db,'SELECT id,document_kind,status,created_at FROM sqf_verification_documents WHERE provider_id=? ORDER BY created_at DESC LIMIT 50',[$actor])->fetchAll(PDO::FETCH_ASSOC);
+    }
+    if($kind==='attachment'&&$request!==null){
+        $row=sqfQuery($db,'SELECT client_id,provider_id FROM sqf_service_requests WHERE id=?',[$request])->fetch(PDO::FETCH_ASSOC);
+        if(!$row||!in_array($actor,[$row['client_id'],$row['provider_id']],true))throw new DomainException('Solicitação indisponível');
+        return sqfQuery($db,'SELECT id,caption,created_at FROM sqf_request_attachments WHERE request_id=? ORDER BY created_at DESC LIMIT 50',[$request])->fetchAll(PDO::FETCH_ASSOC);
+    }
+    throw new DomainException('Tipo de mídia inválido');
+}
