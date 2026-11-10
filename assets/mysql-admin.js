@@ -37,7 +37,25 @@
        }catch(e){status.textContent=e.message;}finally{submit.disabled=false;}});
      }
    }
-   form.hidden=true;status.textContent='Fila de avaliações carregada.';
+   const documents=(await api.staffDocuments()).data;
+   queue.append(el('h2','Documentos de verificação pendentes'));
+   if(!documents.length)queue.append(el('p','Nenhum documento aguardando análise.'));
+   for(const item of documents){
+     const card=el('article');card.className='card';
+     card.append(el('h3',item.document_kind==='identity_evidence'?'Identificação':'Comprovação profissional'));
+     const link=el('a','Visualizar documento privado');link.href=api.mediaUrl('verification',item.id);link.target='_blank';link.rel='noopener noreferrer';card.append(link);
+     const decision=el('form'),select=el('select'),note=el('textarea');
+     for(const [value,label] of [['accepted','Aceitar documento'],['rejected','Rejeitar documento']]){
+       const option=el('option',label);option.value=value;select.append(option);
+     }
+     note.required=true;note.minLength=20;note.maxLength=1000;note.placeholder='Justificativa da análise documental (mínimo 20 caracteres)';
+     const submit=el('button','Registrar análise');submit.type='submit';submit.className='button button-primary';decision.append(select,note,submit);card.append(decision);queue.append(card);
+     decision.addEventListener('submit',async event=>{event.preventDefault();submit.disabled=true;try{
+       if(!window.confirm('Registrar a decisão documental? Esta ação não aprova automaticamente o prestador.'))return;
+       await api.staffDocumentDecide({id:item.id,status:select.value,note:note.value});await load();status.textContent='Análise de documento registrada sem aprovação automática.';
+     }catch(error){status.textContent=error.message;}finally{submit.disabled=false;}});
+   }
+   form.hidden=true;status.textContent='Fila de moderação carregada.';
  }
  form.addEventListener('submit',async event=>{event.preventDefault();const submit=form.querySelector('button');submit.disabled=true;try{await api.staffMfa(form.elements.code.value);form.reset();await load();}catch(e){status.textContent=e.message;}finally{submit.disabled=false;}});
  try{
