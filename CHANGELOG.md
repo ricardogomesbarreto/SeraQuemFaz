@@ -1,3 +1,20 @@
+# v3.11.0 — Painéis por páginas e catálogo mais claro
+
+- Cliente e prestador usam o mesmo shell de painel com **telas independentes**, navegação lateral, cabeçalho compacto e URL de seção em `painel.html?pagina=<perfil>/<tela>`. Apenas o conteúdo ativo é apresentado.
+- Tipo de perfil exibido abaixo do nome e no resumo: **Perfil de cliente** ou **Perfil de prestador de serviço**.
+- Cliente: visão geral, edição, atividades/orçamentos, favoritos (profissionais e categorias), agenda e configurações.
+- Prestador: visão geral, perfil profissional, solicitações/mensagens, serviços, portfólio, agenda, desempenho, verificação, assinatura e configurações.
+- Serviços: edição, pausa de disponibilidade e preços estimados opcionais, sem realizar cobrança ou representar proposta final.
+- Portfólio: definição de uma fotografia de capa por serviço via RPC autenticada, preservando o controle de propriedade e a moderação do perfil.
+- Categorias favoritas protegidas por RLS para clientes; buscas recentes somente na aba atual, com botão de exclusão.
+- Landing reformulada com busca por município/serviço, jornada para cliente e prestador, recursos de transparência e CTA profissional.
+- Catálogo e área de serviço: filtros por avaliações publicadas, portfólio, completude, cadastro recente, quantidade real de fotos e estado sem resultados.
+- Segurança: atualização de senha autenticada em Configurações, sem gravação em logs/armazenamento local.
+- Formulário profissional: corrigidos dois botões duplicados de recarga de categorias.
+- Testes de regressão para rotas, componentes e regras de segurança; Node 22/24 e pacote ZIP via CI.
+
+**Implantação:** nova migração `20261109_18_paineis_servicos_portfolio.sql` é necessária. A homologação em navegador com contas distintas e a validação mobile continuam importantes. Envio de e-mails e checkout comercial não são ativados nesta versão.
+
 # v3.10.0 — Central profissional e experiência ampliada
 
 - Reorganização visual do perfil profissional com sidebar consistente com o painel de cliente.
