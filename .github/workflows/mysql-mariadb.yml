@@ -28,7 +28,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Install PHP PDO driver
-        run: sudo apt-get update && sudo apt-get install -y php-cli php-mysql
+        run: sudo apt-get update && sudo apt-get install -y php-cli php-mysql php-mbstring
       - name: Install schema
         run: docker exec -i ${{ job.services.database.id }} sh -c 'mysql -uroot -p"$MYSQL_ROOT_PASSWORD" sqf_test' < database/mysql/migrations/001_schema.sql
       - name: Lint and integration
@@ -36,5 +36,7 @@ jobs:
           SQF_DB_PASSWORD: sqf-ci-only
         run: |
           php -l backend/src/Agenda.php
+          php -l backend/src/Database.php
+          php -l backend/src/Marketplace.php
           php -l database/tests/agenda-integration.php
           php database/tests/agenda-integration.php
