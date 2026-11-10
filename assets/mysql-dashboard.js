@@ -88,6 +88,8 @@
      const m=(await api.performance()).data,root=$('mysqlMetrics');root.replaceChildren();
      for(const [label,value] of [['Visualizações autenticadas',m.views_authenticated],['Solicitações recebidas',m.requests_total],['Propostas enviadas',m.quotes_sent],['Atendimentos concluídos',m.requests_completed]])root.append(el('p',label+': '+value));
    }
+   const recent=$('mysqlRecentSection');recent.hidden=!client;
+   if(client){const root=$('mysqlRecentSearches');const renderRecent=()=>{let items=[];try{const saved=JSON.parse(sessionStorage.getItem('sqf-search-history-session')||'[]');if(Array.isArray(saved))items=saved.filter(x=>typeof x.q==='string'&&x.q.length<=100&&/^[0-9]{7}$/.test(x.city||'')).slice(0,6);}catch{}root.replaceChildren();if(!items.length)root.append(el('p','Nenhuma busca recente.'));for(const item of items){const link=el('a',item.q);link.href='categorias.html?cidade='+encodeURIComponent(item.city)+'&q='+encodeURIComponent(item.q);const row=el('p');row.append(link);root.append(row);}};renderRecent();$('mysqlClearRecent').onclick=()=>{try{sessionStorage.removeItem('sqf-search-history-session');}catch{}renderRecent();};}
    const discoverySection=$('mysqlDiscoverySection');
    discoverySection.hidden=profile.account_type!=='cliente';
    if(!discoverySection.hidden&&profile.city_ibge&&!$('mysqlDiscoveryForm').elements.city.value)$('mysqlDiscoveryForm').elements.city.value=profile.city_ibge;

@@ -111,6 +111,12 @@ try{
  await client.page.locator('#mysqlProviderFavorites').getByText('Nenhum profissional favorito.').waitFor();
  await provider.page.locator('#mysqlMetricsSection').waitFor({state:'visible'});
  await client.page.locator('#mysqlQuoteCompareSection').waitFor({state:'visible'});
+ await client.page.evaluate(()=>sessionStorage.setItem('sqf-search-history-session',JSON.stringify([{q:'Serviço de teste',city:'2111300'}])));
+ await client.page.reload();await client.page.locator('#mysqlContent').waitFor({state:'visible'});
+ await client.page.locator('#mysqlRecentSearches').getByRole('link',{name:'Serviço de teste'}).waitFor();
+ await client.page.locator('#mysqlClearRecent').click();
+ await client.page.locator('#mysqlRecentSearches').getByText('Nenhuma busca recente.').waitFor();
+ console.log('PASS: recent searches retained and removable in client dashboard');
  const pref=client.page.locator('#mysqlNotificationPreference');
  await pref.locator('input[name=email_enabled]').check();
  await pref.getByRole('button',{name:'Salvar preferência'}).click();
