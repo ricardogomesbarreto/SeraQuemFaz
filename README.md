@@ -1,4 +1,4 @@
-# SERÁ QUEM FAZ? — v3.14.0-rc.10
+# SERÁ QUEM FAZ? — v3.14.0-rc.11
 
 <p align="center"><img src="assets/brand/logo-horizontal.png" alt="Será Quem Faz?" width="380"></p>
 <p align="center"><strong>Encontre profissionais da sua cidade. Organize serviços, propostas e atendimentos em um só lugar.</strong></p>
@@ -17,7 +17,7 @@ O Será Quem Faz? conecta clientes a prestadores de serviços locais. Pesquisa p
 
 HTML, CSS e JavaScript; API PHP 8.1+; PDO MySQL; MySQL 8.0 ou MariaDB 10.11, InnoDB e UTC. Identidades e sessões próprias, RBAC administrativo com MFA, mídia privada fora da raiz web e fila de notificações. Mercado Pago com checkout desativado durante homologação. Destino futuro: Hostinger Unlimited (não Premium). PHP permanece por reaproveitar o backend homologado; Node.js é suportado pelo plano, mas uma reescrita não é necessária. Node 22+ é usado no build e nos testes, não como runtime obrigatório.
 
-## v3.14.0-rc.10
+## v3.14.0-rc.11
 
 Candidato exclusivo MySQL/MariaDB. Distribuição isolada, instalação SQL consolidada, testes PHP/HTTP/Chromium, integridade e restauração de banco descartável. O código histórico foi preservado no histórico Git; não faz parte do caminho de instalação atual.
 
@@ -63,3 +63,7 @@ Autenticação, navegação, catálogo, detalhes, favoritos e imagens utilizam a
 SMTP autenticado Hostinger com TLS; checkout inicial e cancelamento via API de teste, desativados por padrão; solicitação de mudança de ciclo preserva vigência sem cobrança imediata (renovação automática ainda pendente). Migration 007: índices e solicitação de ciclo. Importador privado de snapshot normalizado com contagem, FK, hashes de mídia e rollback; persistência apenas em staging explicitamente habilitado. Testes simulados e restauração de arquivos em CI. Nenhum dado real importado ou pagamento/e-mail enviado. CI e homologação real obrigatórias.
 
 Exportação resumida dos dados da própria conta e [plano de recuperação e corte](database/hostinger/RECOVERY.md) adicionados. A resposta integral a direitos do titular e o ensaio de rollback real ainda exigem validação.
+
+## RC.11 — histórico de assinaturas e renovação segura
+
+Uma assinatura atual por prestador, contratos e faturas históricos preservados (migration 008). Nova contratação manual somente depois de cancelamento confirmado e fim da vigência paga; ciclo solicitado respeitado, sem cobrança antecipada. Testes sintéticos de renovação, duplicidade, histórico e importação relacional com mídia. Integração sandbox/SMTP real, migração real e homologação completa continuam obrigatórias.

@@ -35,6 +35,8 @@ try{
     $billing=sqfOwnBilling($db,$provider);
     check($billing['subscription']['cycle']==='yearly'&&count($billing['invoices'])===1&&$billing['invoices'][0]['cycle']==='monthly','new cycle and old invoice retained');
     check($billing['cycle_request']===null,'confirmed new checkout consumes cycle request');
+    try{sqfQuery($db,"INSERT INTO sqf_billing_subscriptions(user_id,cycle,price_cents,state) VALUES (?,'monthly',1490,'creating')",[$provider]);throw new RuntimeException('duplicate current subscription accepted');}
+    catch(PDOException $e){check($e->getCode()==='23000','database rejects second current subscription');}
 }finally{
     sqfQuery($db,'DELETE FROM sqf_billing_cycle_requests WHERE user_id=?',[$provider]);
     sqfQuery($db,'DELETE a FROM sqf_billing_payment_attempts a JOIN sqf_billing_invoices i ON i.mp_invoice_id=a.invoice_id JOIN sqf_billing_subscriptions s ON s.id=i.subscription_id WHERE s.user_id=?',[$provider]);

@@ -30,3 +30,5 @@ RC.8 recupera instalação PWA, favoritos de profissionais, comparação de prop
 ## RC.10
 
 SMTP por TLS 465: SQF_SMTP_ENABLED, SQF_SMTP_USER, SQF_SMTP_PASSWORD e SQF_MAIL_FROM (mesma caixa), desativado por padrão. Homologue confirmação, recuperação e avisos com caixa autorizada. Checkout sandbox exige SQF_MP_CHECKOUT_ENABLED=1, credencial TEST-, SQF_SITE_URL HTTPS e flag checkout_enabled no banco descartável; não ativar em produção. A solicitação de ciclo não dispara renovação automática. Importador privado em backend/bin/import-snapshot.php, use dry-run e compare inventários antes de staging; rollback de produção ainda requer ensaio e plano de corte. Valide índices por EXPLAIN e latência no hPanel.
+
+RC.11: instalação limpa inclui migrations 001–008. Testar índice único de contrato atual em ambos os engines; renovar apenas depois de cancelamento confirmado e fim do período pago. Histórico preservado. A renovação exige novo checkout explícito; não há renovação automática de ciclo. Importação normalizada inclui 33 conjuntos, com teste relacional e mídia. Não liberar produção sem CI e homologação real.

@@ -24,3 +24,7 @@ RC.1 segurança de conta; RC.2 faturamento; RC.3 validação financeira; RC.4 tr
 ## RC.10 — importação normalizada
 
 Migration 007 acrescenta índices e intenção de ciclo. `php backend/bin/import-snapshot.php snapshot.json diretorio-privado` valida 32 conjuntos operacionais ordenados, contagens, integridade e manifesto SHA256 de mídia. O JSON tem `tables` (lista completa de tabelas conforme sqfImportTables(), cada uma com lista de objetos com colunas MySQL normalizadas) e `media` (mapa caminho relativo -> SHA256). Importação experimental desfaz transação; `--commit-staging` exige SQF_IMPORT_STAGING_ENABLED=1 e destino novo vazio. Arquivos devem estar previamente copiados e normalizados em WebP no diretório privado; o CLI não extrai dados da origem, não transfere arquivos e não importa credenciais/sessões/administradores; perfis privados. Revisão de publicação e redefinição de senhas obrigatórias. Não usar em produção. Backup e restauração de mídia são testados na CI.
+
+## RC.11
+
+Migration 008 separa contrato atual de histórico, com índice único sobre identificador gerado do titular atual. O importador inclui solicitações de mudança de ciclo (33 conjuntos); não aceita a coluna gerada. Teste relacional inclui cliente, prestador, serviço, solicitação, mensagem e WebP com SHA256. Renovação é manual, depois de cancelamento confirmado e vigência vencida. Não há cobrança automática nem migração de dados reais.
