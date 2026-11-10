@@ -46,10 +46,10 @@ jobs:
           php -l database/tests/agenda-integration.php
           php -l backend/src/Auth.php
           php -l backend/public/index.php
-          php database/tests/agenda-integration.php
-          php database/tests/auth-integration.php
           php -l database/seed/import-public.php
           php database/seed/import-public.php
+          php database/tests/agenda-integration.php
+          php database/tests/auth-integration.php
 
           SQF_ALLOW_INSECURE_LOCAL=1 php -S 127.0.0.1:8080 -t backend/public >/tmp/sqf-http.log 2>&1 &
           trap 'kill $! 2>/dev/null || true; cat /tmp/sqf-http.log' EXIT
