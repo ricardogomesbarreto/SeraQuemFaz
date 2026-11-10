@@ -155,6 +155,7 @@ sqfMpProcessInvoiceWebhook($db,$signature,$invoiceId,$requestId,$secret,$now,$ge
 sqfMpProcessInvoiceWebhook($db,$signature,$invoiceId,$requestId,$secret,$now,$get);
 verify(sqfProviderPublic($db,$provider),'verified remote invoice grants paid visibility');
 verify((int)sqfQuery($db,'SELECT COUNT(*) FROM sqf_billing_invoices WHERE mp_invoice_id=?',[$invoiceId])->fetchColumn()===1,'webhook replay is idempotent');
+forbid(fn()=>sqfReconcileVerifiedInvoice($db,$sub,'fixture-duplicate-invoice','fixture-remote-payment','approved',1490,'BRL',$paid,$end),'payment cannot fund a second invoice');
 $remotePayment['status']='charged_back';
 sqfMpProcessInvoiceWebhook($db,$signature,$invoiceId,$requestId,$secret,$now,$get);
 verify(!sqfProviderPublic($db,$provider),'chargeback revokes visibility');
