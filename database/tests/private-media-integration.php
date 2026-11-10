@@ -159,6 +159,17 @@ forbid(fn()=>sqfReconcileVerifiedInvoice($db,$sub,'fixture-duplicate-invoice','f
 $remotePayment['status']='charged_back';
 sqfMpProcessInvoiceWebhook($db,$signature,$invoiceId,$requestId,$secret,$now,$get);
 verify(!sqfProviderPublic($db,$provider),'chargeback revokes visibility');
+sqfReconcileVerifiedInvoice($db,$sub,'fixture-retry-invoice','fixture-retry-first','rejected',1490,'BRL',null,null);
+sqfReconcileVerifiedInvoice($db,$sub,'fixture-retry-invoice','fixture-retry-second','approved',1490,'BRL',$paid,$end);
+verify(sqfProviderPublic($db,$provider),'successful retry restores eligible publication');
+forbid(fn()=>sqfReconcileVerifiedInvoice($db,$sub,'fixture-retry-invoice','fixture-retry-first','rejected',1490,'BRL',null,null),'superseded attempt cannot overwrite approved invoice');
+forbid(fn()=>sqfReconcileVerifiedInvoice($db,$sub,'fixture-other-invoice','fixture-retry-first','approved',1490,'BRL',$paid,$end),'superseded payment cannot fund another invoice');
+verify((int)sqfQuery($db,"SELECT COUNT(*) FROM sqf_billing_payment_attempts WHERE invoice_id='fixture-retry-invoice'")->fetchColumn()===2,'retry preserves both payment identities');
+$parsed=sqfMpWebhookQuery('route=billing%2Fwebhook&data.id=fixture-remote-invoice&type=subscription_authorized_payment');
+verify($parsed['data.id']==='fixture-remote-invoice','webhook query preserves dotted key');
+forbid(fn()=>sqfMpWebhookQuery('data.id=first&data.id=second&type=subscription_authorized_payment'),'duplicate event ID rejected');
+forbid(fn()=>sqfMpWebhookQuery('data.id=first&type=payment'),'unsupported webhook topic rejected');
+sqfQuery($db,'DELETE a FROM sqf_billing_payment_attempts a JOIN sqf_billing_invoices i ON i.mp_invoice_id=a.invoice_id WHERE i.subscription_id=?',[$sub]);
 sqfQuery($db,'DELETE FROM sqf_billing_invoices WHERE subscription_id=?',[$sub]);
 sqfQuery($db,'DELETE FROM sqf_billing_subscriptions WHERE id=?',[$sub]);
 sqfQuery($db,'UPDATE sqf_billing_settings SET require_paid_subscription=0 WHERE singleton=1');
