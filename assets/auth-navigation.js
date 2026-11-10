@@ -23,8 +23,10 @@
       if (link.dataset.sqfOriginalLabel === undefined) link.dataset.sqfOriginalLabel = link.textContent;
       const original = link.dataset.sqfOriginalHref;
       if (original === 'entrar.html') {
-        link.href = authenticated ? 'painel.html' : original;
+        link.href = authenticated ? (window.SQFDataMode==='mysql'?'painel-mysql.html':'painel.html') : original;
         link.textContent = authenticated ? 'Minha conta' : link.dataset.sqfOriginalLabel;
+      } else if (original === 'painel.html' && window.SQFDataMode==='mysql') {
+        link.href = authenticated ? 'painel-mysql.html' : 'entrar.html';
       } else if (original === 'cadastro.html') {
         link.hidden = authenticated;
       }
@@ -124,7 +126,7 @@
     const token = ++generation;
     eventSignal.abort(); eventSignal = new AbortController();
     if(window.SQFDataMode==='mysql'){
-      try{const s=await window.SQFMySQL.session();if(token!==generation)return;if(!s.user_id){guest();return;}const p=await window.SQFMySQL.profile();if(token!==generation)return;userMenu({id:s.user_id},p.data?.full_name||'Minha conta',null,true);if(['entrar.html','cadastro.html'].includes(location.pathname.split('/').pop()))location.replace('painel-mysql.html');}catch{if(token===generation)guest();}return;
+      try{const s=await window.SQFMySQL.session();if(token!==generation)return;if(!s.user_id){guest();return;}const p=await window.SQFMySQL.profile();if(token!==generation)return;userMenu({id:s.user_id},p.data?.full_name||'Minha conta',Number(p.data?.has_avatar)===1?window.SQFMySQL.mediaUrl('avatar',s.user_id):null,true);if(['entrar.html','cadastro.html'].includes(location.pathname.split('/').pop()))location.replace('painel-mysql.html');}catch{if(token===generation)guest();}return;
     }
     try { client = window.getSQFClient(); }
     catch { guest(); return; }
