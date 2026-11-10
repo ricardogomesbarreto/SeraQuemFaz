@@ -7,7 +7,7 @@
     "check": "node database/audit/verify-mysql.mjs",
     "test": "node --test tests/*.test.cjs",
     "verify": "npm run check && npm test",
-    "build:dist": "node database/hostinger/build-install.mjs && node database/hostinger/build-candidate.mjs",
+    "build:dist": "npm run check && node database/hostinger/build-install.mjs && node database/hostinger/build-candidate.mjs",
     "cities:update": "node scripts/atualizar-municipios.mjs"
   },
   "engines": {

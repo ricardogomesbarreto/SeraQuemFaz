@@ -38,7 +38,7 @@
       } else missing();
       document.getElementById('categoryProviderCount').textContent = 'Prévia editorial';
       document.getElementById('sqfProviderFilters').hidden = true;
-      ui.state(results, 'Área de referência', 'Esta apresentação é ilustrativa. Não há profissionais cadastrados ou avaliações associados a esta prévia. O administrador precisa configurar as categorias públicas no Supabase para disponibilizar a busca real.');
+      ui.state(results, 'Área de referência', 'Esta apresentação é ilustrativa. Não há profissionais cadastrados ou avaliações associados a esta prévia. O administrador precisa instalar o catálogo no banco MySQL/MariaDB para disponibilizar a busca real.');
       state.hidden = true; content.hidden = false;
       return;
     }
