@@ -30,7 +30,9 @@ function sqfRequestRow(PDO $db,string $actor,string $id): array {
     return $r;
 }
 function sqfNotify(PDO $db,string $recipient,string $kind,string $title,string $body,string $request):void {
-    sqfQuery($db,'INSERT INTO sqf_notifications(recipient_id,kind,title,body,request_id) VALUES (?,?,?,?,?)',[$recipient,$kind,$title,$body,$request]);
+    $id=(string)$db->query('SELECT UUID()')->fetchColumn();
+    sqfQuery($db,'INSERT INTO sqf_notifications(id,recipient_id,kind,title,body,request_id) VALUES (?,?,?,?,?,?)',[$id,$recipient,$kind,$title,$body,$request]);
+    sqfQuery($db,'INSERT INTO sqf_notification_outbox(notification_id,recipient_id) SELECT ?,user_id FROM sqf_notification_preferences WHERE user_id=? AND email_enabled=1',[$id,$recipient]);
 }
 function sqfEvent(PDO $db,string $request,string $actor,string $action,?string $from,string $to,?int $cents=null):void {
     sqfQuery($db,'INSERT INTO sqf_request_events(request_id,actor_id,action,from_status,to_status,amount_cents) VALUES (?,?,?,?,?,?)',[$request,$actor,$action,$from,$to,$cents]);
