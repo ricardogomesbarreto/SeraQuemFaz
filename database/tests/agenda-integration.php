@@ -115,7 +115,8 @@ execq($db,'UPDATE sqf_admin_members SET active=0 WHERE user_id=?',[$u[2]]);
 reject(fn()=>sqfReviewModerate($db,$u[2],$review,'hidden',$note),'revoked staff cannot moderate');
 
 require_once __DIR__.'/../../backend/src/Category.php';
-$selected=(string)sqfQuery($db,"SELECT category_id FROM provider_services WHERE id=?",[$service2])->fetchColumn();
+$selected=(string)sqfQuery($db,"SELECT id FROM categories WHERE status='active' AND CHAR_LENGTH(id)=36 LIMIT 1")->fetchColumn();
+sqfSaveService($db,$u[1],null,$selected,'Serviço categoria pública','Serviço de homologação',null,null);
 $page=sqfCategoryPage($db,$selected,'2111300');
 check(in_array($u[1],array_column($page['profiles'],'id'),true),'category lists approved provider with matching active service');
 check(count(sqfCategoryPage($db,$selected,'0000000')['profiles'])===0,'category filters by municipality');
