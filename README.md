@@ -1,4 +1,4 @@
-# SERÁ QUEM FAZ? — v3.11.2
+# SERÁ QUEM FAZ? — v3.12.0
 
 <p align="center">
   <img src="assets/brand/logo-horizontal.png" alt="Logomarca do Será Quem Faz?" width="380">
@@ -8,7 +8,7 @@
   <img src="https://img.shields.io/badge/Frontend-HTML%2FCSS%2FJS-e34f26" alt="Frontend HTML, CSS e JavaScript">
   <img src="https://img.shields.io/badge/Banco-PostgreSQL-4169e1?logo=postgresql&logoColor=white" alt="Banco PostgreSQL">
   <img src="https://img.shields.io/badge/Backend-Supabase-3ecf8e?logo=supabase&logoColor=white" alt="Backend Supabase">
-  <a href="https://github.com/ricardogomesbarreto/SeraQuemFaz/releases"><img src="https://img.shields.io/badge/vers%C3%A3o-v3.11.2-8b3a45" alt="Versão v3.11.2"></a>
+  <a href="https://github.com/ricardogomesbarreto/SeraQuemFaz/releases"><img src="https://img.shields.io/badge/vers%C3%A3o-v3.12.0-8b3a45" alt="Versão v3.12.0"></a>
   <a href="https://github.com/ricardogomesbarreto/SeraQuemFaz/actions/workflows/ci.yml"><img src="https://github.com/ricardogomesbarreto/SeraQuemFaz/actions/workflows/ci.yml/badge.svg?branch=main" alt="Status da integração contínua"></a>
 </p>
 
@@ -16,7 +16,16 @@
 
 O **Será Quem Faz?** conecta quem precisa contratar um serviço a profissionais da sua região. O catálogo com sidebar permite pesquisar por município e categoria, consultar perfis e solicitar orçamentos. Clientes e prestadores conversam pelo painel e acompanham cada atendimento até a conclusão. O projeto começou em Santa Inês (MA) e usa o cadastro nacional de municípios do IBGE.
 
-## Última versão · v3.11.2
+## Última versão · v3.12.0
+
+- **Pesquisa assistida:** sinônimos de serviços ligados exclusivamente às categorias realmente ativas. Termos como **notebook**, **faxina** e **vazamento** passam a encontrar profissões correspondentes.
+- **Sugestões de grafia:** em pesquisas sem resultados, a interface sugere até três nomes de categoria existentes, com botões para reaplicar a busca.
+- **Orçamentos:** cliente filtra propostas por situação, pesquisa por descrição, condições e prestador, e ordena por valor ou data. Valores provêm das solicitações privadas, sem previsão fictícia.
+- **Design:** painéis e catálogo com controles responsivos azul-marinho e laranja.
+- **Qualidade:** testes Node 22 e 24 com novos cenários. Banco e regras RLS preservados; não há migração nesta versão.
+- **Gate:** verificar os fluxos reais com prestador aprovado, cliente e administrador antes de considerar o sistema pronto para produção.
+
+### Versão anterior · v3.11.2
 
 - Removida política de leitura RLS duplicada em serviços, sem publicar perfis ainda não aprovados.
 - Catálogo resiliente quando as avaliações ficam temporariamente indisponíveis: mantém profissionais visíveis e evita notas fictícias.
