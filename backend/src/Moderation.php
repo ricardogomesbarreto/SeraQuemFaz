@@ -126,3 +126,20 @@ function sqfStaffReviewCaseDecide(PDO $db,string $actor,string $type,string $id,
         }
     });
 }
+
+function sqfStaffDocuments(PDO $db,string $actor):array {
+    sqfRequireStaff($db,$actor);
+    return sqfQuery($db,"SELECT id,provider_id,document_kind,status,created_at FROM sqf_verification_documents WHERE status='pending' ORDER BY created_at ASC LIMIT 100")->fetchAll(PDO::FETCH_ASSOC);
+}
+function sqfStaffDocumentDecide(PDO $db,string $actor,string $id,string $state,string $note):void {
+    $note=trim($note);
+    if(!in_array($state,['accepted','rejected'],true)||mb_strlen($note)<20||mb_strlen($note)>1000)throw new DomainException('Decisão documental inválida');
+    sqfTxn($db,function()use($db,$actor,$id,$state,$note){
+        sqfRequireStaff($db,$actor,true);
+        $row=sqfQuery($db,'SELECT provider_id,status FROM sqf_verification_documents WHERE id=? FOR UPDATE',[$id])->fetch(PDO::FETCH_ASSOC);
+        if(!$row||$row['provider_id']===$actor||$row['status']!=='pending')throw new DomainException('Documento indisponível ou já analisado');
+        sqfQuery($db,'UPDATE sqf_verification_documents SET status=?,reviewed_by=?,reviewed_at=UTC_TIMESTAMP(6),review_note=? WHERE id=?',[$state,$actor,$note,$id]);
+        sqfQuery($db,"INSERT INTO sqf_staff_decision_log(actor_id,entity_type,entity_id,previous_status,new_status,decision_note) VALUES (?,'verification_document',?,?,?,?)",[$actor,$id,$row['status'],$state,$note]);
+        // Document decision does NOT change provider_verifications.status.
+    });
+}
