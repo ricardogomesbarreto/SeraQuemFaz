@@ -6,11 +6,13 @@
  const button=(text,fn)=>{const n=el('button',text);n.type='button';n.className='button button-outline button-small';n.addEventListener('click',async()=>{n.disabled=true;try{await fn();}catch(e){status(e.message||'Operação indisponível');}finally{n.disabled=false;}});return n;};
  const wrap=(title)=>{const d=el('article');d.className='card';d.append(el('h3',title));return d;};
  const empty=(root,items,msg)=>{root.replaceChildren();if(!items.length)root.append(el('p',msg));};
+ const image=(kind,id,alt)=>{const img=el('img');img.src=api.mediaUrl(kind,id);img.alt=alt;img.loading='lazy';img.style.maxWidth='100%';img.style.maxHeight='220px';img.style.objectFit='contain';return img;};
  let user,profile;
  const load=async()=>{
    const [p,q,a,n]=await Promise.all([api.profile(),api.requests(),api.appointments(),api.notifications()]);
    profile=p.data;if(!profile)throw new Error('Perfil indisponível');
    $('mysqlTitle').textContent=(profile.account_type==='prestador'?'Painel do prestador — ':'Painel do cliente — ')+profile.full_name;
+   const avatar=$('mysqlAvatar');avatar.hidden=Number(profile.has_avatar)!==1;if(!avatar.hidden)avatar.src=api.mediaUrl('avatar',user)+'&v='+Date.now();
    const form=$('mysqlProfile');form.elements.full_name.value=profile.full_name;form.elements.bio.value=profile.bio||'';form.elements.city_ibge.value=profile.city_ibge||'';
    const list=$('mysqlRequests');empty(list,q.data,'Nenhuma solicitação registrada.');
    for(const r of q.data){const card=wrap(r.description);card.append(el('p','Situação: '+r.status));if(r.quote_cents!==null)card.append(el('p',new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(Number(r.quote_cents)/100)+' — '+(r.quote_terms||'')));
@@ -33,6 +35,11 @@
        card.append(form);
      }
      const messages=el('div');card.append(button('Abrir conversa',async()=>{const result=await api.messages(r.id);messages.replaceChildren();for(const m of result.data.slice().reverse())messages.append(el('p',(m.sender_id===user?'Você: ':'Outra parte: ')+m.body));}),messages);
+     const attachments=el('div');card.append(button('Ver anexos',async()=>{const result=await api.mediaList('attachment',r.id);empty(attachments,result.data,'Nenhum anexo.');for(const item of result.data){const box=el('figure');box.append(image('attachment',item.id,item.caption||'Anexo da solicitação'),el('figcaption',item.caption||'Imagem'));attachments.append(box);}}),attachments);
+     if(['requested','quoted','accepted','in_progress','awaiting_confirmation'].includes(r.status)){
+       const file=el('input');file.type='file';file.accept='image/webp';file.setAttribute('aria-label','Imagem para anexar');
+       card.append(file,button('Enviar anexo',async()=>{const selected=file.files?.[0];if(!selected||selected.type!=='image/webp'||selected.size>5*1024*1024)throw new Error('Selecione WebP de até 5 MB.');await api.uploadMedia('attachment',r.id,selected);file.value='';status('Anexo enviado.');}));
+     }
      if(['requested','quoted','accepted','in_progress','awaiting_confirmation'].includes(r.status)){const input=el('textarea');input.placeholder='Mensagem privada';input.maxLength=2000;card.append(input,button('Enviar mensagem',async()=>{await api.sendMessage({request_id:r.id,body:input.value});input.value='';status('Mensagem enviada.');}));}
      if(['accepted','in_progress','awaiting_confirmation'].includes(r.status)){const dt=el('input');dt.type='datetime-local';const dur=el('input');dur.type='number';dur.min='30';dur.max='480';dur.value='60';card.append(dt,dur,button('Propor horário',async()=>{if(!dt.value)throw new Error('Informe a data');await api.appointment({request_id:r.id,action:'propose',starts_at:new Date(dt.value).toISOString(),duration_minutes:Number(dur.value)});await load();}));}
      list.append(card);
@@ -75,6 +82,7 @@
        item.append(link);target.append(item);
      }
    }
+   const portfolioSection=$('mysqlPortfolioSection');portfolioSection.hidden=profile.account_type!=='prestador';
    const serviceSection=$('mysqlServiceSection');
    serviceSection.hidden=profile.account_type!=='prestador';
    if(!serviceSection.hidden){
@@ -83,6 +91,10 @@
      const previous=select.value;select.replaceChildren();
      for(const category of categories.data){const option=el('option',category.name);option.value=category.id;select.append(option);}
      if(categories.data.some(x=>x.id===previous))select.value=previous;
+     const portfolioSelect=$('mysqlPortfolioForm').elements.service_id;portfolioSelect.replaceChildren();
+     for(const service of services.data){const option=el('option',service.service_title);option.value=service.id;portfolioSelect.append(option);}
+     const portfolio=(await api.mediaList('portfolio')).data;const portfolioRoot=$('mysqlPortfolio');empty(portfolioRoot,portfolio,'Nenhuma foto no portfólio.');
+     for(const item of portfolio){const box=el('figure');box.append(image('portfolio',item.id,item.caption||'Foto do portfólio'),el('figcaption',item.caption||'Trabalho realizado'));portfolioRoot.append(box);}
      const target=$('mysqlServices');empty(target,services.data,'Nenhum serviço cadastrado.');
      for(const service of services.data){
        const card=wrap(service.service_title);
@@ -110,6 +122,8 @@
        const details=el('div');
        card.append(button('Ver serviços',async()=>{
          const [result,reviews]=await Promise.all([api.provider(provider.id),api.publicReviews(provider.id)]);details.replaceChildren();
+         if(Number(result.data?.has_avatar)===1)details.append(image('avatar',provider.id,'Foto de '+provider.full_name));
+         if(result.data?.portfolio?.length){details.append(el('h4','Portfólio'));for(const item of result.data.portfolio){const box=el('figure');box.append(image('portfolio',item.id,item.caption||'Trabalho realizado'),el('figcaption',item.caption||'Foto do trabalho'));details.append(box);}}
          if(reviews.data.length){details.append(el('h4','Avaliações publicadas'));for(const review of reviews.data){details.append(el('p',review.rating+'/5 — '+review.comment));if(review.response)details.append(el('p','Resposta do profissional: '+review.response));}}
          if(!result.data?.services?.length){details.append(el('p','Nenhum serviço ativo.'));return;}
          const form=el('form'),list=el('select');
@@ -136,6 +150,15 @@
      }
    }catch(error){target.replaceChildren(el('p',error.message||'Busca indisponível'));}
  });
+ for(const [id,kind] of [['mysqlAvatarForm','avatar'],['mysqlPortfolioForm','portfolio']]){
+   $(id).addEventListener('submit',async event=>{
+     event.preventDefault();const form=event.currentTarget,file=form.elements.file.files?.[0];
+     if(!file||file.type!=='image/webp'||file.size>5*1024*1024){status('Envie WebP de até 5 MB.');return;}
+     const submit=form.querySelector('[type="submit"]');submit.disabled=true;
+     try{await api.uploadMedia(kind,kind==='avatar'?'self':form.elements.service_id.value,file,form.elements.caption?.value||'');form.reset();await load();status('Imagem salva.');}
+     catch(error){status(error.message||'Falha ao salvar imagem.');}finally{submit.disabled=false;}
+   });
+ }
  $('mysqlDocumentForm').addEventListener('submit',async event=>{
    event.preventDefault();
    const form=event.currentTarget,file=form.elements.file.files?.[0],type=form.elements.document_kind.value;
