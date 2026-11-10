@@ -17,3 +17,6 @@ putenv('SQF_MP_WEBHOOK_SECRET=');
 // Private CLI worker: enable only after mail delivery is verified.
 putenv('SQF_NOTIFICATIONS_ENABLED=0');
 putenv('SQF_SITE_URL=');
+
+// Enable only after staging validation; private CLI cron.
+putenv('SQF_MAINTENANCE_ENABLED=0');

@@ -78,6 +78,8 @@ jobs:
           php -l backend/bin/notifications.php
           php -l backend/bin/preflight-identities.php
           php -l backend/bin/hostinger-preflight.php
+          php -l backend/bin/maintenance.php
+          php -l backend/src/Maintenance.php
           php -l backend/src/Moderation.php
           php -l backend/src/PrivateMedia.php
           php -l database/tests/private-media-integration.php
@@ -92,6 +94,7 @@ jobs:
           mkdir -m 700 -p /tmp/sqf-private-media
           php database/tests/private-media-integration.php
           php database/tests/notifications-integration.php
+          php database/tests/maintenance-integration.php
 
           php database/tests/browser-fixture.php
           php database/tests/integrity.php

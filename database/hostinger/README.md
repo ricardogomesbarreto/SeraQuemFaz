@@ -18,3 +18,7 @@ O CLI de notificações e a pré-validação de identidades ficam em sqf-private
 - Staging: subdomínio separado, banco e credenciais próprios, sem cópia de dados privados sem autorização. SFTP/SSH e integração Git apenas com pacote revisado; nunca publicar sqf-private em public_html.
 
 Referências oficiais: https://www.hostinger.com/br/hospedagem-php ; https://www.hostinger.com/support/hostinger-node-js-limits-for-web-and-cloud-plans/ ; https://www.hostinger.com/support/1665153-how-to-activate-daily-backups-in-hostinger/ ; https://www.hostinger.com/support/1583465-how-to-set-up-a-cron-job-at-hostinger/ .
+
+### Rotina de manutenção
+
+Após homologação, configure um Cron Job PHP para `sqf-private/backend/bin/maintenance.php` (por exemplo, a cada hora), habilitando `SQF_MAINTENANCE_ENABLED=1` no config privado. Remove somente tokens de autenticação e limites de tentativas expirados, em lotes de até 200 por execução e com bloqueio concorrente. Não modifica contas, pedidos, faturas ou mídia. Por padrão permanece desativado. Não agendar antes da aprovação do ambiente.

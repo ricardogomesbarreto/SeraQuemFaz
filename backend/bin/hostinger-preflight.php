@@ -32,6 +32,7 @@ try{
 }catch(Throwable $e){$checks['database_connected']=false;}
 $checks['live_webhook_disabled']=getenv('SQF_MP_WEBHOOK_ENABLED')!=='1';
 $checks['live_notifications_disabled']=getenv('SQF_NOTIFICATIONS_ENABLED')!=='1';
+$checks['maintenance_disabled']=getenv('SQF_MAINTENANCE_ENABLED')!=='1';
 $ok=!in_array(false,$checks,true);
 echo json_encode(['plan'=>'Hostinger Unlimited','ready_for_staging'=>$ok,'production_approved'=>false,'checks'=>$checks],JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE|JSON_THROW_ON_ERROR).PHP_EOL;
 exit($ok?0:1);
