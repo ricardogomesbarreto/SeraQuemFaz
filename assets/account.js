@@ -552,6 +552,7 @@
     $('accountToolbar').hidden=false;
     $('accountName').textContent=profile.full_name;
     $('accountEmail').textContent=user.email || 'Não informado';
+    $('accountCity').textContent=profile.city||'Não informada';
     $('accountType').textContent=profile.account_type==='prestador'?'Prestador de serviços':'Cliente';
     $('accountTypeSubtitle').textContent=profile.account_type==='prestador'?'Perfil de prestador de serviço':'Perfil de cliente';
     $('profileFullName').value=profile.full_name;
@@ -574,6 +575,8 @@
       ? 'Organize seus dados profissionais, formas de atendimento, serviços, portfólio e verificação.'
       : 'Acompanhe seus atendimentos confirmados, avaliações, favoritos e solicitações com privacidade.';
     $('accountCatalogShortcut').hidden=providerAccount;
+    $('accountExploreLink').textContent=providerAccount?'Ver catálogo de serviços ↗':'Explorar serviços ↗';
+    $('accountFavoriteLink').hidden=providerAccount;
     $('accountFavoritesShortcut').hidden=providerAccount;
     $('accountServicesShortcut').hidden=!providerAccount;
     $('accountPortfolioShortcut').hidden=!providerAccount;
@@ -769,6 +772,7 @@
           if(removeError)console.warn('Avatar antigo não removido:',removeError.message);
         }
         $('accountName').textContent=updated.full_name;
+        $('accountCity').textContent=updated.city||'Não informada';
         await renderOwnAvatar();
         syncProviderSidebar();syncClientSidebar();
         void window.SQFAccountNavigation?.refresh();
