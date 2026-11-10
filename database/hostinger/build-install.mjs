@@ -5,7 +5,7 @@ import { createHash } from 'node:crypto';
 
 const root=resolve(dirname(fileURLToPath(import.meta.url)),'../..');
 const out=resolve(process.argv[2]||resolve(root,'dist/hostinger'));
-const files=['001_schema.sql','002_auth.sql','003_staff_mfa.sql'];
+const files=['001_schema.sql','002_auth.sql','003_staff_mfa.sql','004_provider_verification_backfill.sql'];
 const migrations=await Promise.all(files.map(name=>readFile(resolve(root,'database/mysql/migrations',name),'utf8')));
 const categories=JSON.parse(await readFile(resolve(root,'database/seed/categories.json'),'utf8'));
 const cities=JSON.parse(await readFile(resolve(root,'assets/municipios-br.json'),'utf8'));
