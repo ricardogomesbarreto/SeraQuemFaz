@@ -45,3 +45,34 @@ jobs:
             dist/SeraQuemFaz_codigo_v*.zip
           if-no-files-found: error
           retention-days: 30
+
+  postgres-agenda:
+    name: PostgreSQL — concorrência de agenda
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: test-only
+          POSTGRES_DB: sqf_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d sqf_test"
+          --health-interval 2s
+          --health-timeout 3s
+          --health-retries 15
+    env:
+      PGHOST: localhost
+      PGPORT: 5432
+      PGUSER: postgres
+      PGPASSWORD: test-only
+      PGDATABASE: sqf_test
+    steps:
+      - uses: actions/checkout@v4
+      - name: Instalar cliente PostgreSQL
+        run: sudo apt-get update -qq && sudo apt-get install -y postgresql-client
+      - name: Validar migração e concorrência real
+        run: bash tests/postgres/appointment-concurrency.sh
