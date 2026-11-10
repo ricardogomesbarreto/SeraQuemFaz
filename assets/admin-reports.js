@@ -37,14 +37,20 @@
     ['Pedidos de suporte em aberto',data[0].tickets_open]
    ];
    target.replaceChildren();
-   metricsSnapshot=counters.map(([label,num])=>[label,Number.isFinite(Number(num))?Number(num):0]);
+   const count=value=>window.SQFOps?.count(value)??null;
+   metricsSnapshot=counters.map(([label,num])=>[label,count(num)??'Indisponível']);
+   const completion=window.SQFOps?.percentage(data[0].requests_completed,data[0].requests_total);
+   metricsSnapshot.push(['Atendimentos concluídos / solicitações (%)',completion==null?'Indisponível':completion]);
    if(exportButton)exportButton.disabled=false;
    for(const [label,num] of counters){
     const card=make('div','admin-stat');
-    card.append(make('span','',label),make('strong','',Number.isFinite(Number(num))?String(num):'—'));
+    card.append(make('span','',label),make('strong','',count(num)==null?'—':String(count(num))));
     target.append(card);
    }
-   msg('sqfAdminReportsStatus','Indicadores atualizados do banco, sujeitos às permissões administrativas.');
+   const rate=make('div','admin-stat');
+   rate.append(make('span','','Atendimentos concluídos / solicitações'),make('strong','',completion==null?'—':completion.toLocaleString('pt-BR')+'%'));
+   target.append(rate);
+   msg('sqfAdminReportsStatus','Atualizado em '+new Intl.DateTimeFormat('pt-BR',{dateStyle:'short',timeStyle:'short'}).format(new Date())+'. Dados autorizados do banco. Percentual histórico, não conversão de vendas.');
   }catch{
    target.replaceChildren();
    metricsSnapshot=null;

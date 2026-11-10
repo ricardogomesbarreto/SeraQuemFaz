@@ -1526,3 +1526,14 @@ body{min-width:320px}
 .sqf-quote-compare-card:focus-within{outline:2px solid #e97e36;outline-offset:2px}
 @media(max-width:860px){.sqf-compare-controls{grid-template-columns:repeat(2,minmax(0,1fr))}.sqf-compare-controls .form-field:first-child{grid-column:1/-1}}
 @media(max-width:540px){.sqf-compare-controls{grid-template-columns:minmax(0,1fr)}.sqf-compare-controls .form-field:first-child{grid-column:auto}.sqf-search-assistance{padding:14px}.sqf-search-assistance-options{width:100%}}
+
+/* v3.13.0 — organização operacional */
+.sqf-ops-controls{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin:12px 0 18px;padding:13px 16px;background:#f4f8fb;border:1px solid #d9e7ef;border-radius:13px}
+.sqf-ops-controls>label{display:flex;align-items:center;gap:8px;color:#153e5b;font-weight:700;font-size:.86rem}
+.sqf-ops-controls p{margin:0;font-size:.82rem}
+.sqf-agenda-controls{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));align-items:end}
+.sqf-agenda-controls .form-field{min-width:0}
+.sqf-agenda-controls #sqfAgendaClear{grid-column:1/-1;justify-self:start}
+.sqf-agenda-overlap{display:block;color:#89501d;background:#fff2df;border-radius:7px;padding:7px 9px;font-weight:700;font-size:.76rem}
+@media(max-width:820px){.sqf-agenda-controls{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:520px){.sqf-agenda-controls{grid-template-columns:minmax(0,1fr)}}

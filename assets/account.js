@@ -505,11 +505,13 @@
     const {data,error}=await client.from('portfolio_photos').select('id,storage_path,caption,service_id,is_cover').eq('provider_id',user.id).order('created_at',{ascending:false});
     if(error) throw error;
     currentPhotoCount=data?.length||0;
+    const chosen=$('portfolioServiceFilter')?.value||'';
+    const coverOnly=Boolean($('portfolioCoverOnly')?.checked);
+    const visible=window.SQFOps?window.SQFOps.portfolio(data,{service:chosen,coverOnly}):(data||[]).filter(photo=>(!chosen||photo.service_id===chosen)&&(!coverOnly||photo.is_cover));
+    if($('portfolioPhotoCount'))$('portfolioPhotoCount').textContent=visible.length+' de '+currentPhotoCount+' foto(s) · agrupadas por serviço, capas primeiro';
     if($('providerStatPhotos'))$('providerStatPhotos').textContent=String(currentPhotoCount);
     if(!data?.length){ui.state(list,'Sem fotos no portfólio','Mostre fotos autorais de serviços que você realizou.');return;}
-    const chosen=$('portfolioServiceFilter')?.value||'';
-    for(const photo of data){
-      if(chosen && photo.service_id!==chosen)continue;
+    for(const photo of visible){
       const imgUrl=ui.publicUrl(client,'sqf-portfolios',photo.storage_path);
       if(!imgUrl)continue;
       const card=ui.make('figure','portfolio-photo');card.append(ui.safeImg(imgUrl,photo.caption || 'Trabalho do prestador'));
@@ -727,6 +729,7 @@
         announce('accountStatus','Perfil disponível. Alguns módulos não carregaram; atualize a página para tentar novamente.');
       }
       $('portfolioServiceFilter')?.addEventListener('change',()=>loadPhotos().catch(e=>announce('galleryMessage',e.message,true)));
+      $('portfolioCoverOnly')?.addEventListener('change',()=>loadPhotos().catch(e=>announce('galleryMessage',e.message,true)));
       const extrasForm=$('professionalDetailsForm');
       const refreshExtrasPreview=()=>{
         try{updateProfessionalExtrasProgress(window.SQFProfessionalDetails.readForm(extrasForm));}
