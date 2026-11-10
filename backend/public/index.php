@@ -72,6 +72,12 @@ try {
     }
     $actor=sqfSessionUser($db,$_SESSION);
     if(!$actor)respond(['error'=>'Autenticação necessária'],401);
+    if($route==='profile/update'){
+      $name=trim(required($body,'full_name'));$bio=trim(required($body,'bio'));$code=isset($body['city_ibge'])?required($body,'city_ibge'):null;
+      if(mb_strlen($name)<2||mb_strlen($name)>120||mb_strlen($bio)>1500)throw new DomainException('Perfil inválido');
+      $city='';if($code!==null){$m=sqfQuery($db,'SELECT name,uf FROM sqf_ibge_municipalities WHERE code=?',[$code])->fetch(PDO::FETCH_ASSOC);if(!$m)throw new DomainException('Município inválido');$city=$m['name'].' - '.$m['uf'];}
+      sqfQuery($db,'UPDATE profiles SET full_name=?,bio=?,city=?,city_ibge=?,updated_at=UTC_TIMESTAMP(6) WHERE id=?',[$name,$bio,$city,$code,$actor]);respond(['ok'=>true]);
+    }
     if($route==='profile')respond(['data'=>sqfQuery($db,'SELECT id,full_name,account_type,city,city_ibge,bio FROM profiles WHERE id=?',[$actor])->fetch(PDO::FETCH_ASSOC)]);
     if($route==='requests')respond(['data'=>sqfQuery($db,'SELECT id,client_id,provider_id,description,status,quote_cents,quote_terms,created_at FROM sqf_service_requests WHERE client_id=? OR provider_id=? ORDER BY created_at DESC LIMIT 100',[$actor,$actor])->fetchAll(PDO::FETCH_ASSOC)]);
     if($route==='appointments')respond(['data'=>sqfQuery($db,'SELECT request_id,starts_at,duration_minutes,status,pending_starts_at,pending_duration_minutes,pending_proposed_by,proposed_by FROM sqf_appointments WHERE client_id=? OR provider_id=? ORDER BY starts_at LIMIT 100',[$actor,$actor])->fetchAll(PDO::FETCH_ASSOC)]);
