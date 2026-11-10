@@ -47,3 +47,9 @@ jobs:
           php -l backend/public/index.php
           php database/tests/agenda-integration.php
           php database/tests/auth-integration.php
+
+          SQF_ALLOW_INSECURE_LOCAL=1 php -S 127.0.0.1:8080 -t backend/public >/tmp/sqf-http.log 2>&1 &
+          trap 'kill $! 2>/dev/null || true; cat /tmp/sqf-http.log' EXIT
+          for i in $(seq 1 20); do curl -fsS 'http://127.0.0.1:8080/index.php?route=session' >/dev/null && break; sleep 1; done
+          node --check assets/mysql-api-client.js
+          node database/tests/http-integration.mjs
