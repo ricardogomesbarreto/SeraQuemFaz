@@ -61,3 +61,19 @@ check(sqfRequestAction($db,$u[0],$id,'confirm')==='completed','client completes'
 check((int)sqfQuery($db,'SELECT COUNT(*) FROM sqf_request_events WHERE request_id=?',[$id])->fetchColumn()===6,'request audit history persists');
 execq($db,"UPDATE provider_verifications SET status='suspended' WHERE provider_id=?",[$u[1]]);
 check(count(sqfCatalog($db,'2111300'))===0,'suspended provider hidden');
+
+require __DIR__.'/../../backend/src/Services.php';
+$category=(string)sqfQuery($db,"SELECT id FROM categories WHERE status='active' LIMIT 1")->fetchColumn();
+check($category!=='','seeded category available');
+reject(fn()=>sqfSaveService($db,$u[0],null,$category,'Serviço proibido','',null,null),'client cannot create provider service');
+$service3=sqfSaveService($db,$u[1],null,$category,'Serviço novo homologação','Descrição do serviço',5000,15000);
+check(strlen($service3)===36,'provider can create own service');
+reject(fn()=>sqfSaveService($db,$u[0],$service3,$category,'Alteração indevida','',null,null),'client cannot change provider service');
+check(count(sqfOwnServices($db,$u[1]))>=1,'provider can list own services');
+reject(fn()=>sqfOwnServices($db,$u[0]),'client cannot list provider management');
+check(sqfPublicProvider($db,$u[1])===null,'suspended provider public detail hidden');
+execq($db,"UPDATE provider_verifications SET status='approved' WHERE provider_id=?",[$u[1]]);
+check(sqfPublicProvider($db,$u[1])!==null,'approved provider public detail available');
+sqfToggleService($db,$u[1],$service3,false);
+check(!in_array($service3,array_column(sqfPublicProvider($db,$u[1])['services'],'id'),true),'inactive service excluded from public profile');
+reject(fn()=>sqfToggleService($db,$u[0],$service3,true),'client cannot toggle service');
