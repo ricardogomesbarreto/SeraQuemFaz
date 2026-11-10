@@ -16,6 +16,27 @@
      }catch(e){status.textContent=e.message;}finally{submit.disabled=false;}});
      card.append(decision);queue.append(card);
    }
+   const cases=(await api.staffReviewCases()).data;
+   for(const [type,items,states] of [
+     ['response',cases.responses,[['published','Publicar'],['rejected','Rejeitar'],['hidden','Ocultar']]],
+     ['dispute',cases.disputes,[['reviewing','Em análise'],['upheld','Aceitar contestação'],['dismissed','Recusar contestação']]]
+   ]){
+     queue.append(el('h2',type==='response'?'Respostas pendentes':'Contestações'));
+     if(!items.length)queue.append(el('p','Nenhum caso pendente.'));
+     for(const item of items){
+       const card=el('article');card.className='card';
+       card.append(el('p',item.message||item.details));
+       const decision=el('form'),select=el('select'),note=el('textarea');
+       for(const [value,label] of states){const option=el('option',label);option.value=value;select.append(option);}
+       note.required=true;note.minLength=20;note.maxLength=1000;note.placeholder='Justificativa da decisão';
+       const submit=el('button','Registrar decisão');submit.className='button button-primary';submit.type='submit';
+       decision.append(select,note,submit);card.append(decision);queue.append(card);
+       decision.addEventListener('submit',async event=>{event.preventDefault();submit.disabled=true;try{
+         if(!window.confirm('Registrar a decisão deste caso?'))return;
+         await api.staffReviewCaseDecide({type,id:type==='response'?item.review_id:item.id,status:select.value,note:note.value});await load();
+       }catch(e){status.textContent=e.message;}finally{submit.disabled=false;}});
+     }
+   }
    form.hidden=true;status.textContent='Fila de avaliações carregada.';
  }
  form.addEventListener('submit',async event=>{event.preventDefault();const submit=form.querySelector('button');submit.disabled=true;try{await api.staffMfa(form.elements.code.value);form.reset();await load();}catch(e){status.textContent=e.message;}finally{submit.disabled=false;}});
