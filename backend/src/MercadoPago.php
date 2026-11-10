@@ -60,7 +60,7 @@ function sqfMpProcessInvoiceWebhook(PDO $db,string $signature,string $id,string 
 function sqfMpGet(string $path):array {
     if(getenv('SQF_MP_WEBHOOK_ENABLED')!=='1')throw new RuntimeException('Integração desativada');
     $token=getenv('SQF_MP_ACCESS_TOKEN');
-    if(!$token||!preg_match('/^[A-Za-z0-9_-]{16,512}$/D',$token)||!function_exists('curl_init'))throw new RuntimeException('Transporte indisponível');
+    if(!$token||!preg_match('/^TEST-[A-Za-z0-9_-]{16,507}$/D',$token)||!function_exists('curl_init'))throw new RuntimeException('Transporte indisponível');
     if(!preg_match('#^/(?:authorized_payments|preapproval|v1/payments)/[A-Za-z0-9_-]{1,120}$#D',$path))throw new DomainException('Recurso inválido');
     $curl=curl_init('https://api.mercadopago.com'.$path);
     $body='';
@@ -71,6 +71,7 @@ function sqfMpGet(string $path):array {
         if(curl_exec($curl)===false||curl_getinfo($curl,CURLINFO_RESPONSE_CODE)!==200)throw new RuntimeException('Consulta financeira indisponível');
         $data=json_decode($body,true,32,JSON_THROW_ON_ERROR|JSON_BIGINT_AS_STRING);
         if(!is_array($data))throw new RuntimeException('Resposta financeira inválida');
+        if(str_starts_with($path,'/v1/payments/')&&($data['live_mode']??null)!==false)throw new RuntimeException('Pagamento fora da homologação');
         return $data;
     }finally{curl_close($curl);}
 }
