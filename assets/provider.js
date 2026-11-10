@@ -35,12 +35,28 @@
   try {
     const client = window.getSQFClient();
     const [{ data: profile, error: pe }, {data: authData}] = await Promise.all([
-      client.from('profiles').select('id,full_name,city,bio,avatar_path,account_type,is_public').eq('id',providerId).eq('account_type','prestador').eq('is_public',true).maybeSingle(),
+      client.from('profiles').select('id,full_name,city,bio,avatar_path,account_type,is_public').eq('id',providerId).eq('account_type','prestador').maybeSingle(),
       client.auth.getUser()
     ]);
     if (pe) throw pe;
     if (!profile) { status.textContent='Perfil não encontrado, não aprovado ou indisponível.'; return; }
     const authUser = authData?.user || null;
+    const viewingOwnProfile=authUser?.id===providerId;
+    if(viewingOwnProfile){
+      // A política RLS libera a prévia ao proprietário, mesmo sem aprovação.
+      // A disponibilidade PÚBLICA é consultada com a mesma função usada nas RLS.
+      // Em caso de falha, nunca assumir que o perfil está publicado.
+      let publiclyVisible=false;
+      try{
+        const {data,error}=await client.rpc('sqf_provider_public',{p_provider:providerId});
+        publiclyVisible=!error&&data===true;
+      }catch{ /* Sem resposta, manter a indicação conservadora de prévia privada. */ }
+      if(!publiclyVisible){
+        const notice=$('sqfOwnerPreviewNotice');
+        if(notice)notice.hidden=false;
+        $('providerTrustStatus').textContent='Prévia somente para sua conta: a publicação pública ainda não foi autorizada.';
+      }
+    }
     if(authUser?.id && authUser.id!==providerId){
       // Contagem única de visitantes autenticados por dia, sem rastreamento anônimo.
       void client.rpc('sqf_register_profile_view',{p_provider:providerId}).then(()=>{},()=>{});
@@ -69,7 +85,11 @@
     $('profileAboutCopy').textContent=profile.bio || 'Este profissional ainda não publicou sua apresentação.';
     $('providerAvatar').replaceWith(ui.avatar(client,profile.avatar_path,profile.full_name,'avatar-large'));
     $('providerRating').replaceWith(ui.ratingLine(publishedReviews));
-    $('providerTrustStatus').textContent='Cadastro analisado pela equipe · Isso não é garantia de idoneidade, qualificação ou segurança.';
+    if(!$('sqfOwnerPreviewNotice')?.hidden){
+      $('providerTrustStatus').textContent='Prévia somente para sua conta: clientes ainda não podem ver este perfil.';
+    }else{
+      $('providerTrustStatus').textContent='Cadastro aprovado para exibição pública · A análise não garante idoneidade, qualificação ou segurança.';
+    }
     try{
       const {data:completed,error:completedError}=await client.rpc('sqf_provider_completed_count',{p_provider:providerId});
       if(!completedError&&Number.isInteger(completed)){
