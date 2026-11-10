@@ -11,6 +11,8 @@ async function call(route,body,token=csrf){
  return {status:response.status,result};
 }
 let x=await call('categories');assert.equal(x.status,200);assert.ok(Array.isArray(x.result.data));assert.equal(x.result.data.length,51);
+const missing=await fetch(base+'?route=provider&id=not-a-uuid');assert.equal(missing.status,400);
+const publicProvider=await fetch(base+'?route=provider&id=00000000-0000-4000-8000-000000000002');assert.equal(publicProvider.status,200);assert.ok((await publicProvider.json()).data);
 x=await call('session');assert.equal(x.status,200);assert.equal(x.result.user_id,null);assert.ok(csrf);
 assert.equal((await call('request/messages',{request_id:'test'})).status,401);
 assert.equal((await call('login',{email:'auth-fixture@example.invalid',password:'new-fixture-password-5678'},'wrong')).status,403);
