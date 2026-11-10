@@ -1,5 +1,7 @@
 'use strict';
 (() => {
+  const mysql=window.SQFDataMode==='mysql';
+  const minPassword=mysql?12:8;
   const utils = window.SQFUtils;
   const $ = (id) => document.getElementById(id);
   const status = (id, value, error = false) => {
@@ -33,10 +35,15 @@
     });
   });
   const localProtocolNotice = $('authLocalProtocolNotice');
-  const localOrUnpublished = !window.SQFAuthRedirect?.publicRedirect();
-  if (localProtocolNotice && (location.protocol === 'file:' || localOrUnpublished)) localProtocolNotice.hidden = false;
+  const localOrUnpublished = !mysql && !window.SQFAuthRedirect?.publicRedirect();
+  if (localProtocolNotice && !mysql && (location.protocol === 'file:' || localOrUnpublished)) localProtocolNotice.hidden = false;
   const verificationRedirect = (page) => window.SQFAuthRedirect?.publicRedirect(page) || null;
   const signup = $('signupForm');
+  if(mysql){
+    if(signup){$('password').minLength=12;$('password').placeholder='Mínimo 12 caracteres';}
+    const code=$('emailCode');if(code){code.pattern='[0-9a-f]{64}';code.minLength=64;code.maxLength=64;code.inputMode='text';code.placeholder='Código de 64 caracteres';}
+    const reset=$('resetPassword');if(reset){reset.minLength=12;reset.placeholder='Mínimo 12 caracteres';const label=document.createElement('label');label.textContent='Código de recuperação recebido por e-mail';const token=document.createElement('input');token.id='mysqlResetToken';token.required=true;token.minLength=64;token.maxLength=64;token.autocomplete='one-time-code';label.append(token);reset.parentNode.insertBefore(label,reset);}
+  }
   let signupInFlight = false;
   if (signup) {
     if (new URLSearchParams(location.search).get('tipo') === 'prestador') $('accountType').value = 'prestador';
@@ -47,7 +54,7 @@
         $('lastName').value.trim().length >= 2,
         utils.isValidEmail($('email').value.trim()),
         Boolean(picker?.getSelected()),
-        $('password').value.length >= 8,
+        $('password').value.length >= minPassword,
         Boolean($('confirmPassword').value) && $('confirmPassword').value === $('password').value
       ].filter(Boolean).length;
       $('signupProgress').value=good;
@@ -74,14 +81,15 @@
       requireField('firstNameError',first.length < 2 || first.length > 60,'Informe um nome válido (2 a 60 caracteres).');
       requireField('lastNameError',last.length < 2 || last.length > 80,'Informe um sobrenome válido (2 a 80 caracteres).');
       requireField('emailError',!utils.isValidEmail(email),'Informe um e-mail válido.');
-      requireField('passwordError',password.length < 8,'Use uma senha com pelo menos 8 caracteres.');
+      requireField('passwordError',password.length < minPassword,`Use uma senha com pelo menos ${minPassword} caracteres.`);
       requireField('confirmPasswordError',password !== $('confirmPassword').value,'As senhas devem ser iguais.');
       if (!selectedCity) { cityPicker?.validate(); valid = false; }
       if (!valid) return;
-      const client = clientOrError(); if (!client) return;
+      const client = mysql?null:clientOrError(); if (!mysql&&!client) return;
       signupInFlight = true;
       const button = $('submitBtn'); busy(button,true);
       try {
+        if(mysql){await window.SQFMySQL.register(email,password,`${first} ${last}`,type,selectedCity.id);status('message','Cadastro recebido. Confira o código de confirmação no e-mail e use a tela de acesso.');return;}
         const redirect = verificationRedirect('entrar.html');
         const { data, error } = await client.auth.signUp({
           email, password,
@@ -101,10 +109,10 @@
   }
   const login = $('loginForm');
   if (login) {
-    const client = clientOrError();
+    const client = mysql?null:clientOrError();
     const resetForm = $('resetForm');
     const requestId=utils.requestIdFromSearch(location.search);
-    const destination=requestId ? `painel.html?solicitacao=${requestId}#sqfRequestPortal` : 'painel.html';
+    const destination=mysql?'painel-mysql.html':requestId ? `painel.html?solicitacao=${requestId}#sqfRequestPortal` : 'painel.html';
     const otpForm=$('emailCodeForm');
     const showCodeForm=()=>{
       if(!otpForm)return;
@@ -122,12 +130,13 @@
       event.preventDefault();
       const email=$('codeEmail').value.trim();
       const token=$('emailCode').value.trim();
-      if(!utils.isValidEmail(email)||!/^[0-9]{6}$/.test(token)){
-        status('codeMessage','Informe seu e-mail e o código de seis dígitos enviado pelo Supabase.',true);return;
+      if(!utils.isValidEmail(email)||!(mysql?/^[0-9a-f]{64}$/:/^[0-9]{6}$/).test(token)){
+        status('codeMessage',mysql?'Informe o e-mail e o código de 64 caracteres.':'Informe seu e-mail e o código de seis dígitos.',true);return;
       }
-      const current=client||clientOrError();if(!current)return;
+      const current=mysql?null:(client||clientOrError());if(!mysql&&!current)return;
       const button=$('verifyEmailCode');busy(button,true);
       try{
+        if(mysql){await window.SQFMySQL.verify(token);showLoginForm();$('email').value=email;status('message','E-mail confirmado. Entre com sua senha.');return;}
         const {data,error}=await current.auth.verifyOtp({email,token,type:'email'});
         if(error)throw error;
         status('codeMessage','E-mail confirmado com sucesso. Você pode entrar na sua conta.');
@@ -154,10 +163,11 @@
       if (!utils.isValidEmail(email)) fieldError('emailError','Informe um e-mail válido.');
       if (!password) fieldError('passwordError','Informe sua senha.');
       if (!utils.isValidEmail(email) || !password) return;
-      const current = client || clientOrError(); if (!current) return;
+      const current = mysql?null:(client || clientOrError()); if (!mysql&&!current) return;
       signupInFlight = true;
       const button = $('submitBtn'); busy(button,true);
       try {
+        if(mysql){await window.SQFMySQL.login(email,password);location.assign(destination);return;}
         const { data, error } = await current.auth.signInWithPassword({ email, password });
         if (error || !data?.session) throw error || new Error('Nenhuma sessão retornada.');
         location.assign(destination);
@@ -170,9 +180,10 @@
       const email = $('email').value.trim();
       if (!utils.isValidEmail(email)) { fieldError('emailError','Digite seu e-mail para solicitar a recuperação.'); $('email').focus(); return; }
       fieldError('emailError','');
-      const current = client || clientOrError(); if (!current) return;
+      const current = mysql?null:(client || clientOrError()); if (!mysql&&!current) return;
       const button = $('forgotBtn'); busy(button,true);
       try {
+        if(mysql){await window.SQFMySQL.requestReset(email);showRecoveryForm();status('resetMessage','Se a conta existir, confira o código recebido por e-mail.');return;}
         const redirect = verificationRedirect('entrar.html?recuperar=1');
         const { error } = await current.auth.resetPasswordForEmail(email,redirect?{redirectTo:redirect}:{});
         if (error) throw error;
@@ -185,8 +196,9 @@
     resetForm.addEventListener('submit',async(event) => {
       event.preventDefault();
       const password = $('resetPassword').value;
-      if (password.length < 8) { status('resetMessage','Use pelo menos 8 caracteres.',true); return; }
-      const current = client || clientOrError(); if (!current) return;
+      if (password.length < minPassword) { status('resetMessage',`Use pelo menos ${minPassword} caracteres.`,true); return; }
+      if(mysql){const button=resetForm.querySelector('button[type="submit"]');busy(button,true);try{await window.SQFMySQL.reset($('mysqlResetToken').value.trim(),password);showLoginForm();status('message','Senha atualizada. Entre novamente.');}catch(error){status('resetMessage',error.message,true);}finally{busy(button,false);}return;}
+      const current = mysql?null:(client || clientOrError()); if (!mysql&&!current) return;
       const { data } = await current.auth.getSession();
       if (!data?.session) { status('resetMessage','O link expirou ou não é válido. Solicite outro e-mail de recuperação.',true); return; }
       const button = resetForm.querySelector('button[type="submit"]'); busy(button,true);
