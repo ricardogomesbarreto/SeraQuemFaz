@@ -295,7 +295,7 @@ CREATE TABLE `sqf_billing_settings` (
   `require_paid_subscription` TINYINT(1) NOT NULL DEFAULT false,
   `checkout_enabled` TINYINT(1) NOT NULL DEFAULT false,
   `updated_at` DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
-  CONSTRAINT `sqf_billing_settings_singleton_check` CHECK (singleton),
+  CONSTRAINT `sqf_billing_settings_singleton_check` CHECK (singleton = 1),
   CONSTRAINT `sqf_billing_settings_pkey` PRIMARY KEY (singleton)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
 
