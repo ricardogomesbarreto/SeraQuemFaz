@@ -46,3 +46,9 @@ Não utilizar o candidato como sistema comercial. Nenhum dado remoto foi alterad
 - `assets/backend-mode.js`: definir `mysql` exclusivamente na homologação. Cadastro, login, recuperação e categorias usam a API candidata nesse modo.
 - `painel-mysql.html`: painel temporário dos dois papéis; perfil, solicitações, propostas, mensagens, agenda e notificações. Ainda não equivale ao painel principal: avaliações, portfólio, verificação, favoritos e gestão administrativa não foram portados.
 - A CI testa importação, autenticação, HTTP e lint dos scripts; a homologação visual e entrega real de e-mail ainda são obrigatórias.
+
+## Módulo de serviços profissionais
+
+`backend/src/Services.php` implementa consultas públicas de perfis aprovados, listagem privada de serviços do proprietário, cadastro/edição e ativação/desativação sem exclusão de histórico. Os endpoints da API são `GET provider?id=<uuid>` e POST `services`, `service/save`, `service/toggle`. A interface candidata fica em `painel-mysql.html` / `assets/mysql-dashboard.js`. Todas as escritas verificam a titularidade com identidade derivada da sessão, jamais por `provider_id` enviado pelo cliente. Testes de isolamento foram adicionados em `database/tests/agenda-integration.php`.
+
+A página atual de produção permanece no modo Supabase. O painel MySQL é apenas para homologação e não substitui ainda a experiência completa dos painéis antigos.
