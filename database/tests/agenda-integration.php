@@ -35,7 +35,7 @@ try {execq($db,'UPDATE sqf_appointments SET duration_minutes=10 WHERE request_id
 require __DIR__.'/../../backend/src/Marketplace.php';
 execq($db,'UPDATE sqf_auth_users SET email_confirmed_at=UTC_TIMESTAMP(6) WHERE id=?',[$u[0]]);
 execq($db,'UPDATE profiles SET city_ibge=?,is_public=1 WHERE id=?',['2111300',$u[1]]);
-execq($db,'INSERT INTO sqf_billing_settings(singleton,require_paid_subscription,checkout_enabled) VALUES (1,0,0)',[]);
+execq($db,'INSERT INTO sqf_billing_settings(singleton,require_paid_subscription,checkout_enabled) VALUES (1,0,0) ON DUPLICATE KEY UPDATE singleton=VALUES(singleton)',[]);
 execq($db,"INSERT INTO provider_verifications(provider_id,status) VALUES (?,'pending')",[$u[1]]);
 check(count(sqfCatalog($db,'2111300'))===0,'unapproved provider hidden');
 execq($db,"UPDATE provider_verifications SET status='approved' WHERE provider_id=?",[$u[1]]);
