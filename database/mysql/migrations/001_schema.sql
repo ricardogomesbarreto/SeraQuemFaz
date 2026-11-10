@@ -385,9 +385,9 @@ CREATE TABLE `sqf_notifications` (
   `request_id` CHAR(36) CHARACTER SET ascii COLLATE ascii_bin NULL,
   `created_at` DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
   `read_at` DATETIME(6) NULL,
-  CONSTRAINT `sqf_notifications_body_check` CHECK ((length(body) <= 300)),
-  CONSTRAINT `sqf_notifications_kind_check` CHECK (((length(kind) >= 2) AND (length(kind) <= 40))),
-  CONSTRAINT `sqf_notifications_title_check` CHECK (((length(title) >= 2) AND (length(title) <= 120))),
+  CONSTRAINT `sqf_notifications_body_check` CHECK ((CHAR_LENGTH(body) <= 300)),
+  CONSTRAINT `sqf_notifications_kind_check` CHECK (((CHAR_LENGTH(kind) >= 2) AND (CHAR_LENGTH(kind) <= 40))),
+  CONSTRAINT `sqf_notifications_title_check` CHECK (((CHAR_LENGTH(title) >= 2) AND (CHAR_LENGTH(title) <= 120))),
   CONSTRAINT `sqf_notifications_pkey` PRIMARY KEY (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
 
@@ -430,7 +430,7 @@ CREATE TABLE `sqf_request_attachments` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
 
 CREATE TABLE `sqf_request_events` (
-  `id` BIGINT NOT NULL,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
   `request_id` CHAR(36) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
   `actor_id` CHAR(36) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
   `action` TEXT NOT NULL,
@@ -513,7 +513,7 @@ CREATE TABLE `sqf_service_requests` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
 
 CREATE TABLE `sqf_staff_decision_log` (
-  `id` BIGINT NOT NULL,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
   `actor_id` CHAR(36) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
   `entity_type` TEXT NOT NULL,
   `entity_id` CHAR(36) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
@@ -533,7 +533,7 @@ CREATE TABLE `sqf_support_tickets` (
   `status` TEXT NOT NULL DEFAULT ('open'),
   `created_at` DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
   `updated_at` DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
-  CONSTRAINT `sqf_support_tickets_message_check` CHECK (((length(TRIM(message)) >= 15) AND (length(TRIM(message)) <= 2000))),
+  CONSTRAINT `sqf_support_tickets_message_check` CHECK (((CHAR_LENGTH(TRIM(message)) >= 15) AND (CHAR_LENGTH(TRIM(message)) <= 2000))),
   CONSTRAINT `sqf_support_tickets_status_check` CHECK ((status IN ('open', 'reviewing', 'resolved'))),
   CONSTRAINT `sqf_support_tickets_topic_check` CHECK ((topic IN ('account', 'budget', 'appointment', 'review', 'technical', 'other'))),
   CONSTRAINT `sqf_support_tickets_pkey` PRIMARY KEY (id)
