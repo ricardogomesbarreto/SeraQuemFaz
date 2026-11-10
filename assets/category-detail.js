@@ -42,9 +42,10 @@
       state.hidden = true; content.hidden = false;
       return;
     }
-    const client = window.getSQFClient();
-    const { data: category, error: e1 } = await client.from('categories')
-      .select('id,name,description,image_url,status').eq('id', id).eq('status','active').maybeSingle();
+    const mysql=window.SQFDataMode==='mysql';
+    const bundle=mysql?(await window.SQFMySQL.category(id,city.id)).data:null;
+    const client=mysql?null:window.getSQFClient();
+    const {data:category,error:e1}=mysql?{data:bundle?.category}:await client.from('categories').select('id,name,description,image_url,status').eq('id',id).eq('status','active').maybeSingle();
     if (e1) throw e1;
     if (!category) { state.textContent = 'Categoria não encontrada ou indisponível.'; return; }
     document.title = `${category.name} | SERÁ QUEM FAZ?`;
@@ -68,14 +69,16 @@
       imageBox.replaceChildren(img);
     } else missing();
     state.hidden = true; content.hidden = false;
+    if(mysql){const hint=document.getElementById('sqfNewRequestHint');hint.href='painel-mysql.html#requests';document.getElementById('providersError').textContent='Não foi possível consultar os prestadores. Tente novamente.';}
     try {
-    const { data: services, error: e2 } = await client.from('provider_services')
+    const { data: services, error: e2 } = mysql?{data:bundle.services}:await client.from('provider_services')
       .select('provider_id,service_title,description,is_active').eq('category_id', String(category.id)).eq('is_active',true);
     if (e2) throw e2;
     const ids = [...new Set((services || []).map(item => item.provider_id))];
     results.replaceChildren();
     let profiles = [], reviews = [], reviewsAvailable = true;
-    if (ids.length) {
+    if(mysql){profiles=bundle.profiles;reviews=bundle.reviews;}
+    else if (ids.length) {
       const [{ data: pro, error: ep }, { data: rev, error: er }] = await Promise.all([
         client.from('profiles').select('id,full_name,city,city_ibge,bio,avatar_path,created_at').in('id',ids).eq('account_type','prestador').eq('is_public',true).eq('city_ibge',city.id),
         client.rpc('sqf_public_reviews', { p_provider_ids: ids })
@@ -93,7 +96,8 @@
       }
     }
     const details = new Map();
-    if(ids.length){
+    if(mysql){for(const detail of bundle.details)details.set(detail.provider_id,detail);}
+    else if(ids.length){
       try{
         const {data:professional,error:e}=await client.from('provider_professional_details')
           .select('provider_id,specialties,service_mode').in('provider_id',ids);
@@ -101,7 +105,8 @@
       }catch{console.warn('Filtro profissional adicional indisponível');}
     }
     const photoOwners=new Set(),photoCounts=new Map();
-    if(ids.length){
+    if(mysql){for(const photo of bundle.photos){photoOwners.add(photo.provider_id);photoCounts.set(photo.provider_id,(photoCounts.get(photo.provider_id)||0)+1);}}
+    else if(ids.length){
       const {data:photoRows,error:photoError}=await client.from('portfolio_photos')
         .select('provider_id').in('provider_id',ids).limit(1000);
       const control=document.getElementById('sqfOnlyPortfolio');
@@ -200,9 +205,10 @@
     for (const pro of profiles) {
       const card = ui.make('article','provider-card');
       const link = ui.make('a','provider-card-link');
-      link.href = `prestador.html?id=${encodeURIComponent(pro.id)}&cidade=${encodeURIComponent(city.id)}`;
+      link.href = `${mysql?'prestador-mysql.html':'prestador.html'}?id=${encodeURIComponent(pro.id)}&cidade=${encodeURIComponent(city.id)}`;
       const top = ui.make('div','provider-card-top');
-      top.append(ui.avatar(client,pro.avatar_path,pro.full_name));
+      if(mysql){const box=ui.make('div','avatar');const img=ui.safeImg(Number(pro.has_avatar)===1?window.SQFMySQL.mediaUrl('avatar',pro.id):'assets/brand/simbolo.png','Foto de '+pro.full_name);box.append(img);top.append(box);}
+      else top.append(ui.avatar(client,pro.avatar_path,pro.full_name));
       const name = ui.make('div');
       const local=pro.city || window.SQFCities.format(city);
       name.append(ui.make('h3','',pro.full_name || 'Profissional'),ui.make('p','provider-card-local',`⌖ ${local}`));
@@ -229,7 +235,7 @@
       if(count)link.append(ui.make('span','sqf-has-portfolio',
         count+' '+(count===1?'foto de trabalho':'fotos de trabalhos')));
       const completeness=Number(Boolean(pro.bio?.trim()&&pro.bio.trim().length>=60))
-        +Number(Boolean(pro.avatar_path))+Number(serviceCount>1)+Number(publicReviews.length>0)+Number(count>0);
+        +Number(mysql?Boolean(Number(pro.has_avatar)):Boolean(pro.avatar_path))+Number(serviceCount>1)+Number(publicReviews.length>0)+Number(count>0);
       card.append(link);results.append(card);
       cards.push({card,profile:pro,services:servicesForPro,rating,
         reviewCount:publicReviews.length,serviceCount,completeness,
@@ -241,5 +247,5 @@
       document.getElementById('categoryProviderCount').textContent = 'Prestadores indisponíveis';
       console.warn('Não foi possível carregar os prestadores:', providerError?.message || providerError);
     }
-  } catch (error) { state.textContent = error?.message?.includes('municíp') || error?.message?.includes('IBGE') ? 'Não foi possível carregar o cadastro de cidades do IBGE. Confira sua conexão e tente novamente.' : ui.message(error); }
+  } catch (error) { state.textContent = error?.message?.includes('municíp') || error?.message?.includes('IBGE') ? 'Não foi possível carregar o cadastro de cidades do IBGE. Confira sua conexão e tente novamente.' : (window.SQFDataMode==='mysql'?'Não foi possível carregar os dados MySQL. Tente novamente.':ui.message(error)); }
 })();
