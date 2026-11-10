@@ -83,3 +83,12 @@ $oldPath=sqfPrivateImagePath($db,$provider,'portfolio',$second);
 sqfManagePortfolio($db,$provider,$second,'delete');
 forbid(fn()=>sqfPrivateImagePath($db,$provider,'portfolio',$second),'deleted photo no longer accessible');
 verify(!is_file($oldPath),'deleted generated file removed');
+
+require_once __DIR__.'/../../backend/src/AccountCases.php';
+$identity=sqfRegister($db,'onboarding-fixture@example.invalid','fixture-onboarding-123','Prestador teste','prestador','2111300');
+verify(sqfVerificationStatus($db,$identity['id'])['status']==='pending','new provider pending verification');
+$case=sqfCreateCase($db,$client,'support','technical','Chamado de teste da integração.');
+verify(count(sqfOwnCases($db,$client)['support'])===1,'own support case visible');
+verify(count(sqfOwnCases($db,$provider)['support'])===0,'support cases isolated');
+forbid(fn()=>sqfStaffCases($db,$client),'client cannot access admin cases');
+forbid(fn()=>sqfStaffProviderDecide($db,$client,$provider,'suspended','Decisão de teste sem autorização'),'client cannot moderate provider');
