@@ -42,6 +42,7 @@ function sqfRegister(PDO $db,string $email,string $password,string $name,string 
         $city='';
         if($cityCode!==null){$m=sqfQuery($db,'SELECT name,uf FROM sqf_ibge_municipalities WHERE code=?',[$cityCode])->fetch(PDO::FETCH_ASSOC);if(!$m)throw new DomainException('Município inválido');$city=$m['name'].' - '.$m['uf'];}
         sqfQuery($db,'INSERT INTO profiles(id,full_name,account_type,city,city_ibge) VALUES (?,?,?,?,?)',[$id,$name,$type,$city,$cityCode]);
+        if($type==='prestador')sqfQuery($db,"INSERT INTO provider_verifications(provider_id,status) VALUES (?,'pending')",[$id]);
         return ['id'=>$id,'token'=>sqfIssueToken($db,$id,'verify')];
     });
 }
