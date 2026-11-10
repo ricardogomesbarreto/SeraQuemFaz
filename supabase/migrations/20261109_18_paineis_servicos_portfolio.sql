@@ -12,7 +12,8 @@ BEGIN
  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname='sqf_provider_services_price_bounds') THEN
   ALTER TABLE public.provider_services ADD CONSTRAINT sqf_provider_services_price_bounds CHECK (
     (price_min_cents IS NULL AND price_max_cents IS NULL)
-    OR (price_min_cents BETWEEN 0 AND 100000000
+    OR (price_min_cents IS NOT NULL AND price_max_cents IS NOT NULL
+        AND price_min_cents BETWEEN 0 AND 100000000
         AND price_max_cents BETWEEN price_min_cents AND 100000000)
   );
  END IF;
