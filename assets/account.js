@@ -553,6 +553,7 @@
     $('accountName').textContent=profile.full_name;
     $('accountEmail').textContent=user.email || 'Não informado';
     $('accountType').textContent=profile.account_type==='prestador'?'Prestador de serviços':'Cliente';
+    $('accountTypeSubtitle').textContent=profile.account_type==='prestador'?'Perfil de prestador de serviço':'Perfil de cliente';
     $('profileFullName').value=profile.full_name;
     const cityPicker = $('profileCity')?.closest('[data-city-picker]')?.__cityPicker;
     if (profile.city_ibge) await cityPicker?.setId(profile.city_ibge);
@@ -568,7 +569,7 @@
     }
     const providerAccount=profile.account_type==='prestador';
     $('dashboardKicker').textContent=providerAccount?'PAINEL PROFISSIONAL':'MINHA CONTA · CLIENTE';
-    $('dashboardHeading').textContent=providerAccount?'Central do prestador':'Central do cliente';
+    $('dashboardHeading').textContent=providerAccount?'Meu espaço profissional':'Minha conta';
     $('dashboardIntroText').textContent=providerAccount
       ? 'Organize seus dados profissionais, formas de atendimento, serviços, portfólio e verificação.'
       : 'Acompanhe seus atendimentos confirmados, avaliações, favoritos e solicitações com privacidade.';
@@ -608,7 +609,7 @@
         const element=$(id);if(element)mainColumn.append(element);
       }
       $('providerLogoutSlot').append($('logoutButton'));
-      $('clientAccountBadge').textContent='Conta profissional';
+      $('clientAccountBadge').textContent='Perfil de prestador de serviço';
       $('clientAccountBadge').hidden=false;
       $('profileSettings').querySelector('h2').textContent='Editar meu perfil profissional';
       syncProviderSidebar();
@@ -769,6 +770,7 @@
         }
         $('accountName').textContent=updated.full_name;
         await renderOwnAvatar();
+        syncProviderSidebar();syncClientSidebar();
         void window.SQFAccountNavigation?.refresh();
         $('avatarFile').value='';
         $('portraitDeclaration').checked=false;
@@ -819,5 +821,10 @@
       }catch(error){if(path)await client.storage.from('sqf-portfolios').remove([path]);console.warn(error?.message);announce('galleryMessage',error?.message?.includes('Escolha uma imagem')?error.message:'Não foi possível enviar a foto.',true);}
       finally{button.disabled=false;}
     });
+    // O roteador só pode realocar módulos após a montagem da conta, da
+    // barra lateral e dos formulários autenticados.
+    window.dispatchEvent(new CustomEvent('sqf:account-ready',{
+      detail:{role:profile.account_type}
+    }));
   }catch(error){status.textContent=ui.message(error);}
 })();
