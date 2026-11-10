@@ -14,6 +14,7 @@ require_once __DIR__.'/../src/Billing.php';
 require_once __DIR__.'/../src/MercadoPago.php';
 require_once __DIR__.'/../src/Engagement.php';
 require_once __DIR__.'/../src/Mail.php';
+require_once __DIR__.'/../src/SubscriptionActions.php';
 
 header('Content-Type: application/json; charset=utf-8');
 header('Cache-Control: no-store');
@@ -157,6 +158,9 @@ try {
     if($route==='quotes/compare')respond(['data'=>sqfCompareQuotes($db,$actor)]);
     if($route==='favorites/categories')respond(['data'=>sqfFavoriteCategories($db,$actor)]);
     if($route==='favorite/category'){if(!isset($body['saved'])||!is_bool($body['saved']))throw new DomainException('Estado inválido');sqfFavoriteCategory($db,$actor,required($body,'category_id'),$body['saved']);respond(['ok'=>true]);}
+    if($route==='billing/checkout'){sqfAuthLimit($db,'billing:'.$actor,5,900);respond(['data'=>sqfCreateCheckout($db,$actor,required($body,'cycle'),'sqfMpWrite')]);}
+    if($route==='billing/cancel'){sqfAuthLimit($db,'billing:'.$actor,5,900);sqfCancelSubscription($db,$actor,'sqfMpWrite');respond(['ok'=>true]);}
+    if($route==='billing/cycle'){if(getenv('SQF_MP_CHECKOUT_ENABLED')!=='1')throw new DomainException('Operação desativada');respond(['data'=>sqfRequestCycle($db,$actor,required($body,'cycle'))]);}
     if($route==='billing')respond(['data'=>sqfOwnBilling($db,$actor)]);
     if($route==='account/security')respond(['data'=>sqfAccountSecurity($db,$actor)]);
     if(in_array($route,['account/password','account/revoke-sessions'],true)){

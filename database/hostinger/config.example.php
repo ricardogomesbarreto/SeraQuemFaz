@@ -25,3 +25,5 @@ putenv('SQF_MAINTENANCE_ENABLED=0');
 putenv('SQF_SMTP_ENABLED=0');
 putenv('SQF_SMTP_USER=');
 putenv('SQF_SMTP_PASSWORD=');
+
+putenv('SQF_MP_CHECKOUT_ENABLED=0');
