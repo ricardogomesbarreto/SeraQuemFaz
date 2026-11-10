@@ -117,3 +117,22 @@ test('configurações atualizam senha sem armazenamento e sem registrar credenci
  assert.match(code,/form\.reset\(\)/);
  assert.doesNotMatch(code,/localStorage|sessionStorage|console\.log\(/);
 });
+
+test('navegação móvel mantém a ação de sair e um só formulário de perfil',()=>{
+ const css=read('assets/site.css'),html=read('painel.html');
+ assert.match(css,/\.sqf-routed-dashboard \.sqf-unified-sidebar \.sqf-sidebar-exit\{display:block/);
+ assert.match(css,/@media\(max-width:740px\)/);
+ assert.equal((html.match(/id="logoutButton"/g)||[]).length,1);
+ assert.equal((html.match(/id="profileForm"/g)||[]).length,1);
+});
+
+test('serviços pausados não são expostos; preços exigem limites completos',()=>{
+ const sql=read('supabase/migrations/20261109_18_paineis_servicos_portfolio.sql');
+ const provider=read('assets/provider.js');
+ const account=read('assets/account.js');
+ assert.match(sql,/price_min_cents IS NOT NULL AND price_max_cents IS NOT NULL/);
+ assert.match(sql,/price_min_cents IS NULL AND price_max_cents IS NULL/);
+ assert.match(sql,/is_active=true AND public\.sqf_provider_public/);
+ assert.match(provider,/\.eq\('is_active',true\)/);
+ assert.match(account,/\.eq\('is_active',true\)\.limit\(1\)/);
+});
