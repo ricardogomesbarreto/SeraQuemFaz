@@ -8,8 +8,8 @@ verify((int)$db->query("SELECT COUNT(*) FROM information_schema.tables WHERE tab
 verify((int)$db->query("SELECT COUNT(*) FROM categories WHERE status='active'")->fetchColumn()===51,'51 active categories preserved');
 verify((int)$db->query("SELECT COUNT(*) FROM sqf_ibge_municipalities")->fetchColumn()>=5500,'Brazilian municipality dataset present');
 $rows=$db->query("SELECT constraint_name,table_name,column_name,referenced_table_name,referenced_column_name FROM information_schema.key_column_usage WHERE table_schema=DATABASE() AND referenced_table_name IS NOT NULL ORDER BY table_name,constraint_name,ordinal_position")->fetchAll(PDO::FETCH_ASSOC);
-$groups=[];foreach($rows as $row)$groups[$row['table_name'].':'.$row['constraint_name']][]=$row;
-verify(count($groups)>=63,'foreign key inventory present');
+$groups=[];foreach($rows as $row){$row=array_change_key_case($row,CASE_LOWER);$groups[$row['table_name'].':'.$row['constraint_name']][]=$row;}
+verify(count($groups)>=63,'foreign key inventory present: '.count($groups));
 foreach($groups as $name=>$parts){
  $first=$parts[0];$join=[];$nonnull=[];
  foreach($parts as $p){$join[]='c.'.ident($p['column_name']).'=p.'.ident($p['referenced_column_name']);$nonnull[]='c.'.ident($p['column_name']).' IS NOT NULL';}
