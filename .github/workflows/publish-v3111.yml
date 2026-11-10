@@ -40,7 +40,7 @@ jobs:
           git cat-file -e "$target^{commit}"
           git checkout --detach "$target"
           test "$(git rev-parse HEAD)" = "$target"
-          test "$(node -p "require('./package.json').version")" = '3.11.0'
+          test "$(node -p "require('./package.json').version")" = '3.11.1'
           npm run verify
           npm run build:dist
           site='dist/SeraQuemFaz_site_v3.11.1.zip'
