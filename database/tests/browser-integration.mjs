@@ -31,7 +31,7 @@ async function login(page,email,password){
  await page.locator('#password').fill(password);
  const responsePromise=page.waitForResponse(r=>new URL(r.url()).searchParams.get('route')==='login');
  await page.locator('#submitBtn').click();
- const response=await responsePromise;assert.equal(response.status(),200,'login response: '+await response.text());
+ const response=await responsePromise;assert.equal(response.status(),200,'login HTTP status');
  await page.waitForURL('**/painel-mysql.html');
  await page.locator('#mysqlContent').waitFor({state:'visible'});
 }
