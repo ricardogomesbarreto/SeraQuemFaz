@@ -28,6 +28,7 @@
     login:(email,password)=>call('login',{email,password}),
     register:(email,password,name,account_type,city_ibge)=>call('register',{email,password,name,account_type,city_ibge}),
     profile:()=>call('profile',{}),
+    updateProfile:body=>call('profile/update',body),
     requests:()=>call('requests',{}),
     appointments:()=>call('appointments',{}),
     notifications:()=>call('notifications',{}),
