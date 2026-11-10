@@ -9,23 +9,46 @@
   let preparedPortrait=null, portraitPreviewUrl=null, portraitBusy=false, portraitVersion=0, portraitDebounce=null;
   let currentServiceCount=0, currentPhotoCount=0, currentVerification=null, professionalExtras=null;
   let providerServicesCache=[];
+  // A moldura da sidebar já é circular. Colocar um segundo .avatar dentro dela
+  // duplica bordas, arredondamentos e cria o efeito de duas fotos sobrepostas.
+  function paintSidebarPortrait(target, source, fallbackName) {
+    if(!target)return;
+    const img=source?.querySelector('img');
+    if(img){
+      const picture=img.cloneNode(true);
+      picture.classList.add('sqf-sidebar-photo');
+      picture.addEventListener('error',()=>{
+        target.replaceChildren(sidebarInitial(fallbackName));
+      },{once:true});
+      target.replaceChildren(picture);
+    }else{
+      target.replaceChildren(sidebarInitial(fallbackName));
+    }
+  }
+  function sidebarInitial(name){
+    const initial=document.createElement('span');
+    initial.className='sqf-avatar-initials';
+    initial.textContent=String(name||'').trim().charAt(0).toLocaleUpperCase('pt-BR')||'P';
+    return initial;
+  }
   function syncProviderSidebar(){
     if(profile?.account_type!=='prestador')return;
-    const label=$('providerSideName'),avatar=$('providerSideAvatar'),existing=$('avatarPreview')?.querySelector('.avatar');
+    const label=$('providerSideName');
     if(label)label.textContent=profile.full_name || 'Profissional';
-    if(avatar && existing)avatar.replaceChildren(existing.cloneNode(true));
+    paintSidebarPortrait($('providerSideAvatar'),$('avatarPreview')?.querySelector('.avatar'),profile.full_name);
     const state=$('providerSideStatus');
     if(state)state.textContent=currentVerification==='approved'
-      ? 'Cadastro analisado' : currentVerification==='rejected'
-      ? 'Revisão necessária' : currentVerification==='suspended'
-      ? 'Cadastro suspenso' : 'Aguardando análise';
+      ? (profile.is_public?'Cadastro aprovado':'Aprovado · perfil não publicado')
+      : currentVerification==='pending' ? 'Aguardando análise'
+      : currentVerification==='rejected' ? 'Revisão necessária'
+      : currentVerification==='suspended' ? 'Cadastro suspenso'
+      : 'Análise não solicitada';
   }
   function syncClientSidebar() {
-    if (profile?.account_type !== 'cliente') return;
-    const label=$('clientSideName'), target=$('clientSideAvatar');
-    if (label) label.textContent=profile.full_name || 'Cliente';
-    const avatar=$('avatarPreview')?.querySelector('.avatar');
-    if (target && avatar) target.replaceChildren(avatar.cloneNode(true));
+    if(profile?.account_type !== 'cliente')return;
+    const label=$('clientSideName');
+    if(label)label.textContent=profile.full_name || 'Cliente';
+    paintSidebarPortrait($('clientSideAvatar'),$('avatarPreview')?.querySelector('.avatar'),profile.full_name);
   }
   // Durante a edição, mostramos somente a foto recortada, evitando a
   // duplicação do avatar antigo (a caixa com a inicial do usuário).
@@ -60,6 +83,20 @@
     $('readinessProgress').value=done;
     const statusText={pending:'Aguardando análise da equipe',approved:'Cadastro aprovado para publicação',rejected:'Revisão necessária',suspended:'Cadastro suspenso'};
     $('readinessDescription').textContent=`${done} de ${items.length} etapas concluídas · ${statusText[currentVerification]||'Análise não solicitada'}.`;
+    const verificationShortcut=$('providerVerificationShortcut');
+    if(verificationShortcut)verificationShortcut.hidden=['pending','approved','suspended'].includes(currentVerification);
+    const publicationNote=$('providerPublicationNote');
+    if(publicationNote){
+      publicationNote.textContent=currentVerification==='pending'
+        ?'Sua solicitação chegou à equipe. O catálogo não exibirá seu perfil até a decisão administrativa.'
+        : currentVerification==='approved'
+        ? (profile.is_public?'Cadastro aprovado. A visibilidade ainda depende das regras de publicação.':'Cadastro aprovado, mas a opção de publicar o perfil está desativada.')
+        : currentVerification==='rejected'
+        ?'Revise as informações solicitadas e envie uma nova análise.'
+        : currentVerification==='suspended'
+        ?'Cadastro suspenso. Solicite suporte para esclarecimentos.'
+        :'Você ainda não pediu a análise. Cadastre os dados necessários e selecione “Solicitar análise cadastral” para entrar na fila.';
+    }
     const ul=$('readinessChecklist');ul.replaceChildren();
     for(const [label,checked] of items){
       const li=ui.make('li',checked?'readiness-done':'readiness-open',`${checked?'✓':'○'} ${label}`);
@@ -439,7 +476,7 @@
     if(error){label.textContent='Não foi possível consultar a análise cadastral.';return;}
     currentVerification=data?.status||null;updateReadiness();syncProviderSidebar();
     const statusText={pending:'Análise pendente pela equipe.',approved:'Cadastro analisado e aprovado para exibição pública (não é certificação de idoneidade).',rejected:'Solicitação não aprovada. Revise os dados e peça nova análise.',suspended:'Cadastro suspenso. Solicite revisão administrativa.'};
-    label.textContent=data ? statusText[data.status]||'Situação não identificada.' : 'Ainda não houve solicitação de análise.';
+    label.textContent=data ? statusText[data.status]||'Situação não identificada.' : 'Análise não solicitada. O perfil ainda não aparece para clientes. Use o botão abaixo para enviar sua solicitação.';
     $('requestVerification').hidden=Boolean(data && ['approved','pending','suspended'].includes(data.status));
     const myLink=$('myPublicProfile');
     if(myLink)myLink.hidden=!(profile.is_public && data?.status==='approved');
