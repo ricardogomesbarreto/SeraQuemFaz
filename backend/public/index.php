@@ -9,6 +9,7 @@ require_once __DIR__.'/../src/PrivateMedia.php';
 require_once __DIR__.'/../src/Category.php';
 require_once __DIR__.'/../src/Professional.php';
 require_once __DIR__.'/../src/AccountCases.php';
+require_once __DIR__.'/../src/AccountSecurity.php';
 
 header('Content-Type: application/json; charset=utf-8');
 header('Cache-Control: no-store');
@@ -132,6 +133,16 @@ try {
     if($route==='media/list')respond(['data'=>sqfListPrivateMedia($db,$actor,required($body,'kind'),isset($body['request_id'])?required($body,'request_id'):null)]);
     if($route==='favorites/categories')respond(['data'=>sqfFavoriteCategories($db,$actor)]);
     if($route==='favorite/category'){if(!isset($body['saved'])||!is_bool($body['saved']))throw new DomainException('Estado inválido');sqfFavoriteCategory($db,$actor,required($body,'category_id'),$body['saved']);respond(['ok'=>true]);}
+    if($route==='account/security')respond(['data'=>sqfAccountSecurity($db,$actor)]);
+    if(in_array($route,['account/password','account/revoke-sessions'],true)){
+      sqfAuthLimit($db,'account-security:'.$actor,5,900);
+      $current=required($body,'current_password');
+      if($route==='account/password')sqfChangePassword($db,$actor,$current,required($body,'new_password'));
+      else sqfRevokeSessions($db,$actor,$current);
+      $_SESSION=[];session_regenerate_id(true);respond(['ok'=>true]);
+    }
+    if($route==='notification/preference'){if(!isset($body['email_enabled'])||!is_bool($body['email_enabled']))throw new DomainException('Preferência inválida');sqfNotificationPreference($db,$actor,$body['email_enabled']);respond(['ok'=>true]);}
+    if($route==='notification/read'){sqfReadNotification($db,$actor,required($body,'id'));respond(['ok'=>true]);}
     if($route==='verification')respond(['data'=>sqfVerificationStatus($db,$actor)]);
     if($route==='cases')respond(['data'=>sqfOwnCases($db,$actor)]);
     if($route==='case/create')respond(['data'=>sqfCreateCase($db,$actor,required($body,'kind'),required($body,'type'),required($body,'message'))]);
