@@ -7,6 +7,7 @@ require_once __DIR__.'/../src/Services.php';
 require_once __DIR__.'/../src/Moderation.php';
 require_once __DIR__.'/../src/PrivateMedia.php';
 require_once __DIR__.'/../src/Category.php';
+require_once __DIR__.'/../src/Professional.php';
 
 header('Content-Type: application/json; charset=utf-8');
 header('Cache-Control: no-store');
@@ -126,6 +127,9 @@ try {
     if($route==='media/list')respond(['data'=>sqfListPrivateMedia($db,$actor,required($body,'kind'),isset($body['request_id'])?required($body,'request_id'):null)]);
     if($route==='favorites/categories')respond(['data'=>sqfFavoriteCategories($db,$actor)]);
     if($route==='favorite/category'){if(!isset($body['saved'])||!is_bool($body['saved']))throw new DomainException('Estado inválido');sqfFavoriteCategory($db,$actor,required($body,'category_id'),$body['saved']);respond(['ok'=>true]);}
+    if($route==='professional')respond(['data'=>sqfProfessionalDetails($db,$actor)]);
+    if($route==='professional/save'){sqfSaveProfessionalDetails($db,$actor,$body);respond(['ok'=>true]);}
+    if($route==='portfolio/manage'){sqfManagePortfolio($db,$actor,required($body,'id'),required($body,'action'));respond(['ok'=>true]);}
     if($route==='services')respond(['data'=>sqfOwnServices($db,$actor)]);
     if($route==='service/save'){
       $id=isset($body['id'])?required($body,'id'):null;
