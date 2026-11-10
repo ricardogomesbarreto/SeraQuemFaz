@@ -42,7 +42,20 @@
      ['Em atendimento',totals.ongoing_count],
      ['Concluídas',totals.completed_count]
    ]:[];
-   if(unread)items.push(['Mensagens não lidas',Array.from(unread.values()).reduce((a,b)=>a+b,0)]);
+   const unreadTotal=unread?Array.from(unread.values()).reduce((a,b)=>a+b,0):null;
+   if(unread)items.push(['Mensagens não lidas',unreadTotal]);
+   if(role==='prestador'){
+     const stats={
+       providerRequestsOpen:totals?.active_count,
+       providerQuotesSent:totals?.quote_count,
+       providerRequestsOngoing:totals?.ongoing_count,
+       providerUnreadMessages:unreadTotal
+     };
+     for(const [id,value] of Object.entries(stats)){
+       const node=$(id);
+       if(node)node.textContent=Number.isFinite(Number(value))&&value!==null&&value!==undefined?String(value):'—';
+     }
+   }
    if(!totals)el.append(create('p','muted','O resumo geral está temporariamente indisponível.'));
    for(const [label,count] of items){
      const block=create('div','sqf-request-stat');block.append(create('strong','',count),create('span','',label));el.append(block);
