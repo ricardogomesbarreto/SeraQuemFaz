@@ -40,6 +40,8 @@ function sqfReconcileVerifiedInvoice(PDO $db,string $subscription,string $invoic
     sqfTxn($db,function()use($db,$subscription,$invoice,$payment,$state,$amount,$currency,$paidAt,$periodEnd){
         $s=sqfQuery($db,'SELECT id,price_cents,currency FROM sqf_billing_subscriptions WHERE id=? FOR UPDATE',[$subscription])->fetch(PDO::FETCH_ASSOC);
         if(!$s||$amount!==(int)$s['price_cents']||$currency!==$s['currency'])throw new DomainException('Pagamento não corresponde ao plano');
+        $existing=sqfQuery($db,'SELECT mp_invoice_id FROM sqf_billing_invoices WHERE mp_payment_id=? FOR UPDATE',[$payment])->fetchColumn();
+        if($existing!==false&&$existing!==$invoice)throw new DomainException('Pagamento já vinculado a outra fatura');
         $old=sqfQuery($db,'SELECT subscription_id,mp_payment_id,status,paid_at,paid_period_end FROM sqf_billing_invoices WHERE mp_invoice_id=? FOR UPDATE',[$invoice])->fetch(PDO::FETCH_ASSOC);
         if($old&&($old['subscription_id']!==$subscription||$old['mp_payment_id']!==$payment))throw new DomainException('Fatura vinculada a outro pagamento');
         if($old&&in_array($old['status'],['refunded','charged_back'],true)&&!in_array($state,['refunded','charged_back'],true))throw new DomainException('Estorno ou contestação não pode reativar pagamento');
