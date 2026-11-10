@@ -70,14 +70,14 @@
     state.hidden = true; content.hidden = false;
     try {
     const { data: services, error: e2 } = await client.from('provider_services')
-      .select('provider_id,service_title,description').eq('category_id', String(category.id));
+      .select('provider_id,service_title,description,is_active').eq('category_id', String(category.id)).eq('is_active',true);
     if (e2) throw e2;
     const ids = [...new Set((services || []).map(item => item.provider_id))];
     results.replaceChildren();
     let profiles = [], reviews = [];
     if (ids.length) {
       const [{ data: pro, error: ep }, { data: rev, error: er }] = await Promise.all([
-        client.from('profiles').select('id,full_name,city,city_ibge,bio,avatar_path').in('id',ids).eq('account_type','prestador').eq('is_public',true).eq('city_ibge',city.id),
+        client.from('profiles').select('id,full_name,city,city_ibge,bio,avatar_path,created_at').in('id',ids).eq('account_type','prestador').eq('is_public',true).eq('city_ibge',city.id),
         client.rpc('sqf_public_reviews', { p_provider_ids: ids })
       ]);
       if (ep || er) throw ep || er;
@@ -91,13 +91,16 @@
         if(!e)for(const detail of professional||[])details.set(detail.provider_id,detail);
       }catch{console.warn('Filtro profissional adicional indisponível');}
     }
-    const photoOwners=new Set();
+    const photoOwners=new Set(),photoCounts=new Map();
     if(ids.length){
       const {data:photoRows,error:photoError}=await client.from('portfolio_photos')
         .select('provider_id').in('provider_id',ids).limit(1000);
       const control=document.getElementById('sqfOnlyPortfolio');
       if(photoError){if(control)control.disabled=true;}
-      else for(const photo of photoRows||[])photoOwners.add(photo.provider_id);
+      else for(const photo of photoRows||[]){
+        photoOwners.add(photo.provider_id);
+        photoCounts.set(photo.provider_id,(photoCounts.get(photo.provider_id)||0)+1);
+      }
     }
     const cards=[];
     const filterBox=document.getElementById('sqfProviderFilters');
@@ -106,6 +109,8 @@
     const countFilter=document.getElementById('sqfProviderFilteredCount');
     const sortControl=document.getElementById('sqfProviderSort');
     const photoControl=document.getElementById('sqfOnlyPortfolio');
+    const reviewControl=document.getElementById('sqfOnlyReviews');
+    const emptyState=document.getElementById('sqfCategoryNoResults');
     const applyFilter=()=>{
       const query=window.SQFUtils.normalize(specialtyFilter.value);
       const mode=modeFilter.value;
@@ -116,7 +121,8 @@
         const serviceMode=details.get(entry.profile.id)?.service_mode||'nao_informado';
         const fitsMode=!mode || serviceMode===mode || (serviceMode==='hibrido'&&['presencial','remoto'].includes(mode));
         const visible=(!query||text.includes(query))&&fitsMode&&
-          (!photoControl?.checked||entry.hasPortfolio);
+          (!photoControl?.checked||entry.hasPortfolio)&&
+          (!reviewControl?.checked||entry.reviewCount>0);
         entry.card.hidden=!visible;if(visible)found++;
       }
       const order=sortControl?.value||'name';
@@ -125,11 +131,14 @@
         if(order==='rating')return b.rating-a.rating||b.reviewCount-a.reviewCount||byName;
         if(order==='reviews')return b.reviewCount-a.reviewCount||byName;
         if(order==='services')return b.serviceCount-a.serviceCount||byName;
+        if(order==='complete')return b.completeness-a.completeness||byName;
+        if(order==='recent')return Date.parse(b.profile.created_at||0)-Date.parse(a.profile.created_at||0)||byName;
         return byName;
       });
       for(const entry of ordered)results.append(entry.card);
       countFilter.textContent=`${found} de ${cards.length} profissionais encontrados`;
       if(cards.length && !found)countFilter.textContent+=' · Tente ampliar os filtros.';
+      if(emptyState)emptyState.hidden=found>0;
     };
     if(profiles.length){
       filterBox.hidden=false;
@@ -137,10 +146,19 @@
       modeFilter.addEventListener('change',applyFilter);
       sortControl?.addEventListener('change',applyFilter);
       photoControl?.addEventListener('change',applyFilter);
+      reviewControl?.addEventListener('change',applyFilter);
+      document.getElementById('sqfResetProviderFilters')?.addEventListener('click',()=>{
+        specialtyFilter.value='';modeFilter.value='';
+        if(sortControl)sortControl.value='name';
+        if(photoControl)photoControl.checked=false;
+        if(reviewControl)reviewControl.checked=false;
+        applyFilter();
+      });
       document.getElementById('sqfProviderFilterClear').addEventListener('click',()=>{
         specialtyFilter.value='';modeFilter.value='';
         if(sortControl)sortControl.value='name';
         if(photoControl)photoControl.checked=false;
+        if(reviewControl)reviewControl.checked=false;
         applyFilter();
       });
     }
@@ -172,10 +190,15 @@
       const rating=publicReviews.length
         ?publicReviews.reduce((total,r)=>total+Number(r.rating||0),0)/publicReviews.length:0;
       const serviceCount=services.filter(s=>s.provider_id===pro.id).length;
-      if(photoOwners.has(pro.id))link.append(ui.make('span','sqf-has-portfolio','Portfólio com fotos'));
+      const count=photoCounts.get(pro.id)||0;
+      if(count)link.append(ui.make('span','sqf-has-portfolio',
+        count+' '+(count===1?'foto de trabalho':'fotos de trabalhos')));
+      const completeness=Number(Boolean(pro.bio?.trim()&&pro.bio.trim().length>=60))
+        +Number(Boolean(pro.avatar_path))+Number(serviceCount>1)+Number(publicReviews.length>0)+Number(count>0);
       card.append(link);results.append(card);
       cards.push({card,profile:pro,services:servicesForPro,rating,
-        reviewCount:publicReviews.length,serviceCount,hasPortfolio:photoOwners.has(pro.id)});
+        reviewCount:publicReviews.length,serviceCount,completeness,
+        hasPortfolio:photoOwners.has(pro.id)});
     }
     if(cards.length)applyFilter();
     } catch (providerError) {
