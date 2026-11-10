@@ -11,6 +11,7 @@
  const load=async()=>{
    const [p,q,a,n]=await Promise.all([api.profile(),api.requests(),api.appointments(),api.notifications()]);
    profile=p.data;if(!profile)throw new Error('Perfil indisponível');
+   const security=(await api.accountSecurity()).data;$('mysqlSecurityEmail').textContent='E-mail: '+security.email+(security.email_confirmed_at?' · confirmado':'');$('mysqlNotificationPreference').elements.email_enabled.checked=Boolean(security.email_enabled);
    const cases=(await api.cases()).data,caseRoot=$('mysqlCases');caseRoot.replaceChildren();for(const item of [...cases.support,...cases.privacy]){const card=wrap(item.topic||item.request_type);card.append(el('p',item.message||item.details),el('p','Situação: '+item.status));caseRoot.append(card);}
    if(!caseRoot.childElementCount)caseRoot.append(el('p','Nenhuma solicitação registrada.'));
    if(profile.account_type==='prestador'){const v=(await api.verification()).data;$('mysqlVerificationStatus').textContent='Situação cadastral: '+v.status;}
@@ -52,7 +53,7 @@
      if((x.status==='proposed'&&x.proposed_by!==user)||(x.pending_starts_at&&x.pending_proposed_by!==user))for(const action of ['confirm','decline'])card.append(button(action==='confirm'?'Confirmar horário':'Recusar proposta',async()=>{await api.appointment({request_id:x.request_id,action});await load();}));
      if(['proposed','confirmed'].includes(x.status))card.append(button('Cancelar horário',async()=>{await api.appointment({request_id:x.request_id,action:'cancel'});await load();}));agenda.append(card);
    }
-   const notes=$('mysqlNotifications');empty(notes,n.data,'Nenhuma notificação.');for(const item of n.data){const c=wrap(item.title);c.append(el('p',item.body));notes.append(c);}
+   const notes=$('mysqlNotifications');empty(notes,n.data,'Nenhuma notificação.');for(const item of n.data){const c=wrap(item.title);c.append(el('p',item.body),el('p',item.read_at?'Lida':'Não lida'));if(!item.read_at)c.append(button('Marcar como lida',async()=>{await api.readNotification(item.id);await load();}));notes.append(c);}
    const reviewRoot=$('mysqlReviews'), reviewData=await api.reviews();
    empty(reviewRoot,reviewData.data,'Nenhuma avaliação registrada.');
    for(const review of reviewData.data){
@@ -117,6 +118,17 @@
    $('mysqlContent').hidden=false;status('Dados carregados.');
  };
  for(const [id,kind] of [['mysqlSupportForm','support'],['mysqlPrivacyForm','privacy']])$(id).addEventListener('submit',async e=>{e.preventDefault();const form=e.currentTarget,submit=form.querySelector('[type=submit]');submit.disabled=true;try{await api.createCase({kind,type:form.elements.type.value,message:form.elements.message.value});form.reset();await load();status('Solicitação registrada.');}catch(error){status(error.message);}finally{submit.disabled=false;}});
+ for(const [id,change] of [['mysqlPasswordForm',true],['mysqlSessionsForm',false]])$(id).addEventListener('submit',async e=>{
+   e.preventDefault();const form=e.currentTarget,fields=form.elements,submit=form.querySelector('[type=submit]');
+   if(change&&fields.new_password.value!==fields.confirmation.value){status('As novas senhas não conferem.');return;}
+   if(!confirm('Esta ação encerrará todas as suas sessões. Continuar?'))return;
+   submit.disabled=true;try{
+     const body={current_password:fields.current_password.value};
+     if(change)await api.changePassword({...body,new_password:fields.new_password.value});else await api.revokeSessions(body);
+     form.reset();location.replace('entrar.html');
+   }catch(error){status(error.message);submit.disabled=false;}
+ });
+ $('mysqlNotificationPreference').addEventListener('submit',async e=>{e.preventDefault();try{await api.notificationPreference(e.currentTarget.elements.email_enabled.checked);status('Preferência salva.');}catch(error){status(error.message);}});
  $('mysqlLogout').addEventListener('click',async()=>{try{await api.logout();location.replace('entrar.html');}catch(e){status(e.message);}});
  $('mysqlDiscoveryForm').addEventListener('submit',async e=>{
    e.preventDefault();const form=e.currentTarget,city=String(form.elements.city.value).trim(),target=$('mysqlDiscoveryResults');
