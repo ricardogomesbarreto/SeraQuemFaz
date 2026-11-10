@@ -43,3 +43,7 @@ Gere a distribuição isolada com `node database/hostinger/build-install.mjs` e 
 O instalador é testado em banco descartável nos dois engines, com conta limitada ao banco e sem privilégios globais. Os testes PHP/HTTP/Chromium e de integridade referencial continuam gates. A conta real, dados pessoais, objetos do Storage, autenticação de origem, reconciliacão, SMTP, backup/restauração e todas as páginas ainda precisam de homologação. Não executar fixtures de teste em banco comercial.
 
 Referência oficial: https://www.hostinger.com/br/support/1884149-como-importar-um-banco-de-dados-com-o-phpmyadmin-no-hostinger/
+
+## CLI privados (RC.6)
+
+O pacote inclui backend/bin/notifications.php (avisos) e backend/bin/preflight-identities.php (pré-validação). Não mover para public_html. Configure remetente e SQF_SITE_URL por meio do arquivo privado; SQF_NOTIFICATIONS_ENABLED=0 até homologação do transporte de e-mail. Depois de homologar, programar execução periódica do PHP CLI no hPanel, respeitando o plano contratado. Não ativar agora. O preflight recebe um JSON privado normalizado e sempre desfaz as inserções; executar somente em banco novo de homologação, com variáveis de ambiente de teste. Consulte database/README.md no repositório para formato e limites. Não enviar exportações pessoais ao GitHub.
