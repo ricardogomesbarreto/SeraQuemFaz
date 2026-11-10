@@ -52,7 +52,7 @@ try {
       switch($route){
         case 'register':
           if(!getenv('SQF_MAIL_FROM'))throw new RuntimeException('Envio de e-mail não configurado');
-          try{$result=sqfRegister($db,$email,required($body,'password'),required($body,'name'),required($body,'account_type'));deliver($email,$result['token'],'verify');}
+          try{$result=sqfRegister($db,$email,required($body,'password'),required($body,'name'),required($body,'account_type'),isset($body['city_ibge'])?required($body,'city_ibge'):null);deliver($email,$result['token'],'verify');}
           catch(PDOException $e){if($e->getCode()!=='23000')throw $e;}
           respond(['message'=>'Se a conta estiver disponível, confira o e-mail para confirmar.'],202);
         case 'login':
@@ -72,6 +72,10 @@ try {
     }
     $actor=sqfSessionUser($db,$_SESSION);
     if(!$actor)respond(['error'=>'Autenticação necessária'],401);
+    if($route==='profile')respond(['data'=>sqfQuery($db,'SELECT id,full_name,account_type,city,city_ibge,bio FROM profiles WHERE id=?',[$actor])->fetch(PDO::FETCH_ASSOC)]);
+    if($route==='requests')respond(['data'=>sqfQuery($db,'SELECT id,client_id,provider_id,description,status,quote_cents,quote_terms,created_at FROM sqf_service_requests WHERE client_id=? OR provider_id=? ORDER BY created_at DESC LIMIT 100',[$actor,$actor])->fetchAll(PDO::FETCH_ASSOC)]);
+    if($route==='appointments')respond(['data'=>sqfQuery($db,'SELECT request_id,starts_at,duration_minutes,status,pending_starts_at,pending_duration_minutes,pending_proposed_by,proposed_by FROM sqf_appointments WHERE client_id=? OR provider_id=? ORDER BY starts_at LIMIT 100',[$actor,$actor])->fetchAll(PDO::FETCH_ASSOC)]);
+    if($route==='notifications')respond(['data'=>sqfQuery($db,'SELECT id,kind,title,body,request_id,created_at,read_at FROM sqf_notifications WHERE recipient_id=? ORDER BY created_at DESC LIMIT 100',[$actor])->fetchAll(PDO::FETCH_ASSOC)]);
     if($route==='logout'){$_SESSION=[];session_regenerate_id(true);respond(['ok'=>true]);}
     // Explicit routes only: no arbitrary SQL, table, column, or actor supplied by browser.
     $data=match($route){
