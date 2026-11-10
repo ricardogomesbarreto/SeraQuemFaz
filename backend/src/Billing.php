@@ -9,8 +9,8 @@ function sqfPaidUntil(PDO $db,string $provider):?string {
 function sqfOwnBilling(PDO $db,string $actor):array {
     if(sqfQuery($db,'SELECT account_type FROM profiles WHERE id=?',[$actor])->fetchColumn()!=='prestador')throw new DomainException('Somente prestadores');
     $settings=sqfQuery($db,'SELECT require_paid_subscription,checkout_enabled FROM sqf_billing_settings WHERE singleton=1')->fetch(PDO::FETCH_ASSOC);
-    $s=sqfQuery($db,'SELECT id,cycle,price_cents,currency,state,paid_until,cancel_requested_at FROM sqf_billing_subscriptions WHERE user_id=?',[$actor])->fetch(PDO::FETCH_ASSOC);
-    $invoices=$s?sqfQuery($db,'SELECT status,amount_cents,currency,paid_at,paid_period_end,verified_at FROM sqf_billing_invoices WHERE subscription_id=? ORDER BY verified_at DESC LIMIT 100',[$s['id']])->fetchAll(PDO::FETCH_ASSOC):[];
+    $s=sqfQuery($db,'SELECT id,cycle,price_cents,currency,state,paid_until,cancel_requested_at FROM sqf_billing_subscriptions WHERE user_id=? AND is_current=1',[$actor])->fetch(PDO::FETCH_ASSOC);
+    $invoices=sqfQuery($db,'SELECT i.status,i.amount_cents,i.currency,i.paid_at,i.paid_period_end,i.verified_at,s.cycle FROM sqf_billing_invoices i JOIN sqf_billing_subscriptions s ON s.id=i.subscription_id WHERE s.user_id=? ORDER BY i.verified_at DESC,i.id LIMIT 100',[$actor])->fetchAll(PDO::FETCH_ASSOC);
     $paid=sqfPaidUntil($db,$actor);
     if($s){unset($s['id']);$s['paid_until']=$paid;$s['active']=$paid!==null;}
     return ['subscription'=>$s?:null,'invoices'=>$invoices,'require_paid_subscription'=>(bool)($settings['require_paid_subscription']??true),'checkout_enabled'=>getenv('SQF_MP_CHECKOUT_ENABLED')==='1'&&(bool)($settings['checkout_enabled']??false),'cycle_request'=>sqfQuery($db,'SELECT next_cycle,effective_after,requested_at FROM sqf_billing_cycle_requests WHERE user_id=?',[$actor])->fetch(PDO::FETCH_ASSOC)?:null,'plans'=>['monthly'=>1490,'yearly'=>14900]];
@@ -18,7 +18,7 @@ function sqfOwnBilling(PDO $db,string $actor):array {
 function sqfStaffBilling(PDO $db,string $actor):array {
     if(sqfRequireStaff($db,$actor)!=='admin')throw new DomainException('Somente administradores');
     $settings=sqfQuery($db,'SELECT require_paid_subscription,checkout_enabled FROM sqf_billing_settings WHERE singleton=1')->fetch(PDO::FETCH_ASSOC);
-    $counts=sqfQuery($db,'SELECT state,COUNT(*) AS total FROM sqf_billing_subscriptions GROUP BY state')->fetchAll(PDO::FETCH_ASSOC);
+    $counts=sqfQuery($db,'SELECT state,COUNT(*) AS total FROM sqf_billing_subscriptions WHERE is_current=1 GROUP BY state')->fetchAll(PDO::FETCH_ASSOC);
     $invoices=sqfQuery($db,'SELECT status,COUNT(*) AS total,COALESCE(SUM(amount_cents),0) AS cents FROM sqf_billing_invoices GROUP BY status')->fetchAll(PDO::FETCH_ASSOC);
     $active=(int)$db->query("SELECT COUNT(DISTINCT s.user_id) FROM sqf_billing_subscriptions s JOIN sqf_billing_invoices i ON i.subscription_id=s.id WHERE i.status='approved' AND i.currency=s.currency AND i.amount_cents=s.price_cents AND i.paid_at<=UTC_TIMESTAMP(6) AND i.paid_period_end>UTC_TIMESTAMP(6)")->fetchColumn();
     return ['settings'=>$settings,'subscriptions'=>$counts,'invoices'=>$invoices,'active_paid'=>$active,'checkout_available'=>false];
@@ -55,6 +55,6 @@ function sqfReconcileVerifiedInvoice(PDO $db,string $subscription,string $invoic
         if($old)sqfQuery($db,'UPDATE sqf_billing_invoices SET mp_payment_id=?,status=?,paid_at=?,paid_period_end=?,verified_at=UTC_TIMESTAMP(6) WHERE mp_invoice_id=?',[$payment,$state,$paidAt,$periodEnd,$invoice]);
         else sqfQuery($db,'INSERT INTO sqf_billing_invoices(subscription_id,mp_invoice_id,mp_payment_id,status,amount_cents,currency,paid_at,paid_period_end) VALUES (?,?,?,?,?,?,?,?)',[$subscription,$invoice,$payment,$state,$amount,$currency,$paidAt,$periodEnd]);
         if($attempt===false)sqfQuery($db,'INSERT INTO sqf_billing_payment_attempts(payment_id,invoice_id) VALUES (?,?)',[$payment,$invoice]);
-        sqfQuery($db,"UPDATE sqf_billing_subscriptions SET paid_until=(SELECT MAX(paid_period_end) FROM sqf_billing_invoices WHERE subscription_id=? AND status='approved' AND currency=? AND amount_cents=? AND paid_at<=UTC_TIMESTAMP(6)),last_verified_at=UTC_TIMESTAMP(6),updated_at=UTC_TIMESTAMP(6) WHERE id=?",[$subscription,$currency,$amount,$subscription]);
+        sqfQuery($db,"UPDATE sqf_billing_subscriptions SET paid_until=(SELECT MAX(paid_period_end) FROM sqf_billing_invoices WHERE subscription_id=? AND status='approved' AND currency=? AND amount_cents=? AND paid_at<=UTC_TIMESTAMP(6)),state=CASE WHEN state IN ('creating','pending') AND ?='approved' THEN 'authorized' ELSE state END,last_verified_at=UTC_TIMESTAMP(6),updated_at=UTC_TIMESTAMP(6) WHERE id=?",[$subscription,$currency,$amount,$state,$subscription]);
     });
 }

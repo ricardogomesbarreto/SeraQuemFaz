@@ -5,7 +5,7 @@ require_once __DIR__.'/Auth.php';
 /** Normalized export only. Source credentials, privileged roles and sessions
  * are deliberately excluded; publication must be reviewed after transfer. */
 function sqfImportTables():array {
-    return ['sqf_auth_users','profiles','provider_professional_details','provider_services','provider_verifications','sqf_account_settings','service_engagements','sqf_service_requests','sqf_appointments','sqf_request_messages','sqf_request_events','sqf_request_read_receipts','portfolio_photos','sqf_request_attachments','sqf_verification_documents','reviews','sqf_review_responses','sqf_review_disputes','sqf_client_favorites','sqf_client_category_favorites','sqf_profile_views','sqf_provider_coverage','sqf_portrait_checks','safety_reports','privacy_requests','sqf_support_tickets','sqf_notification_preferences','sqf_notifications','sqf_billing_subscriptions','sqf_billing_invoices','sqf_billing_payment_attempts','sqf_staff_decision_log'];
+    return ['sqf_auth_users','profiles','provider_professional_details','provider_services','provider_verifications','sqf_account_settings','service_engagements','sqf_service_requests','sqf_appointments','sqf_request_messages','sqf_request_events','sqf_request_read_receipts','portfolio_photos','sqf_request_attachments','sqf_verification_documents','reviews','sqf_review_responses','sqf_review_disputes','sqf_client_favorites','sqf_client_category_favorites','sqf_profile_views','sqf_provider_coverage','sqf_portrait_checks','safety_reports','privacy_requests','sqf_support_tickets','sqf_notification_preferences','sqf_notifications','sqf_billing_subscriptions','sqf_billing_cycle_requests','sqf_billing_invoices','sqf_billing_payment_attempts','sqf_staff_decision_log'];
 }
 function sqfMediaInventory(PDO $db,string $root):array {
     $base=realpath($root);if(!$base||!is_dir($base))throw new DomainException('Diretório de mídia inválido');
@@ -33,7 +33,7 @@ function sqfImportSnapshot(PDO $db,array $snapshot,string $mediaRoot,bool $commi
         foreach($tables as $table){
             if(!is_array($rows[$table])||!array_is_list($rows[$table])||count($rows[$table])>50000)throw new DomainException('Lote inválido');
             if((int)$db->query("SELECT COUNT(*) FROM `$table`")->fetchColumn()!==0)throw new DomainException('Tabela de destino não vazia');
-            $columns=sqfQuery($db,'SELECT column_name FROM information_schema.columns WHERE table_schema=DATABASE() AND table_name=?',[$table])->fetchAll(PDO::FETCH_COLUMN);
+            $columns=sqfQuery($db,'SELECT column_name FROM information_schema.columns WHERE table_schema=DATABASE() AND table_name=? AND column_name<>'current_user_id'',[$table])->fetchAll(PDO::FETCH_COLUMN);
             foreach($rows[$table] as $row){
                 if(!is_array($row)||!$row||array_is_list($row)||array_diff(array_keys($row),$columns))throw new DomainException('Colunas inválidas');
                 if($table==='sqf_auth_users'){

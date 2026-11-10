@@ -26,8 +26,14 @@ function sqfCreateCheckout(PDO $db,string $actor,string $cycle,callable $remote)
     if(!$site||!filter_var($site,FILTER_VALIDATE_URL)||parse_url($site,PHP_URL_SCHEME)!=='https'||parse_url($site,PHP_URL_USER)!==null||parse_url($site,PHP_URL_QUERY)!==null||parse_url($site,PHP_URL_FRAGMENT)!==null)throw new RuntimeException('URL de retorno inválida');
     $reserved=sqfTxn($db,function()use($db,$actor,$cycle,$price){
         $user=sqfSubscriptionActor($db,$actor,true);
-        $s=sqfQuery($db,'SELECT id,external_reference,state,cycle,checkout_url FROM sqf_billing_subscriptions WHERE user_id=? FOR UPDATE',[$actor])->fetch(PDO::FETCH_ASSOC);
-        if($s){if($s['state']==='pending'&&$s['cycle']===$cycle&&$s['checkout_url'])return ['url'=>sqfCheckoutUrl($s['checkout_url'])];throw new DomainException('Assinatura existente: consulte a situação antes de contratar');}
+        $s=sqfQuery($db,'SELECT id,external_reference,state,cycle,checkout_url FROM sqf_billing_subscriptions WHERE user_id=? AND is_current=1 FOR UPDATE',[$actor])->fetch(PDO::FETCH_ASSOC);
+        if($s){
+            if($s['state']==='pending'&&$s['cycle']===$cycle&&$s['checkout_url']&&!sqfPaidUntil($db,$actor))return ['url'=>sqfCheckoutUrl($s['checkout_url'])];
+            if($s['state']!=='canceled'||sqfPaidUntil($db,$actor)!==null)throw new DomainException('A assinatura anterior ou o período pago ainda está vigente');
+            $intent=sqfQuery($db,'SELECT next_cycle,effective_after FROM sqf_billing_cycle_requests WHERE user_id=? FOR UPDATE',[$actor])->fetch(PDO::FETCH_ASSOC);
+            if($intent&&($intent['next_cycle']!==$cycle||($intent['effective_after']!==null&&$intent['effective_after']>gmdate('Y-m-d H:i:s'))))throw new DomainException('Respeite o ciclo solicitado e a vigência');
+            sqfQuery($db,'UPDATE sqf_billing_subscriptions SET is_current=0 WHERE id=?',[$s['id']]);
+        }
         $id=(string)$db->query('SELECT UUID()')->fetchColumn();
         sqfQuery($db,"INSERT INTO sqf_billing_subscriptions(id,user_id,external_reference,cycle,price_cents,state) VALUES (?,?,?,?,?,'creating')",[$id,$actor,$id,$cycle,$price]);
         return ['id'=>$id,'email'=>$user['email']];
@@ -37,14 +43,18 @@ function sqfCreateCheckout(PDO $db,string $actor,string $cycle,callable $remote)
     $response=$remote('POST','/preapproval',['reason'=>'Será Quem Faz? — '.$cycle,'external_reference'=>$id,'payer_email'=>$reserved['email'],'auto_recurring'=>['frequency'=>$months,'frequency_type'=>'months','transaction_amount'=>$price/100,'currency_id'=>'BRL'],'back_url'=>rtrim($site,'/').'/painel.html#assinatura','status'=>'pending']);
     $remoteId=(string)($response['id']??'');$url=sqfCheckoutUrl((string)($response['init_point']??''));
     if(!preg_match('/^[A-Za-z0-9_-]{8,120}$/D',$remoteId)||($response['external_reference']??'')!==$id||($response['status']??'')!=='pending')throw new RuntimeException('Resposta de assinatura divergente');
-    sqfQuery($db,"UPDATE sqf_billing_subscriptions SET mp_preapproval_id=?,checkout_url=?,state='pending',updated_at=UTC_TIMESTAMP(6) WHERE id=? AND state='creating'",[$remoteId,$url,$id]);
+    sqfTxn($db,function()use($db,$remoteId,$url,$id,$actor,$cycle){
+        $changed=sqfQuery($db,"UPDATE sqf_billing_subscriptions SET mp_preapproval_id=?,checkout_url=?,state='pending',updated_at=UTC_TIMESTAMP(6) WHERE id=? AND state='creating' AND is_current=1",[$remoteId,$url,$id])->rowCount();
+        if($changed!==1)throw new RuntimeException('Reserva não confirmada');
+        sqfQuery($db,'DELETE FROM sqf_billing_cycle_requests WHERE user_id=? AND next_cycle=?',[$actor,$cycle]);
+    });
     return ['url'=>$url];
 }
 function sqfCancelSubscription(PDO $db,string $actor,callable $remote):void {
     if(getenv('SQF_MP_CHECKOUT_ENABLED')!=='1')throw new DomainException('Operação desativada');
     $s=sqfTxn($db,function()use($db,$actor){
         sqfSubscriptionActor($db,$actor,true);
-        $s=sqfQuery($db,'SELECT id,mp_preapproval_id,external_reference,state FROM sqf_billing_subscriptions WHERE user_id=? FOR UPDATE',[$actor])->fetch(PDO::FETCH_ASSOC);
+        $s=sqfQuery($db,'SELECT id,mp_preapproval_id,external_reference,state FROM sqf_billing_subscriptions WHERE user_id=? AND is_current=1 FOR UPDATE',[$actor])->fetch(PDO::FETCH_ASSOC);
         if(!$s||!$s['mp_preapproval_id'])throw new DomainException('Assinatura indisponível');
         if($s['state']!=='canceled')sqfQuery($db,'UPDATE sqf_billing_subscriptions SET cancel_requested_at=COALESCE(cancel_requested_at,UTC_TIMESTAMP(6)) WHERE id=?',[$s['id']]);
         return $s;
@@ -58,7 +68,7 @@ function sqfRequestCycle(PDO $db,string $actor,string $cycle):array {
     sqfPlan($cycle);
     return sqfTxn($db,function()use($db,$actor,$cycle){
         sqfSubscriptionActor($db,$actor,true);
-        $s=sqfQuery($db,'SELECT cycle FROM sqf_billing_subscriptions WHERE user_id=? FOR UPDATE',[$actor])->fetch(PDO::FETCH_ASSOC);
+        $s=sqfQuery($db,'SELECT cycle FROM sqf_billing_subscriptions WHERE user_id=? AND is_current=1 FOR UPDATE',[$actor])->fetch(PDO::FETCH_ASSOC);
         if(!$s||$s['cycle']===$cycle)throw new DomainException('Escolha outro ciclo para assinatura existente');
         $until=sqfPaidUntil($db,$actor);
         sqfQuery($db,'INSERT INTO sqf_billing_cycle_requests(user_id,next_cycle,effective_after) VALUES (?,?,?) ON DUPLICATE KEY UPDATE next_cycle=VALUES(next_cycle),effective_after=VALUES(effective_after),requested_at=UTC_TIMESTAMP(6)',[$actor,$cycle,$until]);

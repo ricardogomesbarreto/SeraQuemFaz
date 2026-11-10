@@ -9,8 +9,8 @@ sqfQuery($db,'UPDATE sqf_auth_users SET email_confirmed_at=UTC_TIMESTAMP(6) WHER
 $remoteCalls=0;$reference=null;
 $remote=function(string $method,string $path,array $data)use(&$remoteCalls,&$reference):array{
     $remoteCalls++;
-    if($method==='POST'){check($path==='/preapproval'&&$data['status']==='pending'&&$data['auto_recurring']['transaction_amount']===14.9,'checkout fixed monthly price');$reference=$data['external_reference'];return ['id'=>'fixture-new-preapproval','status'=>'pending','external_reference'=>$reference,'init_point'=>'https://www.mercadopago.com.br/checkout/fixture'];}
-    check($method==='PUT'&&$data['status']==='canceled','remote cancellation contract');return ['id'=>'fixture-new-preapproval','status'=>'canceled','external_reference'=>$reference];
+    if($method==='POST'){check($path==='/preapproval'&&$data['status']==='pending'&&in_array($data['auto_recurring']['transaction_amount'],[14.9,149,149.0],true),'checkout fixed monthly price');$reference=$data['external_reference'];return ['id'=>'fixture-new-preapproval-'.$remoteCalls,'status'=>'pending','external_reference'=>$reference,'init_point'=>'https://www.mercadopago.com.br/checkout/fixture'];}
+    check($method==='PUT'&&$data['status']==='canceled','remote cancellation contract');return ['id'=>'fixture-new-preapproval-1','status'=>'canceled','external_reference'=>$reference];
 };
 putenv('SQF_MP_CHECKOUT_ENABLED=0');reject(fn()=>sqfCreateCheckout($db,$provider,'monthly',$remote),'disabled checkout rejects');
 putenv('SQF_MP_CHECKOUT_ENABLED=1');putenv('SQF_SITE_URL=https://example.invalid');
@@ -26,6 +26,15 @@ try{
     check($cycle['effective_after']===$until&&$cycle['immediate_charge']===false&&$remoteCalls===1,'cycle intent preserves paid period and does not charge');
     sqfCancelSubscription($db,$provider,$remote);sqfCancelSubscription($db,$provider,$remote);
     check($remoteCalls===2&&sqfPaidUntil($db,$provider)===$until,'cancellation idempotent and preserves paid period');
+    reject(fn()=>sqfCreateCheckout($db,$provider,'yearly',$remote),'renewal blocked during paid period');
+    sqfQuery($db,"UPDATE sqf_billing_invoices SET paid_at=DATE_SUB(UTC_TIMESTAMP(6),INTERVAL 2 DAY),paid_period_end=DATE_SUB(UTC_TIMESTAMP(6),INTERVAL 1 DAY) WHERE subscription_id=?",[$s]);
+    sqfQuery($db,"UPDATE sqf_billing_cycle_requests SET effective_after=DATE_SUB(UTC_TIMESTAMP(6),INTERVAL 1 DAY) WHERE user_id=?",[$provider]);
+    reject(fn()=>sqfCreateCheckout($db,$provider,'monthly',$remote),'renewal respects requested cycle');
+    sqfCreateCheckout($db,$provider,'yearly',$remote);
+    check((int)sqfQuery($db,'SELECT COUNT(*) FROM sqf_billing_subscriptions WHERE user_id=?',[$provider])->fetchColumn()===2,'historical subscription preserved');
+    $billing=sqfOwnBilling($db,$provider);
+    check($billing['subscription']['cycle']==='yearly'&&count($billing['invoices'])===1&&$billing['invoices'][0]['cycle']==='monthly','new cycle and old invoice retained');
+    check($billing['cycle_request']===null,'confirmed new checkout consumes cycle request');
 }finally{
     sqfQuery($db,'DELETE FROM sqf_billing_cycle_requests WHERE user_id=?',[$provider]);
     sqfQuery($db,'DELETE a FROM sqf_billing_payment_attempts a JOIN sqf_billing_invoices i ON i.mp_invoice_id=a.invoice_id JOIN sqf_billing_subscriptions s ON s.id=i.subscription_id WHERE s.user_id=?',[$provider]);
