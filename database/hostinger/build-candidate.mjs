@@ -28,5 +28,11 @@ await mkdir(join(pub,'api'),{recursive:true});await cp(join(root,'database/hosti
 await cp(join(root,'dist/hostinger'),join(dest,'database'),{recursive:true});
 await cp(join(root,'database/hostinger/public.htaccess'),join(pub,'.htaccess'));
 await cp(join(root,'database/hostinger/unlimited-profile.json'),join(dest,'unlimited-profile.json'));
+// Reject legacy database clients, credentials and migration sources from the deployable package.
+const forbiddenPath=/(?:supabase|postgres(?:ql)?|\.env(?:\.|$)|\.sql$|\.bak$|\.dump$)/i;
+const forbiddenRuntime=/(?:supabase(?:-js|-config|\.co)|postgres(?:ql)?|postgres:\/\/|postgresql:\/\/|PGHOST|PGPASSWORD|SUPABASE_URL|SUPABASE_KEY)/i;
+const inspect=async(dir)=>{for(const e of await readdir(dir,{withFileTypes:true})){const p=join(dir,e.name);if(forbiddenPath.test(e.name))throw Error('Forbidden deployment path: '+p);if(e.isDirectory())await inspect(p);else if(/\.(?:html|js|mjs|json|php|css|webmanifest|htaccess)$/i.test(e.name)){const data=await readFile(p,'utf8');if(forbiddenRuntime.test(data))throw Error('Legacy runtime reference in deployment package: '+p);}}};
+await inspect(pub);
+await inspect(join(priv,'backend'));
 await writeFile(join(dest,'README.txt'),'HOSTINGER UNLIMITED — CANDIDATO DE HOMOLOGAÇÃO — NÃO IMPLANTAR EM PRODUÇÃO.\npublic_html: arquivos públicos; sqf-private: fora da raiz web, config.php a provisionar localmente.\nSQL: database/01-instalar-banco.sql. MySQL/MariaDB; checkout desativado.\n');
 console.log('MySQL candidate generated: '+scripts.size+' public scripts; no production credentials.');
