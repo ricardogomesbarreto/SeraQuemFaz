@@ -11,13 +11,13 @@ for(const p of files){
  const rel=relative(root,p);
  const active=rel.startsWith('assets/')||rel.startsWith('backend/')||rel.startsWith('database/hostinger/')||rel.startsWith('database/mysql/')||rel.startsWith('.github/workflows/')||rel.endsWith('.html')||rel==='README.md'||rel==='service-worker.js';
  if(forbidden.test(rel)||(active&&legacyRuntime.test(rel)))bad.push(rel);
- if(/\\.(?:md|html|css|webmanifest|js|mjs|cjs|php|sql|ya?ml|json|sh|txt)$/.test(p)){
+ if(/\.(?:md|html|css|webmanifest|js|mjs|cjs|php|sql|ya?ml|json|sh|txt)$/.test(p)){
   const s=await readFile(p,'utf8');
   if(forbidden.test(s))bad.push(rel);
   if(active&&legacyRuntime.test(s))bad.push(rel+' retired runtime');
   if((rel.startsWith('backend/')&&rel.endsWith('.php')||rel.startsWith('database/mysql/')&&rel.endsWith('.sql'))&&incompatibleSql.test(s))bad.push(rel+' incompatible SQL dialect');
  }
- if(/\\.(?:js|mjs|cjs)$/.test(p)){
+ if(/\.(?:js|mjs|cjs)$/.test(p)){
   const x=spawnSync(process.execPath,['--check',p],{encoding:'utf8'});
   if(x.status!==0)throw Error(x.stderr);
  }
