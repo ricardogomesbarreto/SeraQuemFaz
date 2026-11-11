@@ -23,7 +23,13 @@ function sqfMediaInventory(PDO $db,string $root):array {
     ksort($files);return $files;
 }
 function sqfImportSnapshot(PDO $db,array $snapshot,string $mediaRoot,bool $commit=false):array {
-    if($commit&&getenv('SQF_IMPORT_STAGING_ENABLED')!=='1')throw new DomainException('Importação persistente desativada');
+    if($commit){
+        if(getenv('SQF_IMPORT_STAGING_ENABLED')!=='1')throw new DomainException('Importação persistente desativada');
+        $database=(string)$db->query('SELECT DATABASE()')->fetchColumn();
+        $expected=(string)(getenv('SQF_IMPORT_STAGING_DATABASE')?:'');
+        if($expected===''||!hash_equals($expected,$database)||preg_match('/(?:^|_)(?:staging|stage)(?:_|$)/i',$database)!==1)
+            throw new DomainException('Destino de importação não é o banco isolado autorizado');
+    }
     $tables=sqfImportTables();$rows=$snapshot['tables']??null;$manifest=$snapshot['media']??null;
     if(!is_array($rows)||!is_array($manifest)||array_diff(array_keys($rows),$tables)||array_diff($tables,array_keys($rows)))throw new DomainException('Inventário incompleto ou desconhecido');
     if($db->inTransaction())throw new DomainException('Transação aberta');
