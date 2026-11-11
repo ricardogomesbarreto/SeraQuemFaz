@@ -1,4 +1,4 @@
-# SERÁ QUEM FAZ? — v3.14.0-rc.11
+# SERÁ QUEM FAZ? — v3.14.0-rc.13
 
 <p align="center"><img src="assets/brand/logo-horizontal.png" alt="Será Quem Faz?" width="380"></p>
 <p align="center"><strong>Encontre profissionais da sua cidade. Organize serviços, propostas e atendimentos em um só lugar.</strong></p>
@@ -17,7 +17,7 @@ O Será Quem Faz? conecta clientes a prestadores de serviços locais. Pesquisa p
 
 HTML, CSS e JavaScript; API PHP 8.1+; PDO MySQL; MySQL 8.0 ou MariaDB 10.11, InnoDB e UTC. Identidades e sessões próprias, RBAC administrativo com MFA, mídia privada fora da raiz web e fila de notificações. Mercado Pago com checkout desativado durante homologação. Destino futuro: Hostinger Unlimited (não Premium). PHP permanece por reaproveitar o backend homologado; Node.js é suportado pelo plano, mas uma reescrita não é necessária. Node 22+ é usado no build e nos testes, não como runtime obrigatório.
 
-## v3.14.0-rc.11
+## v3.14.0-rc.13
 
 Candidato exclusivo MySQL/MariaDB. Distribuição isolada, instalação SQL consolidada, testes PHP/HTTP/Chromium, integridade e restauração de banco descartável. O código histórico foi preservado no histórico Git; não faz parte do caminho de instalação atual.
 
@@ -42,7 +42,7 @@ O pacote fica em `dist/mysql-candidate/`. Importe `database/01-instalar-banco.sq
 
 ## Homologação e publicação
 
-Não é release comercial. Nenhuma implantação na Hostinger Unlimited antes de 100% de conversão e homologação. CI nos dois engines, paridade funcional, checkout/cancelamento/ciclo, sandbox, SMTP, migração de dados e arquivos, recuperação de contas, backup/restauração e LGPD são gates obrigatórios. Não publicar dados pessoais, credenciais ou snapshots no repositório.
+Não é release comercial. A instalação em subdomínio isolado com banco vazio e dados fictícios pode ser utilizada para homologação após aprovação da CI e do preflight. A publicação comercial e o acesso público permanecem bloqueados até o aceite integral. CI nos dois engines, paridade funcional, checkout/cancelamento/ciclo, sandbox, SMTP, migração de dados e arquivos, recuperação de contas, backup/restauração e LGPD são gates obrigatórios. Não publicar dados pessoais, credenciais ou snapshots no repositório.
 
 ## Preparação para o Unlimited
 
