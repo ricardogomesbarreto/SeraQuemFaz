@@ -4,6 +4,7 @@ test('official backend is fixed to mysql',()=>assert.match(read('assets/backend-
 test('public pages use no external database SDK',()=>{for(const p of ['index.html','categorias.html','categoria.html','entrar.html','cadastro.html','privacidade.html','termos.html','painel.html','prestador.html','admin.html'])assert.doesNotMatch(read(p),/<script\b[^>]*src=["']https?:\/\//i,p);});
 test('canonical panels match validated candidate',()=>{for(const p of ['painel','prestador','admin'])assert.equal(read(p+'.html'),read(p+'-mysql.html'));});
 test('server connection rejects non-mysql DSN',()=>assert.match(read('backend/src/Database.php'),/str_starts_with\(\$dsn, 'mysql:'\)/));
+test('database connection enforces utf8mb4 and native PDO MySQL driver',()=>{const code=read('backend/src/Database.php');assert.match(code,/charset=utf8mb4/);assert.match(code,/PDO::ATTR_DRIVER_NAME/);assert.match(code,/SET time_zone/);});
 test('candidate explicitly blocks production',()=>{const x=JSON.parse(read('database/candidate-version.json'));assert.equal(x.production,false);assert.equal(x.deploymentAllowed,false);assert.deepEqual(x.database,['MySQL 8.0','MariaDB 10.11']);});
 test('private config is not included as live config',()=>assert.equal(fs.existsSync(path.join(root,'backend/config.php')),false));
 
@@ -42,3 +43,5 @@ test('database restoration comparison accepts only the MySQL DSN family',()=>{
  assert.match(read('database/tests/restore-check.php'),/str_starts_with\(\$dsn,'mysql:'\)/);
  assert.match(read('database/tests/run-isolated-restore.sh'),/sqf_import_restore/);
 });
+
+test('isolated fictional restore rejects extra and altered media files',()=>{const source=read('database/tests/isolated-media-inventory.php');assert.match(source,/sqfMediaInventory/);assert.match(source,/physicalInventory/);assert.match(source,/orphan media/);assert.match(read('database/tests/run-isolated-restore.sh'),/isolated-media-inventory[.]php/);});
