@@ -1,7 +1,11 @@
 <?php
 declare(strict_types=1);
 require __DIR__.'/../../backend/src/Database.php';require __DIR__.'/../../backend/src/ImportSnapshot.php';
-$db=sqfDatabase();$root=sys_get_temp_dir().'/sqf-import-'.bin2hex(random_bytes(8));mkdir($root,0700);
+$db=sqfDatabase();
+$keepMedia=getenv('SQF_TEST_ISOLATED_IMPORT_STAGE')==='1';
+$root=$keepMedia?(string)getenv('SQF_PRIVATE_MEDIA_ROOT'):sys_get_temp_dir().'/sqf-import-'.bin2hex(random_bytes(8));
+if($keepMedia&&$root!==sys_get_temp_dir().'/sqf-import-stage-media')throw new RuntimeException('Staging fixture must use its dedicated temporary media root');
+if($root===''||file_exists($root)||is_link($root)||!mkdir($root,0700))throw new RuntimeException('Fixture media root must not exist before the test');
 function check(bool $x,string $m):void{if(!$x)throw new RuntimeException($m);echo "PASS: $m\n";}
 try{
     $tables=array_fill_keys(sqfImportTables(),[]);$id='00000000-0000-4000-8000-000000000090';
@@ -69,4 +73,11 @@ try{
         catch(DomainException $e){check(true,'repeat import refused for nonempty destination');}
         check((int)$db->query('SELECT COUNT(*) FROM sqf_auth_users')->fetchColumn()===2,'failed repeat import preserved committed rows');
     }
-}finally{if(isset($relative)){unlink($root.'/'.$relative);rmdir($root.'/portfolio/'.$provider);rmdir($root.'/portfolio');}rmdir($root);}
+}finally{
+    if(!$keepMedia){
+        if(isset($relative)){unlink($root.'/'.$relative);rmdir($root.'/portfolio/'.$provider);rmdir($root.'/portfolio');}
+        rmdir($root);
+    }else{
+        echo 'INFO: fictional media kept for independent restore comparison at '.$root.PHP_EOL;
+    }
+}
