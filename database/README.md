@@ -82,3 +82,10 @@ php database/tests/index-inventory.php
 ```
 
 A rotina usa apenas `information_schema` e `EXPLAIN`, não grava dados nem presume desempenho a partir de tabelas vazias. Execute separadamente em MySQL 8.0 e MariaDB 10.11. Registre os planos e meça consultas com volume fictício representativo antes de considerar a otimização homologada.
+
+## Pendência de integridade: avaliações em atendimentos recorrentes
+
+A migração 001 contém `UNIQUE(client_id,provider_id)` em `service_engagements`. Na conclusão de uma solicitação, `sqfRequestAction()` reutiliza esse vínculo, enquanto `reviews` possui uma avaliação única por `engagement_id`. Isso limita avaliações independentes de **duas contratações concluídas entre as mesmas pessoas**.
+
+Antes de declarar 100%, revisar uma migração que represente cada atendimento individual sem perder os vínculos e avaliações existentes. Executar casos com dois atendimentos concluídos do mesmo par, avaliações distintas, tentativa de avaliação duplicada e restauração de dados legados em MySQL 8.0 e MariaDB 10.11. Nenhum ajuste destrutivo de índice ou relacionamento deve ser promovido antes da reconciliação.
+
