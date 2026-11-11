@@ -10,6 +10,15 @@ cd "$(dirname "$0")/../.."
 : "${SQF_PRIVATE_MEDIA_ROOT:?Set original private media directory}"
 : "${SQF_RESTORE_MEDIA_ROOT:?Set restored private media directory}"
 
+if [[ "$SQF_PRIVATE_MEDIA_ROOT" != "/tmp/sqf-import-stage-media" || "$SQF_RESTORE_MEDIA_ROOT" != "/tmp/sqf-import-restore-media" ]]; then
+  echo "Refusing paths outside the dedicated fictional media directories" >&2
+  exit 2
+fi
+if [[ ! -d "$SQF_PRIVATE_MEDIA_ROOT" || ! -d "$SQF_RESTORE_MEDIA_ROOT" ]]; then
+  echo "Both independent fictional media directories must exist" >&2
+  exit 2
+fi
+
 php -r '
 require "backend/src/Database.php";
 $src=sqfDatabase();
