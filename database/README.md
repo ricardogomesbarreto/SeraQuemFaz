@@ -4,7 +4,7 @@
 
 ## Instalação
 
-Execute `npm run build:dist`. O SQL consolidado inclui migrations 001–008, 51 categorias e cadastro nacional de municípios. Importe em banco novo e vazio. Veja [Hostinger](hostinger/README.md).
+Execute `npm run build:dist`. O SQL consolidado inclui migrations 001–009, 51 categorias e cadastro nacional de municípios. Importe em banco novo e vazio. Veja [Hostinger](hostinger/README.md).
 
 ## Serviços
 
@@ -64,3 +64,15 @@ Os executores locais permanecem independentes da hospedagem e de pipelines remot
 - Revisão funcional: além da presença de rotas, validar autorização por perfil, métodos HTTP, erros, desempenho, agenda concorrente, mensagens, avaliações, dados privados e fluxos de login em ambos os bancos.
 
 A restauração pressupõe backup e cópia **de um banco de testes criado previamente**, não os executa automaticamente. Não transportar dados reais para os ensaios sintéticos. Concluir a migração exige evidências de execução, além da presença de código de teste.
+
+## Otimização de consultas MySQL/MariaDB — migração 009
+
+A migração `009_marketplace_read_indexes.sql` acrescenta índices não destrutivos para listagem de mensagens por solicitação, identificação de solicitações semelhantes, avaliações públicas por prestador e fila de moderação. As consultas permanecem parametrizadas; a leitura do histórico de mensagens valida a participação na solicitação sem manter bloqueios de escrita.
+
+Para examinar índices e planos de consulta em um banco **descartável**, depois de aplicar todas as migrações e configurar `SQF_DB_DSN`, `SQF_DB_USER` e `SQF_DB_PASSWORD`:
+
+```bash
+php database/tests/index-inventory.php
+```
+
+A rotina usa apenas `information_schema` e `EXPLAIN`, não grava dados nem presume desempenho a partir de tabelas vazias. Execute separadamente em MySQL 8.0 e MariaDB 10.11. Registre os planos e meça consultas com volume fictício representativo antes de considerar a otimização homologada.
