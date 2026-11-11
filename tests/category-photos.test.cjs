@@ -10,7 +10,7 @@ vm.createContext(context);
 vm.runInContext(read('assets/utils.js'), context);
 const { categoryImage, safeImageUrl } = context.window.SQFUtils;
 
-test('restaura URLs de imagens originais do campo image_url do Supabase', () => {
+test('preserva URLs HTTPS originais do campo image_url nas categorias', () => {
   const examples = [
     { name: 'Barbeiro', image_url: 'https://cdn.example.org/barbeiro-original.jpg' },
     { name: 'Cabeleireiro', image_url: 'https://cdn.example.org/cabeleireiro-original.jpg' },
