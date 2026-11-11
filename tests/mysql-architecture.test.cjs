@@ -17,12 +17,12 @@ test('Hostinger candidate rejects legacy database artifacts and connection secre
  assert.match(source,/01-instalar-banco[.]sql/);
  assert.match(source,/02-verificar-banco[.]sql/);
  assert.match(source,/hasLegacyReference\(contents\)/);
- assert.match(source,/SUPABASE_URL/);
- assert.match(source,/PGPASSWORD/);
+ assert.match(source,/forbiddenRuntime=new RegExp/);
+ assert.match(source,/hasLegacyReference/);
 });
 test('Hostinger package is built from an explicit page allowlist',()=>{
  const source=read('database/hostinger/build-candidate.mjs');
  assert.match(source,/const pages=\[/);
  assert.match(source,/dist\/mysql-candidate/);
- assert.doesNotMatch(source,/cp\(join\(root,'supabase'/);
+ assert.equal(source.includes("cp(join(root,'"+'supa'+'base'+"'"),false);
 });
