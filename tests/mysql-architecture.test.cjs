@@ -6,3 +6,19 @@ test('canonical panels match validated candidate',()=>{for(const p of ['painel',
 test('server connection rejects non-mysql DSN',()=>assert.match(read('backend/src/Database.php'),/str_starts_with\(\$dsn, 'mysql:'\)/));
 test('candidate explicitly blocks production',()=>{const x=JSON.parse(read('database/candidate-version.json'));assert.equal(x.production,false);assert.equal(x.deploymentAllowed,false);assert.deepEqual(x.database,['MySQL 8.0','MariaDB 10.11']);});
 test('private config is not included as live config',()=>assert.equal(fs.existsSync(path.join(root,'backend/config.php')),false));
+
+test('Hostinger candidate rejects legacy database artifacts and connection secrets',()=>{
+ const source=read('database/hostinger/build-candidate.mjs');
+ assert.match(source,/forbiddenPath/);
+ assert.match(source,/forbiddenRuntime/);
+ assert.match(source,/await inspect\(pub\)/);
+ assert.match(source,/await inspect\(join\(priv,'backend'\)\)/);
+ assert.match(source,/SUPABASE_URL/);
+ assert.match(source,/PGPASSWORD/);
+});
+test('Hostinger package is built from an explicit page allowlist',()=>{
+ const source=read('database/hostinger/build-candidate.mjs');
+ assert.match(source,/const pages=\[/);
+ assert.match(source,/dist\/mysql-candidate/);
+ assert.doesNotMatch(source,/cp\(join\(root,'supabase'/);
+});
