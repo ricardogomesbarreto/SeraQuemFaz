@@ -6,7 +6,7 @@ import {createHmac} from 'node:crypto';
 import { chromium } from 'playwright';
 const origin='http://127.0.0.1:8080';
 const browser=await chromium.launch({headless:true});
-const sizes=[360,390,768,1366];
+const sizes=[320,360,390,414,768,1024,1366,1920];
 const faults=[],legacyRequests=[];
 async function makePage(){
  const context=await browser.newContext({viewport:{width:390,height:844}});
@@ -23,8 +23,8 @@ async function makePage(){
 async function widthCheck(page,label){
  for(const width of sizes){
    await page.setViewportSize({width,height:844});
-   const metrics=await page.evaluate(()=>({scroll:document.documentElement.scrollWidth,inner:window.innerWidth}));
-   assert.ok(metrics.scroll<=metrics.inner+2,label+' horizontal overflow at '+width+': '+metrics.scroll);
+   const metrics=await page.evaluate(()=>({scroll:document.documentElement.scrollWidth,body:document.body.scrollWidth,inner:window.innerWidth}));
+   assert.ok(Math.max(metrics.scroll,metrics.body)<=metrics.inner+2,label+' horizontal overflow at '+width+': '+JSON.stringify(metrics));
  }
  console.log('PASS: '+label+' at '+sizes.join(', ')+'px');
 }
@@ -42,6 +42,13 @@ async function login(page,email,password){
 }
 try{
  const provider=await makePage(), client=await makePage();
+ // Run viewport checks against all public entrypoints before exercising account workflows.
+ for(const pathname of ['/index.html','/categorias.html?cidade=2111300','/ajuda.html','/privacidade.html','/termos.html']){
+   const response=await provider.page.goto(origin+pathname);
+   assert.equal(response.status(),200,'public page status: '+pathname);
+   await provider.page.locator('body').waitFor({state:'visible'});
+   await widthCheck(provider.page,'public '+pathname);
+ }
  await provider.page.goto(origin+'/entrar.html');await widthCheck(provider.page,'login');
  await provider.page.goto(origin+'/cadastro.html');await widthCheck(provider.page,'signup');
  await login(provider.page,'fixture1@example.invalid','browser-provider-12345');
