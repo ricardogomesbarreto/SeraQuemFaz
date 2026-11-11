@@ -49,7 +49,7 @@ try{
         else putenv('SQF_IMPORT_STAGING_DATABASE='.$priorDestination);
     }
     check((int)$db->query('SELECT COUNT(*) FROM sqf_auth_users')->fetchColumn()===0,'unapproved staging attempt does not persist records');
-    // The normal suite is always rollback-only. Persist only in a named, disposable CI schema.
+    // Default tests roll back. Persist only in an explicitly named disposable schema.
     if(getenv('SQF_TEST_ISOLATED_IMPORT_STAGE')==='1'){
         check((string)$db->query('SELECT DATABASE()')->fetchColumn()==='sqf_import_stage','commit limited to disposable import staging schema');
         check(getenv('SQF_IMPORT_STAGING_ENABLED')==='1','staging persistence explicitly enabled');
