@@ -1,7 +1,7 @@
 # Plano de recuperação e corte — Hostinger Unlimited
 **Candidato; não autoriza implantação.**
 
-1. Homologar RC.10 em subdomínio isolado e banco novo; executar CI e preflight. Conferir limites, TLS, SMTP e sandbox. Definir responsáveis, janela e critérios de aceite.
+1. Homologar v3.14.0-rc.13 em subdomínio isolado e banco novo; executar CI e preflight. Conferir limites, TLS, SMTP e sandbox. Definir responsáveis, janela e critérios de aceite.
 2. Inventariar e exportar dados autorizados, normalizar tipos, preservar UUIDs e preparar mídia privada. Não exportar senhas, tokens, segredos ou sessões. Registrar contagens, hashes e exclusões justificadas; proteger os arquivos com criptografia e acesso restrito.
 3. Fazer backup consistente do banco e mídia da origem e testar restauração isolada. Congelar escritas durante o corte, executar importador dry-run e comparar contagens, vínculos e hashes; somente depois importar em staging. Confirmar redefinição de senhas, análise de publicação, moderação e pagamentos. Não alterar fonte.
 4. Antes de qualquer liberação, revisar LGPD: base legal, retenção, direitos do titular, acesso integral e exclusão sob obrigação legal, tratamento de documentos, registro de incidentes, responsáveis e teste de isolamento. Exportação resumida não substitui atendimento integral.
