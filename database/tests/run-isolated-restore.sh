@@ -30,4 +30,5 @@ echo "PASS: separate disposable source and restore schemas\n";
 
 php database/tests/restore-check.php
 php database/tests/media-restore.php
+php database/tests/isolated-media-inventory.php
 echo "PASS: recovered schema, content digests and private media SHA256 match"
