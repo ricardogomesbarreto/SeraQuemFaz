@@ -51,3 +51,9 @@ foreach([$staff,$id] as $actor){
     catch(DomainException $e){echo "PASS: administrator metrics denied to non-admin fixture\n";}
 }
 echo "PASS: administrator metrics validated and internally consistent\n";
+
+// Reuse the completed synthetic review from the agenda integration suite.
+$reviewId=sqfQuery($db,'SELECT id FROM reviews WHERE reviewer_id=? AND provider_id=? ORDER BY created_at LIMIT 1',['00000000-0000-4000-8000-000000000001',$id])->fetchColumn();
+if(!$reviewId)throw new RuntimeException('Missing synthetic review fixture');
+sqfQuery($db,"UPDATE reviews SET moderation_status='pending',comment='Avaliação fictícia para moderação no navegador' WHERE id=?",[$reviewId]);
+echo "PASS: pending review browser fixture ready\n";
