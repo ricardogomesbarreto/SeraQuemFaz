@@ -11,6 +11,14 @@ if [[ "${SQF_IMPORT_STAGING_ENABLED:-}" != "1" || "${SQF_IMPORT_STAGING_DATABASE
   echo "Refusing persistent import: set SQF_IMPORT_STAGING_ENABLED=1 and SQF_IMPORT_STAGING_DATABASE=sqf_import_stage" >&2
   exit 2
 fi
+if [[ "${SQF_PRIVATE_MEDIA_ROOT:-}" != "/tmp/sqf-import-stage-media" ]]; then
+  echo "Refusing staging media outside the dedicated temporary fixture directory" >&2
+  exit 2
+fi
+if [[ -e "$SQF_PRIVATE_MEDIA_ROOT" || -L "$SQF_PRIVATE_MEDIA_ROOT" ]]; then
+  echo "Staging media fixture directory must be absent before the test" >&2
+  exit 2
+fi
 
 php -r '
 require "backend/src/Database.php";
@@ -27,3 +35,4 @@ echo "PASS: isolated staging schema and catalog verified\n";
 SQF_TEST_ISOLATED_IMPORT_STAGE=1 php database/tests/snapshot-integration.php
 php database/tests/integrity.php
 echo "PASS: persisted fictional import, row/media reconciliation, rollback checks and FK integrity"
+echo "INFO: fixture media retained at $SQF_PRIVATE_MEDIA_ROOT for independent restore validation"
