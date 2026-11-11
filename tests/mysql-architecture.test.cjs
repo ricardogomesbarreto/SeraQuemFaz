@@ -62,3 +62,27 @@ test('staging suite tests persisted rollback and all imported table counts',()=>
  assert.match(code,/persistent import rejects orphaned message sender/);
  assert.match(code,/foreach\\(sqfImportTables\\(\\) as \\$name\\)/);
 });
+
+test('source audit executes on real temporary files, not only on its own source text',()=>{
+ const os=require('node:os');
+ const cp=require('node:child_process');
+ const scratch=fs.mkdtempSync(path.join(os.tmpdir(),'sqf-mysql-audit-'));
+ const audit=path.join(root,'database/audit/verify-mysql.mjs');
+ const run=()=>cp.spawnSync(process.execPath,[audit],{cwd:scratch,encoding:'utf8'});
+ try{
+  const legacy=path.join(scratch,'retired.php');
+  fs.writeFileSync(legacy,'<?php // '+['post','gres'].join('')+'\\n');
+  let result=run();
+  assert.notEqual(result.status,0,'retired database reference must fail source audit');
+  assert.match(result.stderr,/Referências proibidas/);
+  fs.rmSync(legacy);
+  const migrations=path.join(scratch,'database','mysql','migrations');
+  fs.mkdirSync(migrations,{recursive:true});
+  fs.writeFileSync(path.join(migrations,'001_syntax.sql'),'INSERT INTO t VALUES (1) ON CONFLICT DO NOTHING;\\n');
+  result=run();
+  assert.notEqual(result.status,0,'unsupported SQL dialect must fail source audit');
+  assert.match(result.stderr,/incompatible SQL dialect/);
+ }finally{
+  fs.rmSync(scratch,{recursive:true,force:true});
+ }
+});
