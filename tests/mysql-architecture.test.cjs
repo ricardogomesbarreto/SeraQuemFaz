@@ -86,3 +86,12 @@ test('source audit executes on real temporary files, not only on its own source 
   fs.rmSync(scratch,{recursive:true,force:true});
  }
 });
+
+test('every frontend PHP/MySQL API route is registered in the server router',()=>{
+ const client=read('assets/mysql-api-client.js');
+ const server=read('backend/public/index.php');
+ const routes=[...new Set([...client.matchAll(/\\bcall\\('([^']+)'/g)].map(match=>match[1]))];
+ assert.ok(routes.length>=65,'unexpectedly small API contract');
+ for(const route of routes)
+  assert.ok(server.includes("'"+route+"'")||server.includes('"'+route+'"'),'route missing in PHP router: '+route);
+});
