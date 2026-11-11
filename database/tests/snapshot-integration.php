@@ -29,4 +29,20 @@ try{
     $bad=$snap;$bad['media'][$relative]=str_repeat('a',64);
     try{sqfImportSnapshot($db,$bad,$root);throw new RuntimeException('manifest accepted');}catch(DomainException $e){check(true,'mismatched media manifest rejected');}
     check((int)$db->query('SELECT COUNT(*) FROM sqf_auth_users')->fetchColumn()===0,'failed import rolls back');
+    // The normal suite is always rollback-only. Persist only in a named, disposable CI schema.
+    if(getenv('SQF_TEST_ISOLATED_IMPORT_STAGE')==='1'){
+        check((string)$db->query('SELECT DATABASE()')->fetchColumn()==='sqf_import_stage','commit limited to disposable import staging schema');
+        check(getenv('SQF_IMPORT_STAGING_ENABLED')==='1','staging persistence explicitly enabled');
+        $committed=sqfImportSnapshot($db,$snap,$root,true);
+        check($committed['committed']===true&&$committed['publication_enabled']===false,'synthetic snapshot committed without automatic publication');
+        foreach(['sqf_auth_users'=>2,'profiles'=>2,'provider_services'=>1,'sqf_service_requests'=>1,'sqf_request_messages'=>1,'portfolio_photos'=>1] as $name=>$expected){
+            $actual=(int)$db->query('SELECT COUNT(*) FROM `'.$name.'`')->fetchColumn();
+            check($actual===$expected,'staging row count reconciled: '.$name);
+        }
+        $inventory=sqfMediaInventory($db,$root);
+        check($inventory===$snap['media'],'staging WebP media SHA256 reconciled');
+        try{sqfImportSnapshot($db,$snap,$root,true);throw new RuntimeException('nonempty staging accepted');}
+        catch(DomainException $e){check(true,'repeat import refused for nonempty destination');}
+        check((int)$db->query('SELECT COUNT(*) FROM sqf_auth_users')->fetchColumn()===2,'failed repeat import preserved committed rows');
+    }
 }finally{if(isset($relative)){unlink($root.'/'.$relative);rmdir($root.'/portfolio/'.$provider);rmdir($root.'/portfolio');}rmdir($root);}
