@@ -73,8 +73,8 @@ function sqfConsumeToken(PDO $db,string $token,string $purpose,?string $password
 function sqfLogin(PDO $db,string $email,string $password):array {
     $email=sqfEmail($email);
     $u=sqfQuery($db,'SELECT id,password_hash,email_confirmed_at,auth_version FROM sqf_auth_users WHERE email=?',[$email])->fetch(PDO::FETCH_ASSOC);
-    // Dummy hash avoids immediately distinguishing missing accounts from bad passwords.
-    $dummy='$2y$12$Hia2LiVq8pnlPb.0I.JcLOjZ0VvPZ4rgWHqk5FD7hmYRkz4bUHqVe';
+    // Match the Argon2id cost used for real accounts to reduce timing differences for unknown emails.
+    $dummy='$argon2id$v=19$m=65536,t=4,p=1$RzJIUks3cUNId0o2Zzhvag$l2fDCzce4Ogzf6zjs3oU3273mjzDfLXmHrKsWTCMdek';
     $valid=password_verify($password,$u['password_hash']??$dummy);
     if(!$u||!$valid||!$u['email_confirmed_at'])throw new DomainException('Credenciais inválidas ou e-mail não confirmado');
     return ['id'=>$u['id'],'auth_version'=>(int)$u['auth_version']];
