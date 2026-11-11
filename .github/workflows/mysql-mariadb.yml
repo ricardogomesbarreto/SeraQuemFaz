@@ -110,7 +110,7 @@ jobs:
           php database/tests/integrity.php
           node database/hostinger/build-candidate.mjs
           STAGING_ROOT="$PWD/dist/mysql-candidate/public_html"
-          test ! -e "$STAGING_ROOT/assets/supabase-config.js"
+          test -f "$STAGING_ROOT/assets/mysql-api-client.js"
           test ! -e "$STAGING_ROOT/assets/account.js"
           test -f "$STAGING_ROOT/service-worker.js"
           test -f "$STAGING_ROOT/manifest.webmanifest"
