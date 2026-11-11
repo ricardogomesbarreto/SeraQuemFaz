@@ -158,7 +158,14 @@ try{
  assert.equal(await staff.page.getByRole('heading',{name:'Resumo financeiro'}).count(),0);
  assert.equal(await staff.page.getByRole('heading',{name:'Indicadores da plataforma'}).count(),0);
  await widthCheck(staff.page,'moderator queue');
- await staff.context.close();
+ await staff.page.locator('#staffIdentity').getByText('Moderador',{exact:true}).waitFor();
+assert.equal(await staff.page.locator('#staffNavigation').getByText('Resumo financeiro',{exact:true}).count(),0);
+await staff.page.locator('#staffLogout').click();
+await staff.page.waitForURL('**/entrar.html');
+await staff.page.goto(origin+'/admin-mysql.html');
+await staff.page.waitForURL('**/entrar.html');
+console.log('PASS: moderator identity, restricted navigation and administrative logout');
+await staff.context.close();
  console.log('PASS: moderator MFA unlocks moderation queues but not administrator metrics or billing');
  const guest=await makePage();
  await guest.page.goto(origin+'/admin-mysql.html');
