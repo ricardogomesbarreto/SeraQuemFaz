@@ -44,7 +44,7 @@ bash database/tests/run-isolated-import.sh
 
 O executor exige destino vazio, nome exato e um diretório de mídia de teste ainda inexistente. No modo persistido, a mídia fictícia é preservada em `/tmp/sqf-import-stage-media` para permitir a comparação posterior com uma cópia restaurada. Exercita importação transacional, rollback em erro relacional, reconciliação de contagens, relações cliente/prestador/solicitação/mensagem e SHA-256 de arquivo WebP fictício. Os perfis importados continuam não publicados e sem credenciais reutilizadas. **A execução só deve ser considerada aprovada após a saída real do terminal nos dois mecanismos; a presença do script não demonstra aprovação.**
 
-**Restauração e recuperação:** depois de copiar manualmente o banco descartável para outro banco novo, `sqf_import_restore`, e copiar os arquivos fictícios para um diretório privado independente, definir `SQF_RESTORE_DSN`, `SQF_PRIVATE_MEDIA_ROOT` e `SQF_RESTORE_MEDIA_ROOT`; executar:
+**Restauração e recuperação:** depois de copiar manualmente o banco descartável para outro banco novo, `sqf_import_restore`, e copiar os arquivos fictícios para um diretório privado independente, definir `SQF_RESTORE_DSN` para `sqf_import_restore`, `SQF_PRIVATE_MEDIA_ROOT=/tmp/sqf-import-stage-media` e `SQF_RESTORE_MEDIA_ROOT=/tmp/sqf-import-restore-media`; executar:
 
 ```bash
 bash database/tests/run-isolated-restore.sh
