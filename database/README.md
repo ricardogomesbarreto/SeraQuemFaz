@@ -65,6 +65,12 @@ Os executores locais permanecem independentes da hospedagem e de pipelines remot
 
 A restauração pressupõe backup e cópia **de um banco de testes criado previamente**, não os executa automaticamente. Não transportar dados reais para os ensaios sintéticos. Concluir a migração exige evidências de execução, além da presença de código de teste.
 
+## Validação totalmente local, sem hospedagem e sem CI
+
+Execute `bash scripts/validate-conversion-local.sh` para conferir a auditoria de código, testes unitários Node.js e sintaxe dos arquivos PHP. Essa execução não precisa de um banco de dados e não modifica dados ou arquivos existentes.
+
+Para acrescentar **somente** o inventário de índices e `EXPLAIN` em um banco **descartável**, configure `SQF_DB_DSN`, `SQF_DB_USER`, `SQF_DB_PASSWORD` e execute `SQF_WITH_DB=1 bash scripts/validate-conversion-local.sh`. Importação persistida, testes de concorrência, recuperação e comparação de mídia exigem os executores isolados documentados acima, com consentimento explícito e dados fictícios. Não interpretar teste estático como aceite funcional.
+
 ## Otimização de consultas MySQL/MariaDB — migração 009
 
 A migração `009_marketplace_read_indexes.sql` acrescenta índices não destrutivos para listagem de mensagens por solicitação, identificação de solicitações semelhantes, avaliações públicas por prestador e fila de moderação. As consultas permanecem parametrizadas; a leitura do histórico de mensagens valida a participação na solicitação sem manter bloqueios de escrita.
