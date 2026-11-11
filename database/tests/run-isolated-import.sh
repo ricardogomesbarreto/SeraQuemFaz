@@ -25,6 +25,15 @@ require "backend/src/Database.php";
 $db=sqfDatabase();
 $schema=(string)$db->query("SELECT DATABASE()")->fetchColumn();
 if($schema!=="sqf_import_stage")throw new RuntimeException("Refusing non-disposable schema");
+$version=(string)$db->query("SELECT VERSION()")->fetchColumn();
+if(!preg_match("/^8[.]0[.][0-9]+/",$version)&&!preg_match("/^10[.]11[.][0-9]+.*MariaDB/i",$version))
+    throw new RuntimeException("Only MySQL 8.0 and MariaDB 10.11 are supported in the conversion matrix");
+if((string)$db->query("SELECT @@character_set_connection")->fetchColumn()!=="utf8mb4")
+    throw new RuntimeException("Connection must use utf8mb4");
+if((string)$db->query("SELECT @@session.time_zone")->fetchColumn()!=="+00:00")
+    throw new RuntimeException("Connection must use UTC");
+if((int)$db->query("SELECT COUNT(*) FROM information_schema.tables WHERE table_schema=DATABASE() AND table_type=\x27BASE TABLE\x27 AND engine<>\x27InnoDB\x27")->fetchColumn()!==0)
+    throw new RuntimeException("Transactional InnoDB tables required");
 if((int)$db->query("SELECT COUNT(*) FROM sqf_auth_users")->fetchColumn()!==0)throw new RuntimeException("Destination is not empty");
 if((int)$db->query("SELECT COUNT(*) FROM profiles")->fetchColumn()!==0)throw new RuntimeException("Profiles already exist");
 if((int)$db->query("SELECT COUNT(*) FROM categories WHERE status=\x27active\x27")->fetchColumn()!==51)throw new RuntimeException("Import public catalog before testing");
