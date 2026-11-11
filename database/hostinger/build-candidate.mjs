@@ -50,5 +50,10 @@ const inspect=async dir=>{
 };
 await inspect(pub);
 await inspect(join(priv,'backend'));
+// Configuration templates and installation SQL must also be free of obsolete runtime references.
+for(const candidate of [join(priv,'config.example.php'),join(dest,'database/01-instalar-banco.sql'),join(dest,'database/02-verificar-banco.sql')]){
+ const contents=await readFile(candidate,'utf8');
+ if(hasLegacyReference(contents))throw Error('Legacy connection reference in deployment file: '+candidate);
+}
 await writeFile(join(dest,'README.txt'),'HOSTINGER UNLIMITED — CANDIDATO DE HOMOLOGAÇÃO — NÃO IMPLANTAR EM PRODUÇÃO.\npublic_html: arquivos públicos; sqf-private: fora da raiz web, config.php a provisionar localmente.\nSQL: database/01-instalar-banco.sql. MySQL/MariaDB; checkout desativado.\n');
 console.log('MySQL candidate generated: '+scripts.size+' public scripts; no production credentials.');
