@@ -4,7 +4,7 @@
 
 ## Instalação
 
-Execute `npm run build:dist`. O SQL consolidado inclui migrations 001–006, 51 categorias e cadastro nacional de municípios. Importe em banco novo e vazio. Veja [Hostinger](hostinger/README.md).
+Execute `npm run build:dist`. O SQL consolidado inclui migrations 001–008, 51 categorias e cadastro nacional de municípios. Importe em banco novo e vazio. Veja [Hostinger](hostinger/README.md).
 
 ## Serviços
 
@@ -15,7 +15,7 @@ Execute `npm run build:dist`. O SQL consolidado inclui migrations 001–006, 51 
 
 ## Testes e gates
 
-CI nos dois engines: instalação, integridade, PHP, HTTP, Chromium, isolamento, dump/restauração e comparação de tabelas. Fixtures nunca em produção. A pré-validação de contas não é importação definitiva. Ainda faltam transferência integral de dados/mídia, recuperação de contas, SMTP, sandbox, checkout/cancelamento/ciclo, paridade, segurança e LGPD. Não liberar hospedagem antes da aprovação integral.
+CI nos dois engines: instalação, integridade, PHP, HTTP, Chromium, isolamento, dump/restauração e comparação de tabelas. Fixtures nunca em produção. A pré-validação de contas não é importação definitiva. Ainda faltam transferência integral de dados/mídia, recuperação de contas, SMTP, sandbox, checkout/cancelamento/ciclo, paridade, segurança e LGPD. Não liberar produção antes da aprovação integral. Para testes, usar apenas subdomínio de homologação com banco separado e dados fictícios após validação da CI e do preflight.
 
 ## Histórico
 
