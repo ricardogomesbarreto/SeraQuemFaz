@@ -13,6 +13,10 @@ test('Hostinger candidate rejects legacy database artifacts and connection secre
  assert.match(source,/forbiddenRuntime/);
  assert.match(source,/await inspect\(pub\)/);
  assert.match(source,/await inspect\(join\(priv,'backend'\)\)/);
+ assert.match(source,/config[.]example[.]php/);
+ assert.match(source,/01-instalar-banco[.]sql/);
+ assert.match(source,/02-verificar-banco[.]sql/);
+ assert.match(source,/hasLegacyReference\(contents\)/);
  assert.match(source,/SUPABASE_URL/);
  assert.match(source,/PGPASSWORD/);
 });
