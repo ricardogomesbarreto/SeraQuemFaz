@@ -45,3 +45,17 @@ test('database restoration comparison accepts only the MySQL DSN family',()=>{
 });
 
 test('isolated fictional restore rejects extra and altered media files',()=>{const source=read('database/tests/isolated-media-inventory.php');assert.match(source,/sqfMediaInventory/);assert.match(source,/physicalInventory/);assert.match(source,/orphan media/);assert.match(read('database/tests/run-isolated-restore.sh'),/isolated-media-inventory[.]php/);});
+
+test('migration audit rejects database-specific SQL unsupported by both engines',()=>{
+ const code=read('database/audit/verify-mysql.mjs');
+ assert.match(code,/incompatibleSql/);
+ assert.match(code,/ON\\s\+CONFLICT/);
+ assert.match(code,/TIMESTAMPTZ/);
+ assert.match(code,/incompatible SQL dialect/);
+});
+test('staging suite tests persisted rollback and all imported table counts',()=>{
+ const code=read('database/tests/snapshot-integration.php');
+ assert.match(code,/persistent import rejects tampered WebP manifest/);
+ assert.match(code,/persistent import rejects orphaned message sender/);
+ assert.match(code,/foreach\\(sqfImportTables\\(\\) as \\$name\\)/);
+});
