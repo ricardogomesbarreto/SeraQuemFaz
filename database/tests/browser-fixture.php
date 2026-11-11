@@ -35,3 +35,16 @@ foreach([$staff,$id] as $actor){
     }
 }
 echo "PASS: administrator billing and privacy queues available with role isolation\n";
+
+require_once __DIR__.'/../../backend/src/Marketplace.php';
+require_once __DIR__.'/../../backend/src/Engagement.php';
+$metrics=sqfStaffMetrics($db,$admin);
+foreach(['clients','providers','published_providers','requests','completed','pending_verifications'] as $key){
+    if(!isset($metrics[$key])||!is_int($metrics[$key])||$metrics[$key]<0)throw new RuntimeException('Invalid metric: '.$key);
+}
+if($metrics['published_providers']>$metrics['providers']||$metrics['completed']>$metrics['requests'])throw new RuntimeException('Inconsistent administrator metrics');
+foreach([$staff,$id] as $actor){
+    try{sqfStaffMetrics($db,$actor);throw new LogicException('Unauthorized metrics read');}
+    catch(DomainException $e){echo "PASS: administrator metrics denied to non-admin fixture\n";}
+}
+echo "PASS: administrator metrics validated and internally consistent\n";
