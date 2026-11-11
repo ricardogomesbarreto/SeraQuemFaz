@@ -115,3 +115,21 @@ test('message reads preserve participant authorization without write locks',()=>
  assert.doesNotMatch(method,/FOR UPDATE|sqfTxn/);
  assert.match(method,/LIMIT 100/);
 });
+
+test('PHP API and browser client agree on GET versus POST for every registered call',()=>{
+ const client=read('assets/mysql-api-client.js');
+ const router=read('backend/public/index.php');
+ const publicGet=new Set([...router.matchAll(/\\$method==='GET'&&\\$route==='([^']+)'/g)].map(match=>match[1]));
+ const calls=[...client.matchAll(/\\bcall\\('([^']+)'([^)]*)\\)/g)];
+ assert.ok(calls.length>=65,'unexpectedly small API surface');
+ for(const [,route,args] of calls){
+  const get=!args.trim()||args.trim().startsWith(',undefined');
+  assert.equal(get,publicGet.has(route),'HTTP method mismatch for '+route);
+ }
+ assert.ok(client.includes("url.searchParams.set('route','media/upload')"),'multipart upload route missing');
+});
+test('unknown-account login uses Argon2id rather than a cheaper dummy hash',()=>{
+ const source=read('backend/src/Auth.php');
+ assert.match(source,/\\$dummy='\\$argon2id\\$/);
+ assert.match(source,/password_verify\\(\\$password,\\$u\\['password_hash'\\]\\?\\?\\$dummy\\)/);
+});
