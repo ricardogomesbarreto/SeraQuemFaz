@@ -7,12 +7,12 @@ import { chromium } from 'playwright';
 const origin='http://127.0.0.1:8080';
 const browser=await chromium.launch({headless:true});
 const sizes=[320,360,390,414,768,1024,1366,1920];
-const faults=[],legacyRequests=[];
+const faults=[],crossOriginDataRequests=[];
 async function makePage(){
  const context=await browser.newContext({viewport:{width:390,height:844}});
  await context.route('**/*',route=>{
    const url=new URL(route.request().url());
-   if(/supabase/i.test(url.hostname)||/supabase-(?:config|js)/i.test(url.pathname))legacyRequests.push(url.origin+url.pathname);
+   if(url.origin!==origin&&['script','fetch','xhr','websocket'].includes(route.request().resourceType()))crossOriginDataRequests.push(url.origin+url.pathname);
    return url.origin===origin?route.continue():route.abort();
  });
  const page=await context.newPage();
@@ -226,6 +226,6 @@ await staff.context.close();
  await client.page.goto(origin+'/painel-mysql.html');await client.page.waitForURL('**/entrar.html');
  console.log('PASS: logout prevents dashboard access');
  assert.deepEqual(faults,[],'unexpected uncaught browser errors');
- assert.deepEqual(legacyRequests,[],'candidate must not attempt Supabase requests');
- console.log('PASS: isolated package browser makes no Supabase SDK or endpoint requests');
+ assert.deepEqual(crossOriginDataRequests,[],'candidate must not request scripts or data outside its own origin');
+ console.log('PASS: isolated browser uses no external scripts or data endpoints');
 }finally{await browser.close();}
