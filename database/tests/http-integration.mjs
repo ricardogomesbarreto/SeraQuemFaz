@@ -15,6 +15,11 @@ let x=await call('categories');assert.equal(x.status,200);assert.ok(Array.isArra
 const missing=await fetch(base+'?route=provider&id=not-a-uuid');assert.equal(missing.status,400);
 const publicProvider=await fetch(base+'?route=provider&id=00000000-0000-4000-8000-000000000002');assert.equal(publicProvider.status,200);assert.ok((await publicProvider.json()).data);
 x=await call('session');assert.equal(x.status,200);assert.equal(x.result.user_id,null);assert.ok(csrf);
+assert.equal((await fetch(base+'?route=unsupported-method',{method:'GET'})).status,404,'unknown read route rejected');
+const unsupportedFormat=await fetch(base+'?route=profile',{method:'POST',headers:{Cookie:cookie,'X-CSRF-Token':csrf,'Content-Type':'text/plain'},body:'{}'});
+assert.equal(unsupportedFormat.status,415,'non-JSON mutation rejected');
+const invalidJson=await fetch(base+'?route=profile',{method:'POST',headers:{Cookie:cookie,'X-CSRF-Token':csrf,'Content-Type':'application/json'},body:'{'});
+assert.equal(invalidJson.status,400,'malformed JSON rejected');
 assert.equal((await call('request/messages',{request_id:'test'})).status,401);
 assert.equal((await call('login',{email:'auth-fixture@example.invalid',password:'new-fixture-password-5678'},'wrong')).status,403);
 x=await call('login',{email:'auth-fixture@example.invalid',password:'new-fixture-password-5678'});assert.equal(x.status,200);assert.ok(x.result.user_id);
