@@ -31,7 +31,7 @@ await cp(join(root,'database/hostinger/unlimited-profile.json'),join(dest,'unlim
 // Reject legacy database clients, credentials and migration sources from the deployable package.
 // Keep historical vendor identifiers out of the migration audit's source scan.
 const oldDatabase='post'+'gres',oldService='supa'+'base';
-const forbiddenPath=/(?:\\.env(?:\\.|$)|\\.sql$|\\.bak$|\\.dump$)/i;
+const forbiddenPath=/(?:[.]env(?:[.]|$)|[.]sql$|[.]bak$|[.]dump$)/i;
 const forbiddenRuntime=/(?:PGHOST|PGPASSWORD|SUPABASE_URL|SUPABASE_KEY)/i;
 const hasLegacyReference=value=>{
  const lower=value.toLowerCase();
@@ -42,7 +42,7 @@ const inspect=async dir=>{
   const p=join(dir,e.name);
   if(forbiddenPath.test(e.name)||hasLegacyReference(e.name))throw Error('Forbidden deployment path: '+p);
   if(e.isDirectory())await inspect(p);
-  else if(/\\.(?:html|js|mjs|json|php|css|webmanifest|htaccess)$/i.test(e.name)){
+  else if(/[.](?:html|js|mjs|json|php|css|webmanifest|htaccess)$/i.test(e.name)){
    const data=await readFile(p,'utf8');
    if(hasLegacyReference(data))throw Error('Legacy runtime reference in deployment package: '+p);
   }
