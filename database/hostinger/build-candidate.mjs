@@ -14,7 +14,9 @@ for(const page of pages){
 }
 for(const [legacy,candidate] of [['painel.html','painel-mysql.html'],['prestador.html','prestador-mysql.html'],['admin.html','admin-mysql.html']])await cp(join(pub,candidate),join(pub,legacy));
 await mkdir(join(pub,'assets'),{recursive:true});
+const allowedAssetDirectories=new Set(['brand','category-fallbacks','images']);
 for(const entry of await readdir(join(root,'assets'),{withFileTypes:true})){
+ if(entry.isDirectory()&&!allowedAssetDirectories.has(entry.name))throw Error('Unapproved public asset directory: '+entry.name);
  if(entry.isDirectory()||/\.(?:css|json|png|webp|jpg|jpeg|svg|ico)$/i.test(entry.name)||scripts.has(entry.name))await cp(join(root,'assets',entry.name),join(pub,'assets',entry.name),{recursive:true});
 }
 await writeFile(join(pub,'assets/backend-mode.js'),"'use strict';\nwindow.SQFDataMode = 'mysql';\n");
@@ -31,7 +33,7 @@ await cp(join(root,'database/hostinger/unlimited-profile.json'),join(dest,'unlim
 // Reject legacy database clients, credentials and migration sources from the deployable package.
 // Keep historical vendor identifiers out of the migration audit's source scan.
 const oldDatabase='post'+'gres',oldService='supa'+'base';
-const forbiddenPath=/(?:[.]env(?:[.]|$)|[.]sql$|[.]bak$|[.]dump$)/i;
+const forbiddenPath=/(?:[.]env(?:[.]|$)|[.](?:sql|bak|dump|db|sqlite|sqlite3|pem|key|p12|pfx|crt|log)$)/i;
 const forbiddenRuntime=new RegExp(['PG'+'HOST','PG'+'PASSWORD','SUPA'+'BASE_URL','SUPA'+'BASE_KEY'].join('|'),'i');
 const hasLegacyReference=value=>{
  const lower=value.toLowerCase();
