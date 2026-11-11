@@ -29,16 +29,40 @@ try{
     $bad=$snap;$bad['media'][$relative]=str_repeat('a',64);
     try{sqfImportSnapshot($db,$bad,$root);throw new RuntimeException('manifest accepted');}catch(DomainException $e){check(true,'mismatched media manifest rejected');}
     check((int)$db->query('SELECT COUNT(*) FROM sqf_auth_users')->fetchColumn()===0,'failed import rolls back');
+    $relationalFailure=$snap;
+    $relationalFailure['sqf_request_messages'][0]['sender_id']='00000000-0000-4000-8000-000000000999';
+    try{sqfImportSnapshot($db,$relationalFailure,$root);throw new RuntimeException('Broken relation accepted');}
+    catch(PDOException|DomainException $e){check(true,'orphaned sender triggers transactional rollback');}
+    check((int)$db->query('SELECT COUNT(*) FROM sqf_auth_users')->fetchColumn()===0,'relational failure leaves no partially imported identities');
+    check((int)$db->query('SELECT COUNT(*) FROM sqf_service_requests')->fetchColumn()===0,'relational failure leaves no partially imported requests');
+    $priorEnabled=getenv('SQF_IMPORT_STAGING_ENABLED');
+    $priorDestination=getenv('SQF_IMPORT_STAGING_DATABASE');
+    putenv('SQF_IMPORT_STAGING_ENABLED=1');
+    putenv('SQF_IMPORT_STAGING_DATABASE=sqf_unexpected_stage');
+    try{
+        try{sqfImportSnapshot($db,$snap,$root,true);throw new RuntimeException('Unapproved persistent destination accepted');}
+        catch(DomainException $e){check(true,'persistent import rejects mismatched staging database');}
+    }finally{
+        if($priorEnabled===false)putenv('SQF_IMPORT_STAGING_ENABLED');
+        else putenv('SQF_IMPORT_STAGING_ENABLED='.$priorEnabled);
+        if($priorDestination===false)putenv('SQF_IMPORT_STAGING_DATABASE');
+        else putenv('SQF_IMPORT_STAGING_DATABASE='.$priorDestination);
+    }
+    check((int)$db->query('SELECT COUNT(*) FROM sqf_auth_users')->fetchColumn()===0,'unapproved staging attempt does not persist records');
     // The normal suite is always rollback-only. Persist only in a named, disposable CI schema.
     if(getenv('SQF_TEST_ISOLATED_IMPORT_STAGE')==='1'){
         check((string)$db->query('SELECT DATABASE()')->fetchColumn()==='sqf_import_stage','commit limited to disposable import staging schema');
         check(getenv('SQF_IMPORT_STAGING_ENABLED')==='1','staging persistence explicitly enabled');
+        check(getenv('SQF_IMPORT_STAGING_DATABASE')==='sqf_import_stage','isolated destination explicitly confirmed');
         $committed=sqfImportSnapshot($db,$snap,$root,true);
         check($committed['committed']===true&&$committed['publication_enabled']===false,'synthetic snapshot committed without automatic publication');
         foreach(['sqf_auth_users'=>2,'profiles'=>2,'provider_services'=>1,'sqf_service_requests'=>1,'sqf_request_messages'=>1,'portfolio_photos'=>1] as $name=>$expected){
             $actual=(int)$db->query('SELECT COUNT(*) FROM `'.$name.'`')->fetchColumn();
             check($actual===$expected,'staging row count reconciled: '.$name);
         }
+        check((int)$db->query('SELECT COUNT(*) FROM profiles WHERE is_public<>0')->fetchColumn()===0,'imported profiles remain unpublished');
+        check((int)$db->query('SELECT COUNT(*) FROM sqf_auth_users WHERE password_hash IS NOT NULL')->fetchColumn()===0,'imported accounts require new credentials');
+        check((int)$db->query('SELECT COUNT(*) FROM sqf_request_messages m JOIN sqf_service_requests r ON r.id=m.request_id')->fetchColumn()===1,'migrated messages preserve request relationships');
         $inventory=sqfMediaInventory($db,$root);
         check($inventory===$snap['media'],'staging WebP media SHA256 reconciled');
         try{sqfImportSnapshot($db,$snap,$root,true);throw new RuntimeException('nonempty staging accepted');}
