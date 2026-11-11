@@ -92,10 +92,10 @@ function sqfRequestAction(PDO $db,string $actor,string $id,string $action):strin
 }
 
 function sqfMessages(PDO $db,string $actor,string $id):array {
-    return sqfTxn($db,function()use($db,$actor,$id){
-      sqfRequestRow($db,$actor,$id);
-      return sqfQuery($db,'SELECT id,sender_id,body,created_at FROM sqf_request_messages WHERE request_id=? ORDER BY created_at DESC,id DESC LIMIT 100',[$id])->fetchAll(PDO::FETCH_ASSOC);
-    });
+    // Read-only listing: authorize on the request without locking it or holding a write transaction.
+    $request=sqfQuery($db,'SELECT client_id,provider_id FROM sqf_service_requests WHERE id=?',[$id])->fetch(PDO::FETCH_ASSOC);
+    if(!$request||!in_array($actor,[$request['client_id'],$request['provider_id']],true))throw new DomainException('Acesso negado');
+    return sqfQuery($db,'SELECT id,sender_id,body,created_at FROM sqf_request_messages WHERE request_id=? ORDER BY created_at DESC,id DESC LIMIT 100',[$id])->fetchAll(PDO::FETCH_ASSOC);
 }
 function sqfSendMessage(PDO $db,string $actor,string $id,string $body):string {
     $body=trim($body);
