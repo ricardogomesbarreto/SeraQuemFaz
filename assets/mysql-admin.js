@@ -2,7 +2,8 @@
 (async()=>{
  const api=window.SQFMySQL,status=document.getElementById('staffStatus'),form=document.getElementById('staffMfa'),queue=document.getElementById('staffQueue');
  const el=(tag,text)=>{const n=document.createElement(tag);if(text!==undefined)n.textContent=text;return n;};
- const navigation=document.getElementById('staffNavigation');
+ const navigation=document.getElementById('staffNavigation'),account=document.getElementById('staffAccount'),identity=document.getElementById('staffIdentity'),logout=document.getElementById('staffLogout');
+ logout.addEventListener('click',async()=>{logout.disabled=true;try{await api.logout();location.replace('entrar.html');}catch(error){status.textContent=error.message;logout.disabled=false;}});
  function updateNavigation(){
    navigation.replaceChildren();
    const sections=queue.querySelectorAll('h2');
@@ -93,6 +94,7 @@
        }
      }
    }catch(error){if(!/Somente administradores/.test(error.message))throw error;}
+   identity.textContent=queue.querySelector('h2')?.textContent==='Indicadores da plataforma'?'Administrador':'Moderador';account.hidden=false;
    updateNavigation();form.hidden=true;status.textContent='Fila de moderação carregada.';
  }
  form.addEventListener('submit',async event=>{event.preventDefault();const submit=form.querySelector('button');submit.disabled=true;try{await api.staffMfa(form.elements.code.value);form.reset();await load();}catch(e){status.textContent=e.message;}finally{submit.disabled=false;}});
