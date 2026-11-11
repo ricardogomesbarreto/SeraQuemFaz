@@ -58,9 +58,18 @@ try{
         check((string)$db->query('SELECT DATABASE()')->fetchColumn()==='sqf_import_stage','commit limited to disposable import staging schema');
         check(getenv('SQF_IMPORT_STAGING_ENABLED')==='1','staging persistence explicitly enabled');
         check(getenv('SQF_IMPORT_STAGING_DATABASE')==='sqf_import_stage','isolated destination explicitly confirmed');
+        // In commit mode, reject invalid media or broken foreign keys without persisting any rows.
+        try{sqfImportSnapshot($db,$bad,$root,true);throw new RuntimeException('Bad media persisted');}
+        catch(DomainException $e){check(true,'persistent import rejects tampered WebP manifest');}
+        check((int)$db->query('SELECT COUNT(*) FROM sqf_auth_users')->fetchColumn()===0,'media failure leaves staging identities empty');
+        try{sqfImportSnapshot($db,$relationalFailure,$root,true);throw new RuntimeException('Orphan message persisted');}
+        catch(PDOException|DomainException $e){check(true,'persistent import rejects orphaned message sender');}
+        check((int)$db->query('SELECT COUNT(*) FROM sqf_service_requests')->fetchColumn()===0,'relation failure leaves staging requests empty');
         $committed=sqfImportSnapshot($db,$snap,$root,true);
         check($committed['committed']===true&&$committed['publication_enabled']===false,'synthetic snapshot committed without automatic publication');
-        foreach(['sqf_auth_users'=>2,'profiles'=>2,'provider_services'=>1,'sqf_service_requests'=>1,'sqf_request_messages'=>1,'portfolio_photos'=>1] as $name=>$expected){
+        // Compare every migrated table, not only the principal user journeys.
+        foreach(sqfImportTables() as $name){
+            $expected=count($snap['tables'][$name]);
             $actual=(int)$db->query('SELECT COUNT(*) FROM `'.$name.'`')->fetchColumn();
             check($actual===$expected,'staging row count reconciled: '.$name);
         }
