@@ -24,5 +24,6 @@ test('Hostinger package is built from an explicit page allowlist',()=>{
  const source=read('database/hostinger/build-candidate.mjs');
  assert.match(source,/const pages=\[/);
  assert.match(source,/dist\/mysql-candidate/);
- assert.equal(source.includes("cp(join(root,'"+'supa'+'base'+"'"),false);
+ assert.match(source,/allowedAssetDirectories/);
+ assert.match(source,/Unapproved public asset directory/);
 });
