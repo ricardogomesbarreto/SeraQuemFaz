@@ -3,7 +3,7 @@ declare(strict_types=1);
 require __DIR__.'/../../backend/src/Database.php';
 $source=sqfDatabase();
 $dsn=getenv('SQF_RESTORE_DSN');
-if(!$dsn)throw new RuntimeException('Restore DSN required');
+if(!$dsn||!str_starts_with($dsn,'mysql:'))throw new RuntimeException('MySQL/MariaDB restore DSN required');
 $restored=new PDO($dsn,getenv('SQF_DB_USER'),getenv('SQF_DB_PASSWORD'),[PDO::ATTR_ERRMODE=>PDO::ERRMODE_EXCEPTION]);
 $tables=static fn(PDO $db):array=>$db->query("SELECT table_name FROM information_schema.tables WHERE table_schema=DATABASE() AND table_type='BASE TABLE' ORDER BY table_name")->fetchAll(PDO::FETCH_COLUMN);
 $names=$tables($source);
