@@ -15,7 +15,10 @@ sqfQuery($db,'DELETE FROM sqf_staff_mfa_state WHERE user_id=?',[$staff]);
 echo "PASS: moderator browser fixture ready\n";
 
 $admin='00000000-0000-4000-8000-000000000099';
-sqfQuery($db,'INSERT INTO sqf_auth_users(id,email,password_hash,email_confirmed_at) VALUES (?,?,?,UTC_TIMESTAMP(6))',[$admin,'browser-admin@example.invalid',sqfPassword('browser-admin-12345')]);
+$adminPassword=bin2hex(random_bytes(24));
+$fixturePath=sys_get_temp_dir().'/sqf-browser-admin-password';
+file_put_contents($fixturePath,$adminPassword,LOCK_EX);chmod($fixturePath,0600);
+sqfQuery($db,'INSERT INTO sqf_auth_users(id,email,password_hash,email_confirmed_at) VALUES (?,?,?,UTC_TIMESTAMP(6))',[$admin,'browser-admin@example.invalid',sqfPassword($adminPassword)]);
 sqfQuery($db,"INSERT INTO profiles(id,full_name,account_type) VALUES (?,'CI Admin','cliente')",[$admin]);
 sqfQuery($db,"INSERT INTO sqf_admin_members(user_id,role,active) VALUES (?,'admin',1)",[$admin]);
 
