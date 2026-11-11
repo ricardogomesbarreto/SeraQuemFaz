@@ -27,3 +27,18 @@ test('Hostinger package is built from an explicit page allowlist',()=>{
  assert.match(source,/allowedAssetDirectories/);
  assert.match(source,/Unapproved public asset directory/);
 });
+
+test('persistent MySQL import requires explicitly matched isolated staging schema',()=>{
+ const source=read('backend/src/ImportSnapshot.php');
+ assert.match(source,/SQF_IMPORT_STAGING_ENABLED/);
+ assert.match(source,/SQF_IMPORT_STAGING_DATABASE/);
+ assert.match(source,/hash_equals\(\$expected,\$database\)/);
+ assert.match(source,/Destino de importação não é o banco isolado autorizado/);
+ const runner=read('database/tests/run-isolated-import.sh');
+ assert.match(runner,/sqf_import_stage/);
+ assert.match(runner,/SQF_TEST_ISOLATED_IMPORT_STAGE=1/);
+});
+test('database restoration comparison accepts only the MySQL DSN family',()=>{
+ assert.match(read('database/tests/restore-check.php'),/str_starts_with\(\$dsn,'mysql:'\)/);
+ assert.match(read('database/tests/run-isolated-restore.sh'),/sqf_import_restore/);
+});
