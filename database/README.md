@@ -53,3 +53,14 @@ bash database/tests/run-isolated-restore.sh
 A rotina de recuperação é somente leitura e compara inventários de tabelas, conteúdo linha a linha por resumo SHA-256 e hashes de mídia. Ela não cria, apaga ou substitui bancos e arquivos. A criação e restauração inicial do banco de teste são atividades manuais separadas, que precisam ser comprovadas por evidências.
 
 **Critério de conclusão:** exigir validação efetiva em ambos os mecanismos, paridade funcional, ausência de dependências operacionais de outra arquitetura, dados e mídias reconciliados e recuperação aprovada. Hospedagem e liberação comercial permanecem fora desta etapa.
+
+## Controles adicionais da conversão
+
+Os executores locais permanecem independentes da hospedagem e de pipelines remotos:
+
+- `npm run verify`: audita dependências legadas, construções SQL incompatíveis, erros de sintaxe JavaScript e a correspondência entre rotas da API PHP e chamadas do cliente.
+- `bash database/tests/run-isolated-import.sh`: exige MySQL 8.0 ou MariaDB 10.11, PDO MySQL, `utf8mb4`, sessão UTC, InnoDB, banco descartável vazio e catálogo público instalado. Testa falhas transacionais antes do commit sintético e concilia todas as tabelas da lista de migração.
+- `bash database/tests/run-isolated-restore.sh`: valida a recuperação das tabelas e seus conteúdos, confere os hashes SHA-256 e rejeita arquivos órfãos, alterados ou ausentes em ambas as cópias de mídia.
+- Revisão funcional: além da presença de rotas, validar autorização por perfil, métodos HTTP, erros, desempenho, agenda concorrente, mensagens, avaliações, dados privados e fluxos de login em ambos os bancos.
+
+A restauração pressupõe backup e cópia **de um banco de testes criado previamente**, não os executa automaticamente. Não transportar dados reais para os ensaios sintéticos. Concluir a migração exige evidências de execução, além da presença de código de teste.
