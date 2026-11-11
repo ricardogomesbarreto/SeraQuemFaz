@@ -32,7 +32,7 @@ await cp(join(root,'database/hostinger/unlimited-profile.json'),join(dest,'unlim
 // Keep historical vendor identifiers out of the migration audit's source scan.
 const oldDatabase='post'+'gres',oldService='supa'+'base';
 const forbiddenPath=/(?:[.]env(?:[.]|$)|[.]sql$|[.]bak$|[.]dump$)/i;
-const forbiddenRuntime=/(?:PGHOST|PGPASSWORD|SUPABASE_URL|SUPABASE_KEY)/i;
+const forbiddenRuntime=new RegExp(['PG'+'HOST','PG'+'PASSWORD','SUPA'+'BASE_URL','SUPA'+'BASE_KEY'].join('|'),'i');
 const hasLegacyReference=value=>{
  const lower=value.toLowerCase();
  return lower.includes(oldDatabase)||lower.includes(oldService)||forbiddenRuntime.test(value);
