@@ -39,8 +39,11 @@ test('persistent MySQL import requires explicitly matched isolated staging schem
  assert.match(runner,/sqf_import_stage/);
  assert.match(runner,/SQF_TEST_ISOLATED_IMPORT_STAGE=1/);
 });
-test('database restoration comparison accepts only the MySQL DSN family',()=>{
- assert.match(read('database/tests/restore-check.php'),/str_starts_with\(\$dsn,'mysql:'\)/);
+test('database restoration comparison accepts only native MySQL utf8mb4',()=>{
+ const restore=read('database/tests/restore-check.php');
+ assert.match(restore,/str_starts_with\(\$dsn,'mysql:'\)/);
+ assert.match(restore,/charset=utf8mb4/);
+ assert.match(restore,/PDO::ATTR_DRIVER_NAME/);
  assert.match(read('database/tests/run-isolated-restore.sh'),/sqf_import_restore/);
 });
 
