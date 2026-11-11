@@ -36,12 +36,13 @@ A aplicação usa PHP/PDO com DSN `mysql:`, tabelas InnoDB, migrações em `data
 **Importação persistida de registros fictícios:** preparar separadamente um banco novo chamado `sqf_import_stage` em MySQL 8.0 e outro em MariaDB 10.11 (executar um mecanismo por vez). Aplicar o esquema completo e popular as 51 categorias e os municípios. Configurar somente em seu terminal as variáveis `SQF_DB_DSN`, `SQF_DB_USER` e `SQF_DB_PASSWORD` para o banco descartável.
 
 ```bash
+SQF_PRIVATE_MEDIA_ROOT=/tmp/sqf-import-stage-media \
 SQF_IMPORT_STAGING_ENABLED=1 \
 SQF_IMPORT_STAGING_DATABASE=sqf_import_stage \
 bash database/tests/run-isolated-import.sh
 ```
 
-O executor exige destino vazio e nome exato. Exercita importação transacional, rollback em erro relacional, reconciliação de contagens, relações cliente/prestador/solicitação/mensagem e SHA-256 de arquivo WebP fictício. Os perfis importados continuam não publicados e sem credenciais reutilizadas. **A execução só deve ser considerada aprovada após a saída real do terminal nos dois mecanismos; a presença do script não demonstra aprovação.**
+O executor exige destino vazio, nome exato e um diretório de mídia de teste ainda inexistente. No modo persistido, a mídia fictícia é preservada em `/tmp/sqf-import-stage-media` para permitir a comparação posterior com uma cópia restaurada. Exercita importação transacional, rollback em erro relacional, reconciliação de contagens, relações cliente/prestador/solicitação/mensagem e SHA-256 de arquivo WebP fictício. Os perfis importados continuam não publicados e sem credenciais reutilizadas. **A execução só deve ser considerada aprovada após a saída real do terminal nos dois mecanismos; a presença do script não demonstra aprovação.**
 
 **Restauração e recuperação:** depois de copiar manualmente o banco descartável para outro banco novo, `sqf_import_restore`, e copiar os arquivos fictícios para um diretório privado independente, definir `SQF_RESTORE_DSN`, `SQF_PRIVATE_MEDIA_ROOT` e `SQF_RESTORE_MEDIA_ROOT`; executar:
 
