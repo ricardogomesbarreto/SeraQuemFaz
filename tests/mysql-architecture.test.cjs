@@ -60,7 +60,7 @@ test('staging suite tests persisted rollback and all imported table counts',()=>
  const code=read('database/tests/snapshot-integration.php');
  assert.match(code,/persistent import rejects tampered WebP manifest/);
  assert.match(code,/persistent import rejects orphaned message sender/);
- assert.match(code,/foreach\\(sqfImportTables\\(\\) as \\$name\\)/);
+ assert.ok(code.includes('foreach(sqfImportTables() as $name)'));
 });
 
 test('source audit executes on real temporary files, not only on its own source text',()=>{
@@ -94,4 +94,24 @@ test('every frontend PHP/MySQL API route is registered in the server router',()=
  assert.ok(routes.length>=65,'unexpectedly small API contract');
  for(const route of routes)
   assert.ok(server.includes("'"+route+"'")||server.includes('"'+route+'"'),'route missing in PHP router: '+route);
+});
+
+test('MySQL/MariaDB read-path indexes are part of the local schema installer',()=>{
+ const installer=read('database/hostinger/build-install.mjs');
+ const migration=read('database/mysql/migrations/009_marketplace_read_indexes.sql');
+ for(const name of ['ix_sqf_messages_request_time','ix_sqf_requests_open_lookup','ix_sqf_reviews_provider_status_time','ix_sqf_reviews_moderation_queue'])
+  assert.ok(migration.includes(name),'missing index '+name);
+ assert.ok(installer.includes('009_marketplace_read_indexes.sql'),'migration 009 is not included');
+ assert.match(read('database/tests/index-inventory.php'),/information_schema[.]statistics/);
+});
+test('message reads preserve participant authorization without write locks',()=>{
+ const server=read('backend/src/Marketplace.php');
+ const start=server.indexOf('function sqfMessages(');
+ const end=server.indexOf('function sqfSendMessage(',start);
+ assert.ok(start>=0&&end>start);
+ const method=server.slice(start,end);
+ assert.match(method,/client_id,provider_id/);
+ assert.match(method,/Acesso negado/);
+ assert.doesNotMatch(method,/FOR UPDATE|sqfTxn/);
+ assert.match(method,/LIMIT 100/);
 });
