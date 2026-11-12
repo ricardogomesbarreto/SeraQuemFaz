@@ -59,7 +59,7 @@ jobs:
         run: |
           set -euo pipefail
           for key in DEPLOY_HOST DEPLOY_PORT DEPLOY_USER DEPLOY_ROOT DEPLOY_PRIVATE_KEY DEPLOY_KNOWN_HOSTS; do
-            if [[ -z "${key}" ]]; then
+            if [[ -z "${!key}" ]]; then
               echo "Configuracao obrigatoria ausente: $key" >&2
               exit 1
             fi
