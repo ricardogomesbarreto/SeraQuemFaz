@@ -1558,7 +1558,7 @@ body{min-width:320px}
 .sqf-pwa-install-cta[hidden]{display:none!important}
 .sqf-pwa-compat{max-width:560px;margin:15px 0 0;color:#153b55;font-size:.78rem;line-height:1.55}
 .sqf-pwa-art{position:relative;min-height:360px;display:grid;place-items:center}
-.sqf-pwa-art img{display:block;width:min(365px,100%);height:auto;max-height:435px;object-fit:contain;filter:drop-shadow(0 16px 28px rgba(8,43,68,.17))}
+.sqf-pwa-art img{display:block;width:min(365px,100%);height:auto;max-height:455px;object-fit:contain;-webkit-mask-image:radial-gradient(ellipse 72% 78% at 50% 46%,#000 56%,rgba(0,0,0,.98) 64%,transparent 100%);mask-image:radial-gradient(ellipse 72% 78% at 50% 46%,#000 56%,rgba(0,0,0,.98) 64%,transparent 100%);filter:drop-shadow(0 16px 28px rgba(8,43,68,.17))}
 .sqf-pwa-benefits{display:flex;align-items:center;flex-wrap:wrap;gap:0;margin-top:27px;padding-top:25px;border-top:1px solid rgba(16,57,87,.3)}
 .sqf-pwa-benefit{display:flex;align-items:center;gap:10px;padding:3px 21px;min-width:0}
 .sqf-pwa-benefit:first-child{padding-left:0}
