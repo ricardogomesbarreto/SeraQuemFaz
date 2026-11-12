@@ -128,3 +128,22 @@ sqfFavoriteCategory($db,$u[2],$selected,false);
 check(count(sqfFavoriteCategories($db,$u[0]))===1,'other client cannot remove favorite');
 sqfFavoriteCategory($db,$u[0],$selected,false);
 check(count(sqfFavoriteCategories($db,$u[0]))===0,'owner removes favorite');
+
+
+// A second finished job between the same participants must have its own review slot.
+$repeat=sqfCreateRequest($db,$u[0],$u[1],$service2,'Nova solicitação fictícia de trabalho recorrente concluído');
+check(strlen($repeat)===36 && $repeat!==$id,'repeat request created after first completion');
+check(sqfSendQuote($db,$u[1],$repeat,2300,'Condições fictícias para segundo atendimento')==='quoted','second quote issued');
+check(sqfRequestAction($db,$u[0],$repeat,'accept')==='accepted','second quote accepted');
+check(sqfRequestAction($db,$u[1],$repeat,'start')==='in_progress','repeat service started');
+check(sqfRequestAction($db,$u[1],$repeat,'finish')==='awaiting_confirmation','repeat service finished by provider');
+check(sqfRequestAction($db,$u[0],$repeat,'confirm')==='completed','repeat service confirmed by client');
+$firstEng=sqfQuery($db,'SELECT engagement_id FROM sqf_service_requests WHERE id=?',[$id])->fetchColumn();
+$secondEng=sqfQuery($db,'SELECT engagement_id FROM sqf_service_requests WHERE id=?',[$repeat])->fetchColumn();
+check(is_string($firstEng)&&is_string($secondEng)&&$firstEng!==$secondEng,'repeat engagement uses distinct review slot');
+check((string)sqfQuery($db,'SELECT source_request_id FROM service_engagements WHERE id=?',[$secondEng])->fetchColumn()===$repeat,'new engagement traces to completed request');
+check((int)sqfQuery($db,'SELECT COUNT(*) FROM service_engagements WHERE client_id=? AND provider_id=?',[$u[0],$u[1]])->fetchColumn()===2,'separate completed engagements for same client and provider');
+$secondReview=sqfReviewCreate($db,$u[0],$repeat,4,'Segundo atendimento concluído e avaliado');
+check(strlen($secondReview)===36&&$secondReview!==$review,'second service can receive its own review');
+reject(fn()=>sqfReviewCreate($db,$u[0],$repeat,3,'Avaliação duplicada no segundo atendimento'),'repeat service cannot be reviewed twice');
+check(count(sqfOwnReviews($db,$u[0]))===2,'prior review preserved alongside independent repeat review');
