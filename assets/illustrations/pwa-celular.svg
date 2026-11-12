@@ -1,0 +1,75 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="520" height="620" viewBox="0 0 520 620" role="img" aria-labelledby="title desc">
+<title id="title">Aplicativo Será Quem Faz? exibido em um celular</title>
+<desc id="desc">Ilustração de um celular exibindo a pesquisa de serviços da plataforma, com município, campo de busca e categorias.</desc>
+<defs>
+  <linearGradient id="case" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#052339"/><stop offset=".52" stop-color="#153951"/><stop offset="1" stop-color="#051a2b"/></linearGradient>
+  <linearGradient id="screen" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#ffffff"/><stop offset="1" stop-color="#f9fafc"/></linearGradient>
+  <linearGradient id="hero" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#fff7ef"/><stop offset="1" stop-color="#ffeadb"/></linearGradient>
+  <filter id="shadow" x="-40%" y="-35%" width="190%" height="190%"><feGaussianBlur stdDeviation="19"/></filter>
+  <filter id="soft" x="-30%" y="-30%" width="170%" height="170%"><feGaussianBlur stdDeviation="7"/></filter>
+  <clipPath id="display"><rect x="130" y="54" width="260" height="506" rx="32"/></clipPath>
+</defs>
+<ellipse cx="264" cy="562" rx="157" ry="26" fill="#0a2942" opacity=".3" filter="url(#shadow)"/>
+<circle cx="418" cy="137" r="75" fill="#fff" opacity=".1"/>
+<circle cx="93" cy="447" r="51" fill="#fff" opacity=".12"/>
+<g transform="rotate(6 260 305)">
+ <rect x="106" y="28" width="308" height="562" rx="48" fill="#fff" opacity=".21" filter="url(#soft)"/>
+ <rect x="107" y="21" width="306" height="565" rx="49" fill="url(#case)" stroke="#142e42" stroke-width="3"/>
+ <rect x="113" y="27" width="294" height="553" rx="45" fill="none" stroke="#9faeb6" stroke-opacity=".73" stroke-width="2"/>
+ <rect x="130" y="54" width="260" height="506" rx="32" fill="url(#screen)"/>
+ <g clip-path="url(#display)">
+  <rect x="130" y="54" width="260" height="506" fill="#fff"/>
+  <rect x="130" y="54" width="260" height="35" fill="#f9fbfd"/>
+  <text x="149" y="77" font-family="Arial,sans-serif" font-size="12" font-weight="700" fill="#103957">9:41</text>
+  <g stroke="#103957" stroke-width="2" fill="none"><path d="M344 74v-6m6 6V64m6 10V60"/><path d="M367 67q6-6 12 0m-9 2q3-3 6 0"/></g>
+  <rect x="139" y="96" width="242" height="57" rx="12" fill="#fff"/>
+  <circle cx="166" cy="123" r="13" fill="#103957"/>
+  <circle cx="166" cy="121" r="7" fill="none" stroke="#fff" stroke-width="2.2"/>
+  <path d="M171 127l7 8" stroke="#f5832f" stroke-width="4" stroke-linecap="round"/>
+  <text x="185" y="126" font-family="Arial,sans-serif" font-size="15" font-weight="900" fill="#103957">SERÁ</text>
+  <text x="227" y="126" font-family="Arial,sans-serif" font-size="15" font-weight="900" fill="#f5832f">QUEM FAZ?</text>
+  <g stroke="#103957" stroke-width="2" stroke-linecap="round"><path d="M349 116h15m-15 6h15m-15 6h15"/></g>
+  <rect x="130" y="151" width="260" height="204" fill="url(#hero)"/>
+  <text x="151" y="185" font-family="Arial,sans-serif" font-size="11" font-weight="800" letter-spacing="1.6" fill="#e16c20">ENCONTRE PERTO DE VOCÊ</text>
+  <text x="151" y="219" font-family="Arial,sans-serif" font-size="23" font-weight="800" fill="#103957">Serviços na</text>
+  <text x="151" y="248" font-family="Arial,sans-serif" font-size="23" font-weight="800" fill="#103957">sua cidade.</text>
+  <rect x="150" y="264" width="219" height="30" rx="9" fill="#fff" stroke="#e5edf1" stroke-width="1.3"/>
+  <path d="M165 272l-5 0 -4 6 9 8 9-8 -4-6 -5 0z" fill="none" stroke="#ed772c" stroke-width="1.3"/>
+  <text x="183" y="284" font-family="Arial,sans-serif" font-size="12.3" font-weight="700" fill="#103957">Santa Inês — MA</text>
+  <rect x="150" y="304" width="219" height="37" rx="10" fill="#fff" stroke="#e4eaf0" stroke-width="1.3"/>
+  <circle cx="167" cy="321" r="6" fill="none" stroke="#658193" stroke-width="1.7"/>
+  <path d="M172 326l6 6" stroke="#658193" stroke-width="1.7" stroke-linecap="round"/>
+  <text x="187" y="326" font-family="Arial,sans-serif" font-size="11.5" fill="#738895">Buscar profissional...</text>
+  <text x="151" y="380" font-family="Arial,sans-serif" font-size="15" font-weight="800" fill="#103957">Explore serviços</text>
+  <g>
+   <rect x="150" y="393" width="102" height="59" rx="11" fill="#fff" stroke="#e5eaf0" stroke-width="1.1"/>
+   <rect x="266" y="393" width="103" height="59" rx="11" fill="#fff" stroke="#e5eaf0" stroke-width="1.1"/>
+   <rect x="150" y="463" width="102" height="58" rx="11" fill="#fff" stroke="#e5eaf0" stroke-width="1.1"/>
+   <rect x="266" y="463" width="103" height="58" rx="11" fill="#fff" stroke="#e5eaf0" stroke-width="1.1"/>
+   <g font-family="Arial,sans-serif" font-size="10.5" font-weight="700" fill="#103957" text-anchor="middle">
+    <text x="201" y="442">Elétrica</text><text x="317" y="442">Construção</text>
+    <text x="201" y="511">Limpeza</text><text x="317" y="511">Pintura</text>
+   </g>
+   <g stroke="#f5832f" fill="none" stroke-width="3" stroke-linejoin="round" stroke-linecap="round">
+    <path d="M196 406h11l-7 12h9l-13 16 3-14h-8z" fill="#fff1e5"/>
+    <path d="M305 422v-9l12-9 12 9v9h-7v-9h-11v9z" fill="#fff1e5"/>
+    <path d="M201 474c-9 12-11 17-7 22 4 7 16 7 20 0 3-5 1-10-7-22z" fill="#fff1e5"/>
+    <path d="M306 482h25v8h-12v13h-6v-13h-7z" fill="#fff1e5"/>
+   </g>
+  </g>
+  <rect x="130" y="532" width="260" height="28" fill="#fff" stroke="#e9edf1"/>
+  <g font-family="Arial,sans-serif" font-size="10" font-weight="700" text-anchor="middle">
+   <text x="175" y="549" fill="#f5832f">Início</text><text x="260" y="549" fill="#728797">Buscar</text><text x="342" y="549" fill="#728797">Perfil</text>
+  </g>
+ </g>
+ <rect x="215" y="59" width="89" height="16" rx="8" fill="#061d2d"/>
+ <circle cx="296" cy="67" r="3" fill="#1f3b4c"/>
+ <rect x="227" y="572" width="65" height="4" rx="2" fill="#bfcad0" opacity=".8"/>
+ <rect x="411" y="169" width="5" height="61" rx="2.5" fill="#0a2941"/>
+ <rect x="104" y="174" width="5" height="47" rx="2.5" fill="#0a2941"/>
+</g>
+<g transform="translate(395 397)">
+ <circle r="37" fill="#103957" stroke="#fff" stroke-opacity=".25" stroke-width="2"/>
+ <path d="M0-19v26m-12-11L0 8 12-4M-15 16h30" stroke="#fff" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+</g>
+</svg>
