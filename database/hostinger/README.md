@@ -91,8 +91,8 @@ O assistente pede o e-mail da caixa Hostinger, a porta 465 (TLS) ou 587
 (STARTTLS) e a senha com entrada ocultada. O arquivo privado sobrepõe os
 valores legados de `SQF_SMTP_ENABLED` sem editar `config.php`. O assistente
 não funciona via navegador. Confirme a disponibilidade de PHP Sodium e cURL.
-Esta primeira versão restringe o host ao servidor `smtp.hostinger.com`
-para impedir SSRF usando o campo de destino.
+A lista de servidores permitidos inclui `smtp.hostinger.com` e `smtp.titan.email`
+(ambos documentados pela Hostinger), evitando SSRF por destinos arbitrários.
 
 Depois de configurar, faça cadastro de um cliente de teste e confirme
 o e-mail. Provisione uma conta administrativa e TOTP conforme a governança
