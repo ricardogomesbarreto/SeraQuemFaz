@@ -26,7 +26,9 @@ foreach($indexes as $table=>$definitions){
    if($entry['column_name']==='moderation_status'&&(int)$entry['sub_part']!==16)throw new RuntimeException('Unexpected moderation status prefix: '.$name);
   }
   if($name==='uq_service_engagement_source_request'){
-   $unique=sqfQuery($db,'SELECT MAX(non_unique) FROM information_schema.statistics WHERE table_schema=DATABASE() AND table_name=? AND index_name=?',[$table,$name])->fetchColumn();
+   $uniqueStmt=$db->prepare('SELECT MAX(non_unique) FROM information_schema.statistics WHERE table_schema=DATABASE() AND table_name=? AND index_name=?');
+   $uniqueStmt->execute([$table,$name]);
+   $unique=$uniqueStmt->fetchColumn();
    if((int)$unique!==0)throw new RuntimeException('New engagement request key must be unique');
   }
   echo 'PASS: '.$table.'.'.$name.' ('.count($columns).' columns)'.PHP_EOL;
