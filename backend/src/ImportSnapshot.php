@@ -56,6 +56,16 @@ function sqfImportSnapshot(PDO $db,array $snapshot,string $mediaRoot,bool $commi
             if($counts[$table]!==count($rows[$table]))throw new RuntimeException('Contagem divergente');
         }
         if($counts['profiles']!==$counts['sqf_auth_users'])throw new DomainException('Identidades sem perfil');
+        // Never rely solely on database FK settings during a normalized import:
+        // the sender must exist and participate in the referenced service request.
+        $invalidSenders=(int)$db->query(
+            'SELECT COUNT(*) FROM sqf_request_messages m
+             LEFT JOIN sqf_service_requests r ON r.id=m.request_id
+             LEFT JOIN profiles p ON p.id=m.sender_id
+             WHERE r.id IS NULL OR p.id IS NULL
+                OR (m.sender_id<>r.client_id AND m.sender_id<>r.provider_id)'
+        )->fetchColumn();
+        if($invalidSenders!==0)throw new DomainException('Mensagem com remetente sem vínculo com a solicitação');
         $actual=sqfMediaInventory($db,$mediaRoot);ksort($manifest);
         if($actual!==$manifest)throw new DomainException('Manifesto de mídia divergente');
         if($commit)$db->commit();else $db->rollBack();
