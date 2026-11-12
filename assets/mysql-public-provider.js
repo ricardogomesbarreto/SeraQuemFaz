@@ -2,7 +2,13 @@
 (async()=>{
  const api=window.SQFMySQL,ui=window.SQFProfiles,$=id=>document.getElementById(id);
  const status=message=>$('publicProviderStatus').textContent=message;
- const id=new URL(location.href).searchParams.get('id');
+ const params=new URL(location.href).searchParams;
+ const id=params.get('id');
+ const selectedCity=params.get('cidade');
+ if(/^[0-9]{7}$/.test(selectedCity||'')){
+   const back=$('providerBackCatalog');
+   if(back)back.href='categorias.html?cidade='+encodeURIComponent(selectedCity);
+ }
  try{
    if(window.SQFDataMode!=='mysql')throw new Error('Perfil de homologação MySQL indisponível.');
    const [p,r,s]=await Promise.all([api.provider(id),api.publicReviews(id),api.session()]);
@@ -10,6 +16,12 @@
    const provider=p.data,reviews=r.data;
    $('publicProviderName').textContent=provider.full_name;
    $('publicProviderCity').textContent=provider.city||'';
+   const region=$('publicProviderRegionContext');
+   if(region&&/^[0-9]{7}$/.test(selectedCity||'')){
+     region.textContent=selectedCity===provider.city_ibge
+       ?'Profissional encontrado no município da sua pesquisa.'
+       :'Atenção: a cidade cadastrada deste profissional é diferente da cidade informada na pesquisa.';
+   }
    $('publicProviderBio').textContent=provider.bio||'';
    const details=provider.professional;if(details){const root=$('publicProviderBio').parentElement;for(const [label,value] of [['Título',details.professional_title],['Especialidades',details.specialties],['Experiência',details.experience_years==null?'':details.experience_years+' anos'],['Modalidade',({presencial:'Presencial',remoto:'Remoto',hibrido:'Híbrida'})[details.service_mode]],['Área de atendimento',details.coverage_area]])if(value)root.append(ui.make('p','',label+': '+value));}
    if(Number(provider.has_avatar)===1){const img=ui.safeImg(api.mediaUrl('avatar',id),'Foto do profissional');img.width=120;img.height=120;img.style.objectFit='cover';img.style.borderRadius='50%';$('publicProviderAvatar').append(img);}
