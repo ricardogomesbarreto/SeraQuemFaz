@@ -1,0 +1,41 @@
+name: Auth signup - static regression
+on:
+  pull_request:
+    paths:
+      - 'backend/**'
+      - 'assets/**'
+      - 'entrar.html'
+      - 'database/tests/**'
+      - 'tests/**'
+      - '.github/workflows/auth-signup-check.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'backend/**'
+      - 'assets/**'
+      - 'entrar.html'
+      - 'database/tests/**'
+      - 'tests/**'
+      - '.github/workflows/auth-signup-check.yml'
+permissions:
+  contents: read
+jobs:
+  syntax-and-unit:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate PHP and frontend syntax
+        run: |
+          set -euo pipefail
+          php -l backend/public/index.php
+          php -l backend/src/Auth.php
+          php -l backend/src/Mail.php
+          node --check assets/auth.js
+          node --check assets/auth-feedback.js
+          node --check assets/mysql-api-client.js
+      - name: Run source and UI regression unit tests
+        run: npm test
