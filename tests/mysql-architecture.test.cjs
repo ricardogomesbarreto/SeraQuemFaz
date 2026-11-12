@@ -133,3 +133,22 @@ test('unknown-account login uses Argon2id rather than a cheaper dummy hash',()=>
  assert.match(source,/\\$dummy='\\$argon2id\\$/);
  assert.match(source,/password_verify\\(\\$password,\\$u\\['password_hash'\\]\\?\\?\\$dummy\\)/);
 });
+
+test('recurring service engagements preserve existing reviews while creating distinct records',()=>{
+ const schema=read('database/mysql/migrations/010_engagement_per_request.sql');
+ const installer=read('database/hostinger/build-install.mjs');
+ const service=read('backend/src/Marketplace.php');
+ const review=read('backend/src/Moderation.php');
+ const integration=read('database/tests/agenda-integration.php');
+ assert.match(schema,/ADD COLUMN source_request_id/);
+ assert.match(schema,/ADD UNIQUE KEY uq_service_engagement_source_request/);
+ assert.match(schema,/DROP INDEX service_engagements_client_id_provider_id_key/);
+ assert.doesNotMatch(schema,/\\b(?:DELETE FROM|TRUNCATE|DROP TABLE)\\b/i);
+ assert.ok(installer.includes('010_engagement_per_request.sql'),'migration 010 missing from installer');
+ assert.match(service,/INSERT INTO service_engagements\\(id,client_id,provider_id,source_request_id,status/);
+ assert.doesNotMatch(service,/ON DUPLICATE KEY UPDATE status='confirmed'/);
+ assert.match(review,/source_request_id IS NULL OR source_request_id=\\?/);
+ assert.match(integration,/repeat engagement uses distinct review slot/);
+ assert.match(integration,/repeat service cannot be reviewed twice/);
+ assert.match(read('database/tests/run-isolated-import.sh'),/engagement-integrity[.]php/);
+});
