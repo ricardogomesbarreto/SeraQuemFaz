@@ -49,7 +49,7 @@ npm run test:db:disposable
 
 A segunda rotina exige Docker Compose v2 e PHP com `pdo_mysql` e executa as migrações `001–010` **somente em containers descartáveis na máquina local**. Consulte o [roteiro das duas engines](docs/VALIDACAO-LOCAL-MYSQL-MARIADB.md) antes de executar. A importação fictícia persistida e o ensaio completo de recuperação são etapas adicionais, não incluídas automaticamente nessa rotina.
 
-O empacotamento para hospedagem (`npm run build:dist`) e a instalação do pacote `dist/mysql-candidate/` ficam **para depois** da homologação técnica e não devem ser utilizados na produção nesta fase.
+Para gerar os **arquivos separados de homologação da Hostinger**, execute `npm run build:hostinger`. Os ZIPs e SQL de `dist/hostinger-upload/` são exclusivos para subdomínio de testes, **não para produção**. Consulte [o roteiro de instalação no hPanel](database/hostinger/README.md#como-criar-os-arquivos-de-upload-do-hpanel). Não utilize o ZIP integral do repositório como backup de site.
 
 ## Homologação e publicação
 
