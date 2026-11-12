@@ -13,6 +13,12 @@ on:
       - 'offline.html'
       - '.github/workflows/deploy-hostinger-staging.yml'
   workflow_dispatch:
+    inputs:
+      publicar:
+        description: 'Publicar arquivos na Hostinger? Desmarcado = apenas validar pacote.'
+        required: true
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -23,7 +29,7 @@ concurrency:
 
 jobs:
   deploy:
-    if: ${{ vars.HOSTINGER_AUTO_DEPLOY_ENABLED == 'true' }}
+    if: ${{ github.ref == 'refs/heads/main' && (github.event_name == 'workflow_dispatch' || vars.HOSTINGER_AUTO_DEPLOY_ENABLED == 'true') }}
     runs-on: ubuntu-latest
     environment: hostinger-staging
     steps:
@@ -49,6 +55,7 @@ jobs:
           test ! -e dist/mysql-candidate/sqf-private/config.php
 
       - name: Implantar public_html e sqf-private sem tocar nas credenciais
+        if: ${{ github.event_name == 'push' || inputs.publicar == true }}
         env:
           DEPLOY_HOST: ${{ vars.HOSTINGER_SSH_HOST }}
           DEPLOY_PORT: ${{ vars.HOSTINGER_SSH_PORT }}
@@ -98,6 +105,7 @@ jobs:
           echo "Arquivos publicos e backend privados sincronizados; banco, media e credenciais preservados."
 
       - name: Smoke test nao destrutivo da API publica
+        if: ${{ github.event_name == 'push' || inputs.publicar == true }}
         run: |
           set -euo pipefail
           curl --fail --silent --show-error --max-time 25 \
