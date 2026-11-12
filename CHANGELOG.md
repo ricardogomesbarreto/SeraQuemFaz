@@ -1,5 +1,15 @@
 # Histórico de mudanças
 
+## v3.14.0-rc.14 — candidata Hostinger Unlimited (12/11/2026)
+
+- Geração de **dois ZIPs segregados** para envio manual pelo Gerenciador de Arquivos: frontend/API pública em `site-public_html.zip` e backend privado em `sqf-private.zip`. Arquivos de instalação SQL e hashes SHA-256 separados, sem credenciais no pacote.
+- API PHP/PDO MySQL; fluxo cliente/prestador/admin, catálogo, busca por cidade, solicitações, agenda, mensagens, avaliações, portfólio e PWA protegidos por testes de regressão. Nenhuma funcionalidade foi intencionalmente removida.
+- Correção do teste de importação que modificava chaves fora de `snapshot.tables`; validação explícita de mensagens importadas por participante e bloqueio de campos desconhecidos.
+- Migrations 001–010, PHP 8.2+ no preflight para o hPanel e matriz MySQL 8.0/MariaDB 10.11.
+- GitHub Actions com auditoria de pacote, testes PHP/API/Chromium/responsividade e restauração descartável. **Publicação da tag e pré-release condicionada à aprovação integral dos jobs do commit candidato**.
+- **Não é liberação comercial:** dados reais, SMTP real, pagamentos sandbox/produção, isolamento efetivo no hPanel, backup operacional, segurança/LGPD e rollback ainda exigem homologação no ambiente contratado.
+
+
 ## Em desenvolvimento — migração MySQL/MariaDB (ainda sem tag/release)
 
 - **Organização do repositório:** documentação do layout e dos endereços compatíveis, proteção de arquivos privados por `.gitignore` e remoção da imagem duplicada `simbolo-dark.png`, mantendo `simbolo.png`.

@@ -177,3 +177,52 @@ jobs:
           name: mysql-candidate-${{ matrix.image == 'mysql:8.0' && 'mysql' || 'mariadb' }}
           path: dist/mysql-candidate/
           retention-days: 14
+
+  publish-hostinger-prerelease:
+    # One explicit publication commit; never run for PRs, ordinary pushes or main.
+    if: github.event_name == 'push' && github.ref == 'refs/heads/feat/mysql-mariadb-migration' && github.event.head_commit.message == 'release(hostinger): publish v3.14.0-rc.14'
+    needs: [repository-audit, database]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: hostinger-unlimited-staging-uploads
+          path: release-assets
+      - name: Verify approved staging release assets and version
+        shell: bash
+        run: |
+          set -euo pipefail
+          node -e "const p=require('./package.json');const c=require('./database/candidate-version.json');if(p.version!=='3.14.0-rc.14'||c.version!==p.version||c.production!==false||c.deploymentAllowed!==false)process.exit(1)"
+          (cd release-assets && sha256sum -c SHA256SUMS)
+          unzip -t release-assets/site-public_html.zip >/dev/null
+          unzip -t release-assets/sqf-private.zip >/dev/null
+          test -s release-assets/01-instalar-banco.sql
+          test -s release-assets/02-verificar-banco.sql
+          test -f docs/releases/v3.14.0-rc.14.md
+      - name: Create immutable tag and prerelease from tested commit
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          tag="v3.14.0-rc.14"
+          if git ls-remote --tags origin "refs/tags/$tag" | grep -q .; then
+            echo "Tag $tag already exists; refusing to move or recreate it." >&2
+            exit 1
+          fi
+          gh release create "$tag" \
+            release-assets/site-public_html.zip \
+            release-assets/sqf-private.zip \
+            release-assets/01-instalar-banco.sql \
+            release-assets/02-verificar-banco.sql \
+            release-assets/SHA256SUMS \
+            release-assets/LEIA-ME-HPANEL.txt \
+            --repo "$GITHUB_REPOSITORY" \
+            --target "$GITHUB_SHA" \
+            --title "Será Quem Faz? v3.14.0-rc.14 — Hostinger Unlimited (homologação)" \
+            --notes-file docs/releases/v3.14.0-rc.14.md \
+            --prerelease \
+            --latest=false

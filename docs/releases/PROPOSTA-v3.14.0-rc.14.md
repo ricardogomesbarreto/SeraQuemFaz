@@ -1,15 +1,15 @@
-# Proposta de pré-release v3.14.0-rc.14 — ainda NÃO publicada
+# Proposta histórica — critérios para a pré-release v3.14.0-rc.14
 
 **Produto:** Será Quem Faz?  
 **Branch de origem:** `feat/mysql-mariadb-migration`  
 **PR:** #16 (rascunho; não foi integrado na `main`)  
 **Natureza:** candidata local MySQL/MariaDB, sem produção nem cobrança real
 
-> Este arquivo é uma **proposta de publicação**. Não é uma tag, uma GitHub Release ou um certificado de homologação. Não atribuir a ela o status de release enquanto os testes obrigatórios não forem executados e aprovados.
+> Este documento registra os critérios anteriores. As [notas de publicação](v3.14.0-rc.14.md) e a execução da CI são as fontes atuais para a candidata. A versão continua sem homologação de produção, mesmo que a pré-release seja publicada.
 
 ## Alterações para a próxima candidata
 
-- Runtime exclusivo PHP 8.1+ / PDO MySQL; compatibilidade-alvo MySQL 8.0 e MariaDB 10.11.
+- Runtime exclusivo PHP 8.2+ / PDO MySQL; compatibilidade-alvo MySQL 8.0 e MariaDB 10.11.
 - Migrações SQL 001–010 e dados públicos de categorias/municípios.
 - Migração 009: índices para consultas frequentes, mensagens e avaliações.
 - Migração 010: atendimento independente por solicitação concluída, permitindo avaliar contratações recorrentes sem apagar históricos; validação de associações antigas necessária.

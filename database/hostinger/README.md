@@ -2,14 +2,14 @@
 
 Não implantar em produção. Gere `npm run build:dist` na raiz. O pacote `dist/mysql-candidate` contém public_html, sqf-private e database. Importe database/01-instalar-banco.sql em um banco novo e vazio no hPanel/phpMyAdmin; confira SHA256SUMS e execute 02-verificar-banco.sql. Matriz testada: MySQL 8.0 e MariaDB 10.11; confira a versão contratada.
 
-PHP 8.1+, PDO MySQL, mbstring, GD/WebP, fileinfo, cURL, Argon2id e HTTPS. Copie public_html para a raiz pública; mantenha sqf-private fora dela. Copie config.example.php para config.php no diretório privado e configure DSN mysql:, usuário, senha e mídia privada. Não exponha SQL, arquivos de configuração ou snapshots. Checkout, webhook e notificações desativados por padrão.
+PHP 8.2+ (8.3 ou superior recomendado para a Hostinger), PDO MySQL, mbstring, GD/WebP, fileinfo, cURL, Argon2id e HTTPS. Copie public_html para a raiz pública; mantenha sqf-private fora dela. Copie config.example.php para config.php no diretório privado e configure DSN mysql:, usuário, senha e mídia privada. Não exponha SQL, arquivos de configuração ou snapshots. Checkout, webhook e notificações desativados por padrão.
 
 O CLI de notificações e a pré-validação de identidades ficam em sqf-private/backend/bin. Testar somente em ambiente descartável. A implantação comercial depende dos gates descritos no README principal.
 
 ## Recursos do Unlimited e configuração prevista
 
 - Destino oficial: Hostinger Unlimited. A oferta atual inclui 50 GB NVMe no Brasil, CDN, backups diários e suporte Node.js; confirme os recursos e limites exatos no hPanel da conta, pois variam por geração e região. Não confundir sites ilimitados com recursos computacionais ilimitados.
-- PHP 8.3/8.4, se disponível, com extensões indicadas acima; Node 22+ apenas build/CI. O backend atual não necessita processo persistente.
+- PHP 8.3 ou superior, conforme opções efetivas do hPanel, com extensões indicadas acima; Node 22+ apenas build/CI. O backend atual não necessita processo persistente.
 - Execute `php sqf-private/backend/bin/hostinger-preflight.php` via SSH/CLI no diretório do domínio, com config.php e media provisionados. O diagnóstico verifica PHP, extensões, diretórios, conexão, versão testada, catálogo e bloqueios comerciais; não imprime segredos.
 - CDN/cache: cacheie exclusivamente arquivos públicos estáticos; exclua /api/*, páginas de login/painel/admin, cookies/sessões e mídia servida pela API. O pacote inclui .htaccess; validar cabeçalhos no servidor real. Não habilitar cache de respostas privadas.
 - Backups: habilitar/verificar backups diários do hPanel, retenção e restauração de arquivos e banco. Manter cópia externa cifrada e testar restauração separada; backup da hospedagem não substitui esse teste.
@@ -31,7 +31,13 @@ RC.8 recupera instalação PWA, favoritos de profissionais, comparação de prop
 
 SMTP por TLS 465: SQF_SMTP_ENABLED, SQF_SMTP_USER, SQF_SMTP_PASSWORD e SQF_MAIL_FROM (mesma caixa), desativado por padrão. Homologue confirmação, recuperação e avisos com caixa autorizada. Checkout sandbox exige SQF_MP_CHECKOUT_ENABLED=1, credencial TEST-, SQF_SITE_URL HTTPS e flag checkout_enabled no banco descartável; não ativar em produção. A solicitação de ciclo não dispara renovação automática. Importador privado em backend/bin/import-snapshot.php, use dry-run e compare inventários antes de staging; rollback de produção ainda requer ensaio e plano de corte. Valide índices por EXPLAIN e latência no hPanel.
 
-RC.11: instalação limpa inclui migrations 001–008. Testar índice único de contrato atual em ambos os engines; renovar apenas depois de cancelamento confirmado e fim do período pago. Histórico preservado. A renovação exige novo checkout explícito; não há renovação automática de ciclo. Importação normalizada inclui 33 conjuntos, com teste relacional e mídia. Não liberar produção sem CI e homologação real.
+A instalação limpa desta pré-release inclui as migrações 001–010. Testar índice único de contrato atual em ambos os engines; renovar apenas depois de cancelamento confirmado e fim do período pago. Histórico preservado. A renovação exige novo checkout explícito; não há renovação automática de ciclo. Importação normalizada inclui 33 conjuntos, com teste relacional e mídia. Não liberar produção sem CI e homologação real.
+
+## Pré-release v3.14.0-rc.14 e hospedagem real
+
+A tag e a release de homologação são publicadas **somente se** auditoria e jobs MySQL/MariaDB da mesma revisão passarem. Os arquivos da release são os ZIPs de instalação, scripts SQL e SHA256SUMS; o arquivo ZIP do repositório não é instalador. Na Hostinger selecione **site PHP/HTML personalizado**; não use o assistente que espera um backup de outro site. Se a versão MySQL/MariaDB disponível no hPanel divergir das versões exercitadas na CI, homologar novamente antes do uso.
+
+Configure PHP 8.3 no hPanel quando disponível (mínimo suportado pelo preflight: 8.2), HTTPS, extensões necessárias, banco exclusivo de staging e credenciais fora da raiz web. Nunca desative o WAF ou afrouxe permissões de mídia para contornar erros. A release permanece proibida para produção até os ensaios reais documentados.
 
 ## Como criar os arquivos de upload do hPanel
 

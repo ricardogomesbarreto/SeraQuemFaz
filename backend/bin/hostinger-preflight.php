@@ -7,7 +7,7 @@ require __DIR__.'/../src/PrivateMedia.php';
 $root=dirname(__DIR__,2);
 if(is_file($root.'/config.php'))require $root.'/config.php';
 $checks=[];
-$checks['php_8_1_plus']=PHP_VERSION_ID>=80100;
+$checks['php_8_2_plus']=PHP_VERSION_ID>=80200;
 foreach(['pdo_mysql','mbstring','gd','fileinfo','curl','openssl','session'] as $extension)$checks['extension_'.$extension]=extension_loaded($extension);
 $checks['argon2id']=defined('PASSWORD_ARGON2ID');
 $checks['webp']=function_exists('imagecreatefromwebp')&&function_exists('imagewebp');

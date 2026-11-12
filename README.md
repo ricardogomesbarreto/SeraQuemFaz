@@ -1,4 +1,4 @@
-# SERÁ QUEM FAZ? — v3.14.0-rc.13
+# SERÁ QUEM FAZ? — v3.14.0-rc.14
 
 <p align="center"><img src="assets/brand/logo-horizontal.png" alt="Será Quem Faz?" width="380"></p>
 <p align="center"><strong>Encontre profissionais da sua cidade. Organize serviços, propostas e atendimentos em um só lugar.</strong></p>
@@ -18,15 +18,18 @@ O Será Quem Faz? conecta clientes a prestadores de serviços locais. Pesquisa p
 - [Estrutura do repositório](docs/ESTRUTURA-DO-REPOSITORIO.md): localização dos módulos, arquivos versionados e páginas mantidas por compatibilidade.
 - [Roteiro local MySQL 8.0 / MariaDB 10.11](docs/VALIDACAO-LOCAL-MYSQL-MARIADB.md): instalação das migrações `001–010` em bancos descartáveis, autenticação, solicitações recorrentes, integridade, importação fictícia e recuperação.
 - [Histórico das mudanças](CHANGELOG.md): diferencia implementações ainda **não publicadas** das versões já marcadas.
-- [Proposta de pré-release v3.14.0-rc.14](docs/releases/PROPOSTA-v3.14.0-rc.14.md): notas e critérios pendentes; **não é uma tag nem uma release publicada**.
+- [Notas da pré-release v3.14.0-rc.14](docs/releases/v3.14.0-rc.14.md): pacote de homologação Hostinger, validação automatizada e limitações de produção. A tag e a release só são criadas após aprovação dos jobs da CI no commit de publicação.
 
 A organização e os novos testes foram adicionados à branch de migração. **A publicação de uma tag ou release validada exige a execução comprovada dos testes locais nos dois bancos.** Hostinger e produção serão considerados apenas após 100% de conversão e homologação técnica. Não há pagamentos reais ativados.
 
 ## Arquitetura oficial — Hostinger Unlimited
 
-HTML, CSS e JavaScript; API PHP 8.1+; PDO MySQL; MySQL 8.0 ou MariaDB 10.11, InnoDB e UTC. Identidades e sessões próprias, RBAC administrativo com MFA, mídia privada fora da raiz web e fila de notificações. Mercado Pago com checkout desativado durante homologação. Destino futuro: Hostinger Unlimited (não Premium). PHP permanece por reaproveitar o backend homologado; Node.js é suportado pelo plano, mas uma reescrita não é necessária. Node 22+ é usado no build e nos testes, não como runtime obrigatório.
+HTML, CSS e JavaScript; API PHP 8.2+; PDO MySQL; MySQL 8.0 ou MariaDB 10.11, InnoDB e UTC. Identidades e sessões próprias, RBAC administrativo com MFA, mídia privada fora da raiz web e fila de notificações. Mercado Pago com checkout desativado durante homologação. Destino futuro: Hostinger Unlimited (não Premium). PHP permanece por reaproveitar o backend homologado; Node.js é suportado pelo plano, mas uma reescrita não é necessária. Node 22+ é usado no build e nos testes, não como runtime obrigatório.
 
-## v3.14.0-rc.13
+## v3.14.0-rc.14
+
+Distribuição Hostinger em ZIPs separados, PHP 8.2+ para compatibilidade com o hPanel, validação de vínculos de mensagens importadas e suíte MySQL/MariaDB aprovada. A publicação comercial permanece bloqueada até os testes na hospedagem real.
+
 
 Candidato exclusivo MySQL/MariaDB. Distribuição isolada, instalação SQL consolidada, testes PHP/HTTP/Chromium, integridade e restauração de banco descartável. O código histórico foi preservado no histórico Git; não faz parte do caminho de instalação atual.
 
@@ -40,7 +43,7 @@ Candidato exclusivo MySQL/MariaDB. Distribuição isolada, instalação SQL cons
 
 ## Executar e testar
 
-Requisitos: Node 22+, PHP 8.1+ (PDO MySQL, mbstring, GD/WebP, cURL, fileinfo, Argon2id), MySQL 8.0 ou MariaDB 10.11.
+Requisitos: Node 22+, PHP 8.2+ (PDO MySQL, mbstring, GD/WebP, cURL, fileinfo, Argon2id), MySQL 8.0 ou MariaDB 10.11.
 
 ```bash
 npm run verify:local

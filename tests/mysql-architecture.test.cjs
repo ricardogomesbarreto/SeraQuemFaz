@@ -164,3 +164,20 @@ test('Hostinger upload builder separates public site from private PHP and SQL',(
  assert.match(script,/SHA256SUMS/);
  assert.match(read('.github/workflows/mysql-mariadb.yml'),/hostinger-unlimited-staging-uploads/);
 });
+
+test('candidate release and Hostinger staging metadata remain internally consistent',()=>{
+ const pkg=JSON.parse(read('package.json'));
+ const candidate=JSON.parse(read('database/candidate-version.json'));
+ const profile=JSON.parse(read('database/hostinger/unlimited-profile.json'));
+ assert.equal(pkg.version,candidate.version);
+ assert.equal(pkg.version,'3.14.0-rc.14');
+ assert.equal(candidate.production,false);
+ assert.equal(candidate.deploymentAllowed,false);
+ assert.equal(profile.deploymentAllowed,false);
+ assert.equal(profile.phpMinimum,'8.2');
+ const preflight=read('backend/bin/hostinger-preflight.php');
+ assert.match(preflight,/php_8_2_plus/);
+ assert.match(preflight,/PHP_VERSION_ID>=80200/);
+ assert.match(read('.github/workflows/mysql-mariadb.yml'),/needs: \[repository-audit, database\]/);
+ assert.match(read('.github/workflows/mysql-mariadb.yml'),/--prerelease/);
+});
