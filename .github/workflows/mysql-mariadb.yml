@@ -180,7 +180,10 @@ jobs:
 
   publish-hostinger-prerelease:
     # One explicit publication commit; never run for PRs, ordinary pushes or main.
-    if: github.event_name == 'push' && github.ref == 'refs/heads/feat/mysql-mariadb-migration' && github.event.head_commit.message == 'release(hostinger): publish v3.14.0-rc.14'
+    if: >-
+      github.event_name == 'push' &&
+      github.ref == 'refs/heads/feat/mysql-mariadb-migration' &&
+      github.event.head_commit.message == 'release(hostinger): publish v3.14.0-rc.14'
     needs: [repository-audit, database]
     runs-on: ubuntu-latest
     permissions:
