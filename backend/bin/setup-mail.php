@@ -22,12 +22,13 @@ try {
         fwrite(STDOUT,"Sem alterações.\n");exit(0);
     }
     fwrite(STDOUT,"Configuração SMTP segura do Será Quem Faz? (fora de public_html)\n");
-    $user=sqfPrompt('E-mail completo da caixa autenticada Hostinger');
+    $host=sqfPrompt('Servidor (smtp.hostinger.com ou smtp.titan.email; padrão smtp.hostinger.com)')?:'smtp.hostinger.com';
+    $user=sqfPrompt('E-mail completo da caixa autenticada');
     $port=(int)(sqfPrompt('Porta (465 ou 587, padrão 465)')?:'465');
     $password=sqfPrompt('Senha da caixa de e-mail (entrada oculta)',true);
     if($password==='')throw new DomainException('Senha obrigatória nesta primeira configuração');
     sqfMailSettingsSave([
-       'enabled'=>true,'host'=>'smtp.hostinger.com','port'=>$port,
+       'enabled'=>true,'host'=>$host,'port'=>$port,
        'security'=>$port===587?'starttls':'tls','from'=>$user,
        'username'=>$user,'password'=>$password
     ],'server-bootstrap');
