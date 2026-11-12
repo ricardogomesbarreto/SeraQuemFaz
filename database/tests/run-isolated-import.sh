@@ -43,5 +43,6 @@ echo "PASS: isolated staging schema and catalog verified\n";
 
 SQF_TEST_ISOLATED_IMPORT_STAGE=1 php database/tests/snapshot-integration.php
 php database/tests/integrity.php
-echo "PASS: persisted fictional import, row/media reconciliation, rollback checks and FK integrity"
+php database/tests/engagement-integrity.php
+echo "PASS: persisted fictional import, row/media reconciliation, rollback checks, engagement integrity and FK integrity"
 echo "INFO: fixture media retained at $SQF_PRIVATE_MEDIA_ROOT for independent restore validation"
