@@ -83,6 +83,9 @@ try{
  await discovery.locator('input[name=city]').fill('2111300');
  await discovery.locator('button[type=submit]').click();
  const result=client.page.locator('#mysqlDiscoveryResults');
+ const directProfile=result.getByRole('link',{name:'Ver perfil completo'}).first();
+ await directProfile.waitFor();
+ assert.match(await directProfile.getAttribute('href'),/^prestador-mysql[.]html[?]id=[0-9a-f-]{36}&cidade=2111300$/i);
  await result.getByRole('button',{name:'Ver serviços'}).first().click();
  await result.getByRole('button',{name:'Solicitar orçamento'}).waitFor();
  await result.locator('select').selectOption({label:'Serviço teste de navegador editado'});
@@ -111,6 +114,8 @@ try{
  await client.page.locator('#providersList a.provider-card-link').first().click();
  await client.page.waitForURL('**/prestador-mysql.html?*');
  await client.page.locator('#publicProviderContent').waitFor({state:'visible'});
+ assert.equal(await client.page.locator('#providerBackCatalog').getAttribute('href'),'categorias.html?cidade=2111300');
+ await client.page.locator('#publicProviderRegionContext').getByText('Profissional encontrado no município da sua pesquisa.').waitFor();
  await client.page.getByRole('button',{name:'Salvar profissional'}).click();
  await client.page.getByRole('button',{name:'Remover dos favoritos'}).waitFor();
  await widthCheck(client.page,'public provider');
@@ -167,6 +172,7 @@ try{
  await staff.page.getByRole('heading',{name:'Contestações',exact:true}).waitFor();
  assert.equal(await staff.page.getByRole('heading',{name:'Resumo financeiro'}).count(),0);
  assert.equal(await staff.page.getByRole('heading',{name:'Indicadores da plataforma'}).count(),0);
+ assert.equal(await staff.page.getByRole('heading',{name:'Diagnóstico do catálogo por município'}).count(),0);
  await widthCheck(staff.page,'moderator queue');
  await staff.page.locator('#staffIdentity').getByText('Moderador',{exact:true}).waitFor();
 assert.equal(await staff.page.locator('#staffNavigation').getByText('Resumo financeiro',{exact:true}).count(),0);
@@ -197,6 +203,12 @@ await staff.context.close();
  for(const name of ['Indicadores da plataforma','Resumo financeiro','Solicitações de privacidade','Chamados de suporte','Verificação de prestadores','Avaliações pendentes']){
    await administrator.page.getByRole('heading',{name,exact:true}).waitFor();
  }
+ await administrator.page.getByRole('heading',{name:'Diagnóstico do catálogo por município',exact:true}).waitFor();
+ const catalogCity=administrator.page.locator('#staffCatalogCity');
+ await catalogCity.fill('Santa Inês — MA');
+ await administrator.page.getByRole('button',{name:'Verificar visibilidade'}).click();
+ await administrator.page.locator('.sqf-catalog-diagnostic-results').getByText('1 — visíveis para clientes no catálogo').waitFor();
+ console.log('PASS: admin diagnostics identify published professional in exact requested municipality');
  const downloadPromise=administrator.page.waitForEvent('download');
  await administrator.page.getByRole('button',{name:'Baixar indicadores CSV'}).click();
  const download=await downloadPromise;
