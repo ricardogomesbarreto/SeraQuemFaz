@@ -17,7 +17,11 @@
     }
     const response=await fetch(url,options);
     const data=await response.json();
-    if(!response.ok)throw new Error(data.error||'Operação indisponível');
+    if(!response.ok){
+      const error=new Error(data.error||'Operação indisponível');
+      error.status=response.status;
+      throw error;
+    }
     if(typeof data.csrf==='string')csrf=data.csrf;
     return data;
   }
