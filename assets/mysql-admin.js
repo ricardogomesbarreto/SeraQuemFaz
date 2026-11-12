@@ -95,6 +95,7 @@
        }
      }
    }catch(error){if(!/Somente administradores/.test(error.message))throw error;}
+   if(isAdmin&&window.SQFAdminCatalog)queue.append(await window.SQFAdminCatalog.panel(api));
    if(isAdmin&&window.SQFAdminMail)queue.append(await window.SQFAdminMail.panel(api));
    identity.textContent=isAdmin?'Administrador':'Moderador';account.hidden=false;
    updateNavigation();form.hidden=true;status.textContent='Fila de moderação carregada.';

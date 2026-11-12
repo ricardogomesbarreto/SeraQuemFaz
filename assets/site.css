@@ -1601,3 +1601,15 @@ body{min-width:320px}
 .sqf-mail-diagnostics p{margin:6px 0;color:#516f84}
 .sqf-mail-audit li{padding:4px 0;color:#516f84}
 @media(max-width:720px){.sqf-mail-grid{grid-template-columns:1fr}.sqf-mail-panel{padding:18px}.sqf-mail-controls{flex-direction:column}.sqf-mail-controls button{width:100%}}
+
+/* Diagnostics in restricted administration, responsive and usable with keyboard. */
+.sqf-catalog-diagnostics{margin-top:28px;padding:28px;background:#fff;border:1px solid #dbe6ed;border-radius:20px}
+.sqf-catalog-diagnostic-form{display:flex;flex-wrap:wrap;align-items:end;gap:14px;margin:16px 0}
+.sqf-catalog-diagnostic-form label{font-weight:700;color:#153954;width:100%}
+.sqf-catalog-diagnostic-form .city-picker{flex:1;min-width:240px}
+.sqf-catalog-diagnostic-form [data-city-input]{min-width:0;width:100%}
+.sqf-catalog-diagnostic-results{border:1px solid #dce7ef;border-radius:12px;background:#f6f9fb;padding:16px;margin-top:12px}
+.sqf-catalog-diagnostic-results:empty{display:none}
+.sqf-catalog-diagnostic-results h3{margin:0 0 12px}
+.sqf-catalog-diagnostic-results p{margin:6px 0}
+@media(max-width:720px){.sqf-catalog-diagnostics{padding:18px}.sqf-catalog-diagnostic-form .city-picker,.sqf-catalog-diagnostic-form button{width:100%}}

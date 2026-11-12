@@ -103,6 +103,12 @@ jobs:
             dist/mysql-candidate/sqf-private/ "$target:$DEPLOY_ROOT/sqf-private/"
           ssh "${ssh_flags[@]}" "$target" "test -f '$DEPLOY_ROOT/public_html/api/index.php' && test -f '$DEPLOY_ROOT/sqf-private/config.php'"
           echo "Arquivos publicos e backend privados sincronizados; banco, media e credenciais preservados."
+          # Relatorio seguro e apenas de leitura: sem nomes, credenciais, tokens ou envios SMTP.
+          if ssh "${ssh_flags[@]}" "$target" "php -d display_errors=0 '$DEPLOY_ROOT/sqf-private/backend/bin/onboarding-preflight.php'"; then
+            echo "Preflight de cadastro/catálogo concluído (a entrega de e-mails exige teste real separado)."
+          else
+            echo "::warning::Preflight operacional não disponível; verificar PHP CLI na Hostinger."
+          fi
 
       - name: Smoke test nao destrutivo da API publica
         if: ${{ github.event_name == 'push' || inputs.publicar == true }}

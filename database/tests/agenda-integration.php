@@ -39,7 +39,9 @@ execq($db,'INSERT INTO sqf_billing_settings(singleton,require_paid_subscription,
 execq($db,"INSERT INTO provider_verifications(provider_id,status) VALUES (?,'pending')",[$u[1]]);
 check(count(sqfCatalog($db,'2111300'))===0,'unapproved provider hidden');
 execq($db,"UPDATE provider_verifications SET status='approved' WHERE provider_id=?",[$u[1]]);
-check(count(sqfCatalog($db,'2111300'))===1,'approved provider visible');
+check(count(sqfCatalog($db,'2111300'))===0,'unconfirmed provider excluded despite approval');
+execq($db,'UPDATE sqf_auth_users SET email_confirmed_at=UTC_TIMESTAMP(6) WHERE id=?',[$u[1]]);
+check(count(sqfCatalog($db,'2111300'))===1,'approved and confirmed provider visible');
 check(!sqfProviderPublic($db,$u[0]),'client never public');
 $service2='00000000-0000-4000-8000-000000000020';
 execq($db,'INSERT INTO provider_services(id,provider_id,category_id,service_title) VALUES (?,?,?,?)',[$service2,$u[1],'fixture','Segundo serviço']);

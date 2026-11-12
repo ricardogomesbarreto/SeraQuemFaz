@@ -84,6 +84,10 @@ jobs:
           php -l backend/src/Marketplace.php
           php -l backend/src/Services.php
           php -l backend/src/Category.php
+          php -l backend/src/CatalogDiagnostics.php
+          php -l backend/bin/onboarding-preflight.php
+          php -l database/tests/registration-catalog-integration.php
+          node --check assets/mysql-admin-catalog.js
           php -l backend/src/Professional.php
           php -l backend/src/AccountCases.php
           php -l backend/src/AccountSecurity.php
@@ -122,6 +126,7 @@ jobs:
           php database/tests/maintenance-integration.php
 
           php database/tests/browser-fixture.php
+          php database/tests/registration-catalog-integration.php
           php database/tests/integrity.php
           node database/hostinger/build-candidate.mjs
           STAGING_ROOT="$PWD/dist/mysql-candidate/public_html"

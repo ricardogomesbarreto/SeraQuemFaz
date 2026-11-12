@@ -156,6 +156,10 @@
      for(const provider of result.data){
        const card=wrap(provider.full_name);
        card.append(el('p',provider.city||''),el('p',provider.bio||''));
+       const profileLink=el('a','Ver perfil completo');
+       profileLink.className='button button-outline';
+       profileLink.href='prestador-mysql.html?id='+encodeURIComponent(provider.id)+'&cidade='+encodeURIComponent(city);
+       card.append(profileLink);
        const details=el('div');
        card.append(button('Ver serviços',async()=>{
          const [result,reviews]=await Promise.all([api.provider(provider.id),api.publicReviews(provider.id)]);details.replaceChildren();

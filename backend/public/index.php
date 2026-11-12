@@ -7,6 +7,7 @@ require_once __DIR__.'/../src/Services.php';
 require_once __DIR__.'/../src/Moderation.php';
 require_once __DIR__.'/../src/PrivateMedia.php';
 require_once __DIR__.'/../src/Category.php';
+require_once __DIR__.'/../src/CatalogDiagnostics.php';
 require_once __DIR__.'/../src/Professional.php';
 require_once __DIR__.'/../src/AccountCases.php';
 require_once __DIR__.'/../src/AccountSecurity.php';
@@ -182,6 +183,10 @@ try {
           if(!$ok)respond(['error'=>'Falha no envio de teste. Confira a configuração SMTP e a caixa postal da Hostinger.'],503);
           respond(['ok'=>true,'message'=>'Teste solicitado. Confira a caixa postal do administrador e a pasta de spam.']);
         }
+      }
+      if($route==='staff/catalog-diagnostics'){
+        sqfAuthLimit($db,'staff-catalog:'.$actor,30,900);
+        respond(['data'=>sqfStaffCatalogDiagnostics($db,$actor,required($body,'city_ibge'))]);
       }
       if($route==='staff/metrics')respond(['data'=>sqfStaffMetrics($db,$actor)]);
       if($route==='staff/billing')respond(['data'=>sqfStaffBilling($db,$actor)]);
