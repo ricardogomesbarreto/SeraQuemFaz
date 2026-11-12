@@ -79,6 +79,7 @@
     cancelSubscription:()=>call('billing/cancel',{}),
     requestCycle:cycle=>call('billing/cycle',{cycle}),
     staffMetrics:()=>call('staff/metrics',{}),
+    staffCatalogDiagnostics:city_ibge=>call('staff/catalog-diagnostics',{city_ibge}),
     staffBilling:()=>call('staff/billing',{}),
     privacyExport:()=>call('account/export',{}),
     accountSecurity:()=>call('account/security',{}),
