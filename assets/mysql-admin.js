@@ -17,8 +17,9 @@
  }
  async function load(){
    navigation.hidden=true;
+   let isAdmin=false;
    const result=await api.staffReviews();queue.replaceChildren();
-   try{const m=(await api.staffMetrics()).data,card=el('article');card.className='card';card.append(el('h2','Indicadores da plataforma'));const labels={clients:'Clientes',providers:'Prestadores',published_providers:'Prestadores publicados',requests:'Solicitações',completed:'Atendimentos concluídos',pending_verifications:'Verificações pendentes'};for(const [k,label] of Object.entries(labels))card.append(el('p',label+': '+m[k]));const exportBtn=el('button','Baixar indicadores CSV');exportBtn.type='button';exportBtn.className='button button-outline';exportBtn.addEventListener('click',()=>{const csv='Indicador;Quantidade\n'+Object.entries(labels).map(([k,label])=>label+';'+Number(m[k])).join('\n');const url=URL.createObjectURL(new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'}));const a=el('a');a.href=url;a.download='indicadores-sqf.csv';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);});card.append(exportBtn);queue.append(card);}catch(error){if(!/Somente administradores/.test(error.message))throw error; /* Moderators retain their authorized queues. */}
+   try{const m=(await api.staffMetrics()).data,card=el('article');isAdmin=true;card.className='card';card.append(el('h2','Indicadores da plataforma'));const labels={clients:'Clientes',providers:'Prestadores',published_providers:'Prestadores publicados',requests:'Solicitações',completed:'Atendimentos concluídos',pending_verifications:'Verificações pendentes'};for(const [k,label] of Object.entries(labels))card.append(el('p',label+': '+m[k]));const exportBtn=el('button','Baixar indicadores CSV');exportBtn.type='button';exportBtn.className='button button-outline';exportBtn.addEventListener('click',()=>{const csv='Indicador;Quantidade\n'+Object.entries(labels).map(([k,label])=>label+';'+Number(m[k])).join('\n');const url=URL.createObjectURL(new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'}));const a=el('a');a.href=url;a.download='indicadores-sqf.csv';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);});card.append(exportBtn);queue.append(card);}catch(error){if(!/Somente administradores/.test(error.message))throw error; /* Moderators retain their authorized queues. */}
    queue.append(el('h2','Avaliações pendentes'));
    if(!result.data.length)queue.append(el('p','Nenhuma avaliação pendente.'));
    for(const r of result.data){
@@ -94,7 +95,8 @@
        }
      }
    }catch(error){if(!/Somente administradores/.test(error.message))throw error;}
-   identity.textContent=queue.querySelector('h2')?.textContent==='Indicadores da plataforma'?'Administrador':'Moderador';account.hidden=false;
+   if(isAdmin&&window.SQFAdminMail)queue.append(await window.SQFAdminMail.panel(api));
+   identity.textContent=isAdmin?'Administrador':'Moderador';account.hidden=false;
    updateNavigation();form.hidden=true;status.textContent='Fila de moderação carregada.';
  }
  form.addEventListener('submit',async event=>{event.preventDefault();const submit=form.querySelector('button');submit.disabled=true;try{await api.staffMfa(form.elements.code.value);form.reset();await load();}catch(e){status.textContent=e.message;}finally{submit.disabled=false;}});
