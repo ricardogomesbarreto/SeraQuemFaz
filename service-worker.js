@@ -1,7 +1,7 @@
 'use strict';
 /* Cache só de arquivos públicos; NÃO armazenar sessão, perfis, conversas,
    mensagens, solicitações ou respostas do Supabase no Service Worker. */
-const CACHE='sqf-public-v3.10.0';
+const CACHE='sqf-public-v3.13.1';
 const STATIC=['./index.html','./categorias.html','./ajuda.html',
  './assets/site.css','./assets/brand/logo-horizontal.png',
  './assets/brand/icone-192.png','./assets/brand/icone-512.png'];

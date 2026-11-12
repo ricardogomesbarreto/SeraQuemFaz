@@ -20,11 +20,11 @@
   if(!['accepted','in_progress','awaiting_confirmation'].includes(request.status))return;
   const section=el('section','sqf-agenda-editor');
   section.append(el('h4','','Agendar atendimento'),el('p','muted',
-   'O horário fica confirmado somente quando a outra parte aceitar. Propostas não reservam horários. A confirmação será bloqueada se houver outro atendimento confirmado no mesmo intervalo; não há cobrança automática.'));
+   'O horário fica confirmado somente quando a outra parte aceitar. Propostas não reservam horários; um reagendamento mantém a reserva confirmada até a aceitação. A confirmação será bloqueada se houver outro atendimento confirmado no mesmo intervalo; não há cobrança automática.'));
   let appointment;
   try{
    const {data,error}=await client.from('sqf_appointments')
-    .select('id,request_id,starts_at,duration_minutes,status,proposed_by')
+    .select('id,request_id,starts_at,duration_minutes,status,proposed_by,pending_starts_at,pending_duration_minutes,pending_proposed_by')
     .eq('request_id',request.id).maybeSingle();
    if(error)throw error;appointment=data;
   }catch{
@@ -37,6 +37,9 @@
   if(appointment){
    section.append(el('span','sqf-agenda-badge',names[appointment.status]||'Horário informado'));
    section.append(el('p','muted',labelTime(appointment.starts_at)+' · '+appointment.duration_minutes+' minutos'));
+  }
+  if(appointment?.pending_starts_at){
+   section.append(el('p','muted','Reagendamento proposto: '+labelTime(appointment.pending_starts_at)+' · '+appointment.pending_duration_minutes+' minutos. O horário confirmado permanece reservado.'));
   }
   const command=async(action,date=null,duration=null)=>{
    feedback.textContent='Registrando horário...';feedback.dataset.error='false';
@@ -57,6 +60,10 @@
     await command(action);
    }catch(error){feedback.textContent=error.message||'Falha ao atualizar a agenda.';feedback.dataset.error='true';}
   },primary));
+  if(appointment?.status==='confirmed'&&appointment.pending_starts_at&&appointment.pending_proposed_by!==user.id){
+   add('Confirmar reagendamento','confirm',true);
+   add('Recusar reagendamento','decline');
+  }
   if(appointment?.status==='proposed'&&appointment.proposed_by!==user.id){
    add('Confirmar horário','confirm',true);
    add('Recusar proposta','decline');
