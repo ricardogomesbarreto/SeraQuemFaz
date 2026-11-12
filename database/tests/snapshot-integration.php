@@ -3,8 +3,11 @@ declare(strict_types=1);
 require __DIR__.'/../../backend/src/Database.php';require __DIR__.'/../../backend/src/ImportSnapshot.php';
 $db=sqfDatabase();
 $keepMedia=getenv('SQF_TEST_ISOLATED_IMPORT_STAGE')==='1';
+$scope=(string)(getenv('SQF_LOCAL_ENGINE')?:'');
+if($scope!==''&&!in_array($scope,['mysql80','mariadb1011'],true))throw new RuntimeException('Unsupported local fixture engine');
+$expectedMediaRoot=sys_get_temp_dir().'/sqf-import'.($scope!==''?'-'.$scope:'').'-stage-media';
 $root=$keepMedia?(string)getenv('SQF_PRIVATE_MEDIA_ROOT'):sys_get_temp_dir().'/sqf-import-'.bin2hex(random_bytes(8));
-if($keepMedia&&$root!==sys_get_temp_dir().'/sqf-import-stage-media')throw new RuntimeException('Staging fixture must use its dedicated temporary media root');
+if($keepMedia&&$root!==$expectedMediaRoot)throw new RuntimeException('Staging fixture must use its dedicated temporary media root');
 if($root===''||file_exists($root)||is_link($root)||!mkdir($root,0700))throw new RuntimeException('Fixture media root must not exist before the test');
 function check(bool $x,string $m):void{if(!$x)throw new RuntimeException($m);echo "PASS: $m\n";}
 try{
