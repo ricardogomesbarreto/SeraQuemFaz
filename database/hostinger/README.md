@@ -107,3 +107,20 @@ Para mover a hospedagem, restaure os arquivos privados com permissões corretas.
 A configuração legada em `config.php` é usada apenas enquanto não houver
 `mail-settings/settings.json`. Testes isolados definem
 `SQF_MAIL_SETTINGS_TEST_DIR` apenas em PHP CLI, nunca em execução web.
+
+### Provisionar a primeira conta administrativa (uma única vez)
+
+Após a primeira conta ser cadastrada e seu e-mail ser **confirmado**, conecte-se
+por SSH e execute:
+
+    php sqf-private/backend/bin/provision-first-admin.php
+
+O assistente só funciona no terminal, só promove um usuário cujo e-mail já tenha sido
+confirmado e **somente se não existir administrador ativo**. É necessário digitar
+`PROVISIONAR`, registrar o segredo TOTP no seu aplicativo autenticador e validar um
+código gerado pelo próprio aplicativo antes da promoção. O segredo do primeiro
+administrador é armazenado cifrado em `sqf-private/mail-settings/staff-totp.json`,
+nunca na API ou no GitHub. Ele é apresentado apenas no terminal SSH durante a
+configuração; não salve o segredo em prints nem envie por chat. Se já existir um
+administrador ativo, o comando bloqueia a promoção, exigindo governança própria
+para recuperação/rotação. O segredo TOTP legado do `config.php` continua aceito.
