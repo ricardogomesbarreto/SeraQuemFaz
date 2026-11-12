@@ -17,7 +17,8 @@
    const form=node('form');form.className='sqf-mail-form';
    const enabled=node('input');enabled.type='checkbox';enabled.name='enabled';
    const enabledLabel=label('Habilitar envio de e-mails de autenticação',enabled);enabledLabel.className='sqf-mail-toggle';
-   const host=field('host','smtp.hostinger.com');host.required=true;host.readOnly=true;
+   const host=node('select');host.name='host';
+   [['smtp.hostinger.com','Hostinger Email'],['smtp.titan.email','Titan Email']].forEach(([v,t])=>{const o=node('option',t+' — '+v);o.value=v;host.append(o);});
    const port=node('select');port.name='port';
    [['465','465 — TLS/SSL'],['587','587 — STARTTLS']].forEach(([v,t])=>{const o=node('option',t);o.value=v;port.append(o);});
    const from=field('from','', 'email');from.required=true;
@@ -25,7 +26,7 @@
    const password=field('password','', 'password');password.placeholder='Deixe em branco para manter a senha atual';password.autocomplete='new-password';
    const grid=node('div');grid.className='sqf-mail-grid';
    grid.append(label('Servidor SMTP',host),label('Porta e criptografia',port),label('E-mail remetente',from),label('Usuário de autenticação',username),label('Senha da caixa de e-mail',password));
-   const help=node('p','Hostinger: smtp.hostinger.com. O remetente e o usuário precisam ser a mesma caixa postal. Nunca use a senha do login de cliente neste campo.');
+   const help=node('p','Selecione o servidor mostrado nas configurações da sua caixa postal Hostinger ou Titan. O remetente e o usuário precisam ser a mesma caixa. Nunca informe a senha de login de cliente.');
    help.className='muted';
    const save=button('Salvar configuração','submit');
    form.append(enabledLabel,grid,help,save);
