@@ -181,3 +181,12 @@ test('candidate release and Hostinger staging metadata remain internally consist
  assert.match(read('.github/workflows/mysql-mariadb.yml'),/needs: \[repository-audit, database\]/);
  assert.match(read('.github/workflows/mysql-mariadb.yml'),/--prerelease/);
 });
+
+test('service worker cache version matches release manifest and PWA integration test',()=>{
+ const version=JSON.parse(read('package.json')).version;
+ const expected='sqf-public-v'+version;
+ const sw=read('service-worker.js');
+ const pwa=read('database/tests/pwa-integration.mjs');
+ assert.ok(sw.includes("const CACHE='"+expected+"'"),'service worker cache is out of sync with package version');
+ assert.equal((pwa.match(/sqf-public-v3[.]14[.]0-rc[.]14/g)||[]).length,2,'PWA test must use current cache key for install and offline verification');
+});
