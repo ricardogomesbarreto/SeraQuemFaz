@@ -23,7 +23,7 @@ jobs:
           unzip -Z1 dist/hostinger-upload/site-public_html.zip | grep -Fx '.htaccess'
           unzip -Z1 dist/hostinger-upload/site-public_html.zip | grep -Fx 'api/index.php'
           unzip -Z1 dist/hostinger-upload/sqf-private.zip | grep -Fx 'sqf-private/backend/src/Database.php'
-          if unzip -Z1 dist/hostinger-upload/site-public_html.zip | grep -E '(^|/)(sqf-private|config\\.php|\\.env)(/|$)'; then exit 1; fi
+          if unzip -Z1 dist/hostinger-upload/site-public_html.zip | grep -E '(^|/)(sqf-private|config\.php|\.env)(/|$)'; then exit 1; fi
       - name: Publish staging uploads for manual review
         uses: actions/upload-artifact@v4
         with:
