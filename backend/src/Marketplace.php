@@ -83,8 +83,10 @@ function sqfRequestAction(PDO $db,string $actor,string $id,string $action):strin
         if($next==='accepted'&&!sqfProviderPublic($db,$r['provider_id']))throw new DomainException('Prestador indisponível');
         if(in_array($next,['in_progress','awaiting_confirmation'],true)&&!sqfQuery($db,"SELECT 1 FROM profiles p JOIN provider_verifications v ON v.provider_id=p.id WHERE p.id=? AND p.account_type='prestador' AND p.is_public=1 AND v.status='approved'",[$r['provider_id']])->fetchColumn())throw new DomainException('Prestador suspenso');
         if($next==='completed'){
-            sqfQuery($db,"INSERT INTO service_engagements(client_id,provider_id,status,requested_at,confirmed_at) VALUES (?,?,'confirmed',UTC_TIMESTAMP(6),UTC_TIMESTAMP(6)) ON DUPLICATE KEY UPDATE status='confirmed',confirmed_at=COALESCE(confirmed_at,UTC_TIMESTAMP(6))",[$r['client_id'],$r['provider_id']]);
-            $eng=sqfQuery($db,'SELECT id FROM service_engagements WHERE client_id=? AND provider_id=?',[$r['client_id'],$r['provider_id']])->fetchColumn();
+            // Each completed request gets an independent engagement (and review slot).
+            // The UNIQUE source_request_id constraint rejects accidental double completion.
+            $eng=(string)$db->query('SELECT UUID()')->fetchColumn();
+            sqfQuery($db,"INSERT INTO service_engagements(id,client_id,provider_id,source_request_id,status,requested_at,confirmed_at) VALUES (?,?,?,?,'confirmed',?,UTC_TIMESTAMP(6))",[$eng,$r['client_id'],$r['provider_id'],$id,$r['created_at']]);
             sqfQuery($db,'UPDATE sqf_service_requests SET status=?,updated_at=UTC_TIMESTAMP(6),completed_at=UTC_TIMESTAMP(6),engagement_id=? WHERE id=?',[$next,$eng,$id]);
         }else sqfQuery($db,'UPDATE sqf_service_requests SET status=?,updated_at=UTC_TIMESTAMP(6) WHERE id=?',[$next,$id]);
         sqfEvent($db,$id,$actor,$action,$status,$next,$r['quote_cents']===null?null:(int)$r['quote_cents']);sqfNotify($db,$client?$r['provider_id']:$r['client_id'],'request_status','Atendimento atualizado','Consulte os detalhes na central de solicitações.',$id);return $next;
