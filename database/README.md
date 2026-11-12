@@ -4,7 +4,7 @@
 
 ## Instalação
 
-Execute `npm run build:dist`. O SQL consolidado inclui migrations 001–009, 51 categorias e cadastro nacional de municípios. Importe em banco novo e vazio. Veja [Hostinger](hostinger/README.md).
+Execute `npm run build:dist`. O SQL consolidado inclui migrations 001–010, 51 categorias e cadastro nacional de municípios. Importe em banco novo e vazio. Veja [Hostinger](hostinger/README.md).
 
 ## Serviços
 
@@ -83,9 +83,13 @@ php database/tests/index-inventory.php
 
 A rotina usa apenas `information_schema` e `EXPLAIN`, não grava dados nem presume desempenho a partir de tabelas vazias. Execute separadamente em MySQL 8.0 e MariaDB 10.11. Registre os planos e meça consultas com volume fictício representativo antes de considerar a otimização homologada.
 
-## Pendência de integridade: avaliações em atendimentos recorrentes
+## Migração 010 — atendimento independente por solicitação
 
-A migração 001 contém `UNIQUE(client_id,provider_id)` em `service_engagements`. Na conclusão de uma solicitação, `sqfRequestAction()` reutiliza esse vínculo, enquanto `reviews` possui uma avaliação única por `engagement_id`. Isso limita avaliações independentes de **duas contratações concluídas entre as mesmas pessoas**.
+A migração `010_engagement_per_request.sql` resolve a limitação da unicidade por par `(client_id, provider_id)`: inclui `source_request_id` único (e inicialmente nulo para registros históricos), conserva um índice **não único** de consulta do par e passa a criar um atendimento independente para cada solicitação concluída.
 
-Antes de declarar 100%, revisar uma migração que represente cada atendimento individual sem perder os vínculos e avaliações existentes. Executar casos com dois atendimentos concluídos do mesmo par, avaliações distintas, tentativa de avaliação duplicada e restauração de dados legados em MySQL 8.0 e MariaDB 10.11. Nenhum ajuste destrutivo de índice ou relacionamento deve ser promovido antes da reconciliação.
+A avaliação de um novo atendimento exige que `source_request_id` coincida com a solicitação concluída. A regra `UNIQUE(engagement_id)` de avaliações permanece, para evitar avaliações duplicadas do mesmo atendimento. A atualização **não exclui nem reatribui** atendimentos e avaliações anteriores.
+
+**Atenção à migração histórica:** registros antigos podem compartilhar um único `engagement_id` entre solicitações diferentes. A coluna nova permanece nula para essas entradas; não é seguro atribuir automaticamente uma avaliação antiga a uma das solicitações sem evidência da origem. A verificação somente leitura `php database/tests/engagement-integrity.php` identifica mapeamentos ambíguos e exige reconciliação explícita antes do aceite. Não execute reparos automáticos nem alterações em bancos existentes.
+
+O teste de integração `database/tests/agenda-integration.php` contém agora duas contratações concluídas do mesmo par cliente/prestador e verifica atendimentos independentes, avaliações distintas e bloqueio da duplicação. Execute em MySQL 8.0 e MariaDB 10.11 descartáveis depois de aplicar o esquema atualizado. Sem esses resultados, o bloqueio de homologação não está resolvido.
 
