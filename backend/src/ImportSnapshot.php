@@ -32,6 +32,31 @@ function sqfImportSnapshot(PDO $db,array $snapshot,string $mediaRoot,bool $commi
     }
     $tables=sqfImportTables();$rows=$snapshot['tables']??null;$manifest=$snapshot['media']??null;
     if(!is_array($rows)||!is_array($manifest)||array_diff(array_keys($rows),$tables)||array_diff($tables,array_keys($rows)))throw new DomainException('Inventário incompleto ou desconhecido');
+    // Validate the normalized source before any insert. This must remain safe
+    // even when a source dump or database session has disabled foreign keys.
+    $profiles=[];
+    if(!is_array($rows['profiles'])||!is_array($rows['sqf_service_requests'])||!is_array($rows['sqf_request_messages']))
+        throw new DomainException('Relações do inventário inválidas');
+    foreach($rows['profiles'] as $profile){
+        if(!is_array($profile)||!isset($profile['id'])||!is_string($profile['id']))throw new DomainException('Perfil de origem inválido');
+        $profiles[$profile['id']]=true;
+    }
+    $participants=[];
+    foreach($rows['sqf_service_requests'] as $request){
+        if(!is_array($request)||!isset($request['id'],$request['client_id'],$request['provider_id'])
+           ||!is_string($request['id'])||!is_string($request['client_id'])||!is_string($request['provider_id']))
+            throw new DomainException('Solicitação de origem inválida');
+        if(!isset($profiles[$request['client_id']],$profiles[$request['provider_id']]))
+            throw new DomainException('Solicitação sem perfis participantes');
+        $participants[$request['id']]=[$request['client_id'],$request['provider_id']];
+    }
+    foreach($rows['sqf_request_messages'] as $message){
+        if(!is_array($message)||!isset($message['request_id'],$message['sender_id'])
+           ||!is_string($message['request_id'])||!is_string($message['sender_id'])
+           ||!isset($participants[$message['request_id']])
+           ||!in_array($message['sender_id'],$participants[$message['request_id']],true))
+            throw new DomainException('Mensagem sem remetente participante da solicitação');
+    }
     if($db->inTransaction())throw new DomainException('Transação aberta');
     if((int)$db->query('SELECT COUNT(*) FROM sqf_auth_users')->fetchColumn()!==0)throw new DomainException('Banco de destino deve estar vazio');
     $db->beginTransaction();try{
