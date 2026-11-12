@@ -100,9 +100,30 @@ try {
       }
       switch($route){
         case 'register':
-          sqfMailConfig();
-          try{$result=sqfRegister($db,$email,required($body,'password'),required($body,'name'),required($body,'account_type'),isset($body['city_ibge'])?required($body,'city_ibge'):null);sqfAuthMail($email,$result['token'],'verify');}
-          catch(PDOException $e){if($e->getCode()!=='23000')throw $e;}
+          // Reject before touching the database when confirmation mail is not configured.
+          try { sqfMailConfig(); }
+          catch(RuntimeException $e) {
+            error_log('SQF registration blocked: mail transport unavailable');
+            respond(['error'=>'Cadastro temporariamente indisponível: envio de e-mail não configurado.'],503);
+          }
+          try {
+            $result=sqfRegister($db,$email,required($body,'password'),required($body,'name'),required($body,'account_type'),isset($body['city_ibge'])?required($body,'city_ibge'):null);
+            $token=$result['token'];
+          } catch(PDOException $e) {
+            if((string)$e->getCode()!=='23000')throw $e;
+            // Retry email delivery for an unverified identity left by a previous failed send.
+            // Do not hide unrelated constraint errors as duplicate registrations.
+            $existing=sqfQuery($db,'SELECT email_confirmed_at FROM sqf_auth_users WHERE email=?',[$email])->fetch(PDO::FETCH_ASSOC);
+            if(!$existing)throw $e;
+            $token=$existing['email_confirmed_at']===null?sqfRequestAuthToken($db,$email,'verify'):null;
+          }
+          if($token!==null) {
+            try { sqfAuthMail($email,$token,'verify'); }
+            catch(Throwable $e) {
+              error_log('SQF registration confirmation delivery failed: '.get_class($e));
+              respond(['error'=>'Não foi possível enviar o e-mail de confirmação. Tente novamente mais tarde ou solicite um novo código na tela de acesso.'],503);
+            }
+          }
           respond(['message'=>'Se a conta estiver disponível, confira o e-mail para confirmar.'],202);
         case 'login':
           $identity=sqfLogin($db,$email,required($body,'password'));session_regenerate_id(true);
@@ -110,7 +131,11 @@ try {
           respond(['user_id'=>$identity['id'],'csrf'=>$_SESSION['csrf']]);
         case 'request-reset':
         case 'resend-verification':
-          sqfMailConfig();
+          try { sqfMailConfig(); }
+          catch(RuntimeException $e) {
+            error_log('SQF auth email request blocked: mail transport unavailable');
+            respond(['error'=>'Envio de e-mail temporariamente indisponível.'],503);
+          }
           $purpose=$route==='request-reset'?'reset':'verify';
           $token=sqfRequestAuthToken($db,$email,$purpose);
           if($token!==null)try{sqfAuthMail($email,$token,$purpose);}catch(Throwable $e){error_log('SQF mail delivery failed');}
