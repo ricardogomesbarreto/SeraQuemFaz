@@ -1,0 +1,105 @@
+name: Deploy seguro - Hostinger homologacao
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '*.html'
+      - 'assets/**'
+      - 'backend/**'
+      - 'database/hostinger/**'
+      - 'service-worker.js'
+      - 'manifest.webmanifest'
+      - 'offline.html'
+      - '.github/workflows/deploy-hostinger-staging.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: seraquemfaz-hostinger-staging
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    if: ${{ vars.HOSTINGER_AUTO_DEPLOY_ENABLED == 'true' }}
+    runs-on: ubuntu-latest
+    environment: hostinger-staging
+    steps:
+      - name: Checkout do commit aprovado na main
+        uses: actions/checkout@v4
+
+      - name: Configurar Node 22 (build apenas)
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Construir exclusivamente a distribuicao Hostinger
+        run: |
+          set -euo pipefail
+          node database/hostinger/build-install.mjs
+          node database/hostinger/build-candidate.mjs
+          test -f dist/mysql-candidate/public_html/.htaccess
+          test -f dist/mysql-candidate/public_html/api/index.php
+          test -f dist/mysql-candidate/sqf-private/backend/src/Database.php
+          test ! -e dist/mysql-candidate/public_html/backend
+          test ! -e dist/mysql-candidate/public_html/database
+          test ! -e dist/mysql-candidate/public_html/.github
+          test ! -e dist/mysql-candidate/sqf-private/config.php
+
+      - name: Implantar public_html e sqf-private sem tocar nas credenciais
+        env:
+          DEPLOY_HOST: ${{ vars.HOSTINGER_SSH_HOST }}
+          DEPLOY_PORT: ${{ vars.HOSTINGER_SSH_PORT }}
+          DEPLOY_USER: ${{ vars.HOSTINGER_SSH_USER }}
+          DEPLOY_ROOT: ${{ vars.HOSTINGER_SITE_ROOT }}
+          DEPLOY_PRIVATE_KEY: ${{ secrets.HOSTINGER_SSH_PRIVATE_KEY }}
+          DEPLOY_KNOWN_HOSTS: ${{ secrets.HOSTINGER_SSH_KNOWN_HOSTS }}
+        run: |
+          set -euo pipefail
+          for key in DEPLOY_HOST DEPLOY_PORT DEPLOY_USER DEPLOY_ROOT DEPLOY_PRIVATE_KEY DEPLOY_KNOWN_HOSTS; do
+            if [[ -z "${key}" ]]; then
+              echo "Configuracao obrigatoria ausente: $key" >&2
+              exit 1
+            fi
+          done
+          [[ "$DEPLOY_HOST" =~ ^[a-zA-Z0-9.-]+$ ]] || exit 1
+          [[ "$DEPLOY_USER" =~ ^[a-zA-Z0-9_-]+$ ]] || exit 1
+          [[ "$DEPLOY_PORT" =~ ^[0-9]{2,5}$ ]] || exit 1
+          [[ "$DEPLOY_ROOT" =~ ^/[a-zA-Z0-9_.-]+(/[a-zA-Z0-9_.-]+)*$ ]] || exit 1
+          [[ "/$DEPLOY_ROOT/" != *"/../"* ]] || exit 1
+          # Esta integracao foi preparada somente para este site de homologacao.
+          [[ "$DEPLOY_ROOT" == *"/deeppink-hawk-778631.hostingersite.com" ]] || {
+            echo "Destino diferente do subdominio de homologacao; deploy bloqueado." >&2
+            exit 1
+          }
+          umask 077
+          mkdir -p "$HOME/.ssh"
+          printf '%s\n' "$DEPLOY_PRIVATE_KEY" | tr -d '\r' > "$HOME/.ssh/sqf_hostinger"
+          printf '%s\n' "$DEPLOY_KNOWN_HOSTS" > "$HOME/.ssh/known_hosts"
+          chmod 600 "$HOME/.ssh/sqf_hostinger" "$HOME/.ssh/known_hosts"
+          target="$DEPLOY_USER@$DEPLOY_HOST"
+          ssh_flags=(-i "$HOME/.ssh/sqf_hostinger" -p "$DEPLOY_PORT" -o BatchMode=yes -o StrictHostKeyChecking=yes -o IdentitiesOnly=yes)
+          # Um arquivo marcador criado manualmente pelo titular confirma o alvo correto.
+          ssh "${ssh_flags[@]}" "$target" "test -f '$DEPLOY_ROOT/.sqf-staging-deploy' && test -d '$DEPLOY_ROOT/public_html' && test -d '$DEPLOY_ROOT/sqf-private' && test -f '$DEPLOY_ROOT/sqf-private/config.php'" || {
+            echo "Destino nao confirmado: faltam marcador, pastas ou config.php; nenhum arquivo enviado." >&2
+            exit 1
+          }
+          transport="ssh -i $HOME/.ssh/sqf_hostinger -p $DEPLOY_PORT -o BatchMode=yes -o StrictHostKeyChecking=yes -o IdentitiesOnly=yes"
+          # Nunca publicar o repositorio bruto; sem --delete para preservar dados existentes.
+          rsync -rtz --no-perms --no-owner --no-group -e "$transport" \
+            dist/mysql-candidate/public_html/ "$target:$DEPLOY_ROOT/public_html/"
+          # config.php e media/ nao sao gerados pelo build nem devem ser tocados.
+          rsync -rtz --no-perms --no-owner --no-group \
+            --exclude='/config.php' --exclude='/media/**' -e "$transport" \
+            dist/mysql-candidate/sqf-private/ "$target:$DEPLOY_ROOT/sqf-private/"
+          ssh "${ssh_flags[@]}" "$target" "test -f '$DEPLOY_ROOT/public_html/api/index.php' && test -f '$DEPLOY_ROOT/sqf-private/config.php'"
+          echo "Arquivos publicos e backend privados sincronizados; banco, media e credenciais preservados."
+
+      - name: Smoke test nao destrutivo da API publica
+        run: |
+          set -euo pipefail
+          curl --fail --silent --show-error --max-time 25 \
+            'https://deeppink-hawk-778631.hostingersite.com/api/index.php?route=categories' \
+            | node -e "let body='';process.stdin.on('data',c=>body+=c);process.stdin.on('end',()=>{const v=JSON.parse(body);if(!Array.isArray(v.data)||v.data.length<51)process.exit(1);console.log('API publica: categorias >= 51');})"
