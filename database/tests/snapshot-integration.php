@@ -42,6 +42,15 @@ try{
     catch(PDOException|DomainException $e){check(true,'orphaned sender triggers transactional rollback');}
     check((int)$db->query('SELECT COUNT(*) FROM sqf_auth_users')->fetchColumn()===0,'relational failure leaves no partially imported identities');
     check((int)$db->query('SELECT COUNT(*) FROM sqf_service_requests')->fetchColumn()===0,'relational failure leaves no partially imported requests');
+    // Existing profiles that are not participants cannot inject imported messages.
+    $nonParticipant=$snap;
+    $outsider='00000000-0000-4000-8000-000000000096';
+    $nonParticipant['sqf_auth_users'][]=['id'=>$outsider,'email'=>'snapshot-outsider@example.invalid'];
+    $nonParticipant['profiles'][]=['id'=>$outsider,'full_name'=>'Terceiro sem vínculo','account_type'=>'cliente'];
+    $nonParticipant['sqf_request_messages'][0]['sender_id']=$outsider;
+    try{sqfImportSnapshot($db,$nonParticipant,$root);throw new RuntimeException('Unrelated sender accepted');}
+    catch(DomainException $e){check(true,'existing non-participant sender rejected');}
+    check((int)$db->query('SELECT COUNT(*) FROM sqf_auth_users')->fetchColumn()===0,'non-participant sender leaves destination empty');
     $priorEnabled=getenv('SQF_IMPORT_STAGING_ENABLED');
     $priorDestination=getenv('SQF_IMPORT_STAGING_DATABASE');
     putenv('SQF_IMPORT_STAGING_ENABLED=1');
