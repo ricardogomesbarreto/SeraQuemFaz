@@ -37,7 +37,7 @@ function sqfReviewCreate(PDO $db,string $actor,string $request,int $rating,strin
     return sqfTxn($db,function()use($db,$actor,$request,$rating,$comment){
         $r=sqfRequestRow($db,$actor,$request);
         if($r['client_id']!==$actor||$r['status']!=='completed'||!$r['engagement_id'])throw new DomainException('Somente cliente de atendimento concluído pode avaliar');
-        $e=sqfQuery($db,"SELECT id FROM service_engagements WHERE id=? AND client_id=? AND provider_id=? AND status='confirmed' FOR UPDATE",[$r['engagement_id'],$actor,$r['provider_id']])->fetchColumn();
+        $e=sqfQuery($db,"SELECT id FROM service_engagements WHERE id=? AND client_id=? AND provider_id=? AND status='confirmed' AND (source_request_id IS NULL OR source_request_id=?) FOR UPDATE",[$r['engagement_id'],$actor,$r['provider_id'],$request])->fetchColumn();
         if(!$e||sqfQuery($db,'SELECT 1 FROM reviews WHERE engagement_id=?',[$e])->fetchColumn())throw new DomainException('Avaliação indisponível ou já registrada');
         $id=(string)$db->query('SELECT UUID()')->fetchColumn();
         sqfQuery($db,"INSERT INTO reviews(id,provider_id,reviewer_id,engagement_id,rating,comment,moderation_status) VALUES (?,?,?,?,?,?,'pending')",[$id,$r['provider_id'],$actor,$e,$rating,$comment]);
