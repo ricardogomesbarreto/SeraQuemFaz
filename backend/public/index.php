@@ -14,6 +14,7 @@ require_once __DIR__.'/../src/Billing.php';
 require_once __DIR__.'/../src/MercadoPago.php';
 require_once __DIR__.'/../src/Engagement.php';
 require_once __DIR__.'/../src/Mail.php';
+require_once __DIR__.'/../src/StaffSecrets.php';
 require_once __DIR__.'/../src/SubscriptionActions.php';
 require_once __DIR__.'/../src/PrivacyExport.php';
 
@@ -149,8 +150,7 @@ try {
     if($route==='staff/mfa'){
       sqfRequireStaff($db,$actor);
       sqfAuthLimit($db,'staff-mfa:'.$actor,5,300);
-      $secrets=json_decode(getenv('SQF_STAFF_TOTP_SECRETS')?:'{}',true,32,JSON_THROW_ON_ERROR);
-      sqfStaffMfa($db,$actor,required($body,'code'),(string)($secrets[$actor]??''),time());
+      sqfStaffMfa($db,$actor,required($body,'code'),sqfStaffMfaSecret($actor),time());
       session_regenerate_id(true);$_SESSION['staff_mfa_until']=time()+600;
       respond(['ok'=>true]);
     }
