@@ -11,6 +11,7 @@ require_once __DIR__.'/../../backend/src/Category.php';
 require_once __DIR__.'/../../backend/src/AccountCases.php';
 require_once __DIR__.'/../../backend/src/CatalogDiagnostics.php';
 require_once __DIR__.'/../../backend/src/Mail.php';
+require_once __DIR__.'/../../backend/src/PrivateMedia.php';
 $db=sqfDatabase();
 function assertFlow(bool $ok,string $label):void {if(!$ok)throw new RuntimeException($label);echo "PASS: ".$label."\n";}
 function blocked(callable $fn,string $label):void {try{$fn();}catch(DomainException $e){assertFlow(true,$label);return;}throw new RuntimeException($label);}
@@ -50,10 +51,15 @@ $admin='00000000-0000-4000-8000-000000000099';
 $before=sqfStaffCatalogDiagnostics($db,$admin,$city);
 assertFlow($before['verification_pending']>=1&&$before['visible']===0,'administration detects pending provider without public exposure');
 blocked(fn()=>sqfStaffCatalogDiagnostics($db,$client['id'],$city),'client cannot access regional administrative diagnostics');
-$doc=(string)$db->query('SELECT UUID()')->fetchColumn();
-// Synthetic accepted identity document for disposable CI only: no physical identity photo.
-sqfQuery($db,"INSERT INTO sqf_verification_documents(id,provider_id,document_kind,storage_path,status) VALUES (?,?,'identity_evidence',?,'accepted')",
-  [$doc,$provider['id'],$provider['id'].'/'.$doc.'.webp']);
+// Generate a genuine 8x8 synthetic WebP file in disposable private media storage.
+// This is only a test artifact, never a real identity document.
+$image=imagecreatetruecolor(8,8);
+imagefill($image,0,0,imagecolorallocate($image,16,72,93));
+ob_start();imagewebp($image);$imageBytes=ob_get_clean();imagedestroy($image);
+if(!is_string($imageBytes))throw new RuntimeException('WebP fixture unavailable');
+$doc=sqfSavePrivateImage($db,$provider['id'],'verification','identity_evidence',$imageBytes);
+sqfQuery($db,"UPDATE sqf_verification_documents SET status='accepted' WHERE id=? AND provider_id=?",[$doc,$provider['id']]);
+assertFlow(is_file(sqfPrivateImagePath($db,$provider['id'],'verification',$doc)),'synthetic identity file persisted for restore/integrity test');
 sqfStaffProviderDecide($db,$admin,$provider['id'],'approved','Documento fictício aceito apenas durante teste isolado de homologação.');
 $found=sqfCatalog($db,$city);
 assertFlow(count($found)===1&&$found[0]['id']===$provider['id'],'approved provider appears in client-requested municipality');
