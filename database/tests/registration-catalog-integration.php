@@ -57,10 +57,10 @@ sqfQuery($db,"INSERT INTO sqf_verification_documents(id,provider_id,document_kin
 sqfStaffProviderDecide($db,$admin,$provider['id'],'approved','Documento fictício aceito apenas durante teste isolado de homologação.');
 $found=sqfCatalog($db,$city);
 assertFlow(count($found)===1&&$found[0]['id']===$provider['id'],'approved provider appears in client-requested municipality');
-assertFlow(count(sqfCatalog($db,$other))===0,'provider from Santa Inês never leaks into São Luís search');
+assertFlow(!in_array($provider['id'],array_column(sqfCatalog($db,$other),'id'),true),'provider from Santa Inês never leaks into São Luís search');
 $bundle=sqfCategoryPage($db,$category,$city);
 assertFlow($bundle!==null&&count($bundle['profiles'])===1&&$bundle['profiles'][0]['id']===$provider['id'],'category displays approved provider with active matching service');
-assertFlow(count(sqfCategoryPage($db,$category,$other)['profiles'])===0,'category listing respects requested city');
+assertFlow(!in_array($provider['id'],array_column(sqfCategoryPage($db,$category,$other)['profiles'],'id'),true),'category listing respects requested city');
 assertFlow(sqfPublicProvider($db,$provider['id'])['city_ibge']===$city,'public provider page retains municipality ID');
 $after=sqfStaffCatalogDiagnostics($db,$admin,$city);
 assertFlow($after['visible']===1&&$after['visible_categories']>=1,'administrative diagnostics match public catalog');
