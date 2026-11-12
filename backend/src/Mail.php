@@ -9,7 +9,7 @@ function sqfMailConfig():array {
     $host=(string)$c['host'];$port=(int)$c['port'];$security=(string)$c['security'];
     if(!$c['enabled']||!function_exists('curl_init')||!$user||!$pass||!$from||
         !filter_var($user,FILTER_VALIDATE_EMAIL)||!filter_var($from,FILTER_VALIDATE_EMAIL)||
-        strcasecmp($user,$from)!==0||$host!=='smtp.hostinger.com'||
+        strcasecmp($user,$from)!==0||!in_array($host,['smtp.hostinger.com','smtp.titan.email'],true)||
         !in_array([$port,$security],[[465,'tls'],[587,'starttls']],true)){
         throw new RuntimeException('Envio de e-mail não configurado');
     }
