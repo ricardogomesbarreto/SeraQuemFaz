@@ -18,6 +18,7 @@ O Será Quem Faz? conecta clientes a prestadores de serviços locais. Pesquisa p
 - [Estrutura do repositório](docs/ESTRUTURA-DO-REPOSITORIO.md): localização dos módulos, arquivos versionados e páginas mantidas por compatibilidade.
 - [Roteiro local MySQL 8.0 / MariaDB 10.11](docs/VALIDACAO-LOCAL-MYSQL-MARIADB.md): instalação das migrações `001–010` em bancos descartáveis, autenticação, solicitações recorrentes, integridade, importação fictícia e recuperação.
 - [Histórico das mudanças](CHANGELOG.md): diferencia implementações ainda **não publicadas** das versões já marcadas.
+- [Proposta de pré-release v3.14.0-rc.14](docs/releases/PROPOSTA-v3.14.0-rc.14.md): notas e critérios pendentes; **não é uma tag nem uma release publicada**.
 
 A organização e os novos testes foram adicionados à branch de migração. **A publicação de uma tag ou release validada exige a execução comprovada dos testes locais nos dois bancos.** Hostinger e produção serão considerados apenas após 100% de conversão e homologação técnica. Não há pagamentos reais ativados.
 
@@ -42,11 +43,13 @@ Candidato exclusivo MySQL/MariaDB. Distribuição isolada, instalação SQL cons
 Requisitos: Node 22+, PHP 8.1+ (PDO MySQL, mbstring, GD/WebP, cURL, fileinfo, Argon2id), MySQL 8.0 ou MariaDB 10.11.
 
 ```bash
-npm run verify
-npm run build:dist
+npm run verify:local
+npm run test:db:disposable
 ```
 
-O pacote fica em `dist/mysql-candidate/`. Importe `database/01-instalar-banco.sql` em banco novo e vazio. Configure `sqf-private/config.php` fora de `public_html`. Consulte [guia de instalação](database/hostinger/README.md) e [banco de dados](database/README.md).
+A segunda rotina exige Docker Compose v2 e PHP com `pdo_mysql` e executa as migrações `001–010` **somente em containers descartáveis na máquina local**. Consulte o [roteiro das duas engines](docs/VALIDACAO-LOCAL-MYSQL-MARIADB.md) antes de executar. A importação fictícia persistida e o ensaio completo de recuperação são etapas adicionais, não incluídas automaticamente nessa rotina.
+
+O empacotamento para hospedagem (`npm run build:dist`) e a instalação do pacote `dist/mysql-candidate/` ficam **para depois** da homologação técnica e não devem ser utilizados na produção nesta fase.
 
 ## Homologação e publicação
 
