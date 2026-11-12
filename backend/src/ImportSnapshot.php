@@ -32,6 +32,7 @@ function sqfImportSnapshot(PDO $db,array $snapshot,string $mediaRoot,bool $commi
     }
     $tables=sqfImportTables();$rows=$snapshot['tables']??null;$manifest=$snapshot['media']??null;
     if(!is_array($rows)||!is_array($manifest)||array_diff(array_keys($rows),$tables)||array_diff($tables,array_keys($rows)))throw new DomainException('Inventário incompleto ou desconhecido');
+    if(array_diff(array_keys($snapshot),['tables','media']))throw new DomainException('Campos desconhecidos no snapshot');
     // Validate the normalized source before any insert. This must remain safe
     // even when a source dump or database session has disabled foreign keys.
     $profiles=[];
