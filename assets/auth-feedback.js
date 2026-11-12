@@ -8,6 +8,7 @@
     const status = Number(error?.status || 0);
     if (code === 'over_email_send_rate_limit' || message.includes('email rate limit exceeded')) return 'email-limit';
     if (code === 'email_address_not_authorized') return 'email-unauthorized';
+    if (status === 503 && message.includes('e-mail')) return 'email-unavailable';
     if (status === 429 || code.includes('rate_limit') || code === 'too_many_requests') return 'rate-limit';
     if (code === 'signup_disabled') return 'signup-disabled';
     if (code === 'email_not_confirmed') return 'email-unconfirmed';
@@ -18,6 +19,10 @@
     switch (classify(error)) {
       case 'email-limit':
         return 'O serviço de e-mail do serviço de e-mail atingiu o limite de envios (HTTP 429). Não tente enviar o cadastro repetidamente: aguarde a liberação do limite. O administrador deve configurar SMTP próprio antes de liberar novos cadastros.';
+      case 'email-unavailable':
+        return context === 'signup'
+          ? 'O cadastro está temporariamente indisponível porque o envio de e-mails não está pronto na hospedagem. A administração precisa conferir o SMTP; a confirmação de e-mail continua obrigatória.'
+          : 'O envio de e-mail está temporariamente indisponível. A administração precisa conferir a configuração SMTP.';
       case 'email-unauthorized':
         return 'Este ambiente de homologação não está autorizado a enviar mensagens para esse endereço. O administrador precisa configurar um provedor SMTP próprio para permitir cadastros públicos.';
       case 'rate-limit':

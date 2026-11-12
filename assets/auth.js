@@ -104,6 +104,17 @@
     $('openEmailCode')?.addEventListener('click',showCodeForm);
     $('closeEmailCode')?.addEventListener('click',showLoginForm);
     if(location.hash==='#confirmar-email')showCodeForm();
+    $('resendEmailCode')?.addEventListener('click',async()=>{
+      const email=$('codeEmail').value.trim();
+      if(!utils.isValidEmail(email)){status('codeMessage','Informe o e-mail cadastrado para solicitar outro código.',true);return;}
+      const button=$('resendEmailCode');busy(button,true);
+      try{
+        await window.SQFMySQL.resendVerification(email);
+        status('codeMessage','Se houver uma conta pendente, um novo código será enviado ao e-mail cadastrado.');
+      }catch(error){
+        status('codeMessage',window.SQFAuthFeedback.message(error,'resend'),true);
+      }finally{busy(button,false);}
+    });
     otpForm?.addEventListener('submit',async(event)=>{
       event.preventDefault();
       const email=$('codeEmail').value.trim();

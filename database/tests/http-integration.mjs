@@ -15,6 +15,12 @@ let x=await call('categories');assert.equal(x.status,200);assert.ok(Array.isArra
 const missing=await fetch(base+'?route=provider&id=not-a-uuid');assert.equal(missing.status,400);
 const publicProvider=await fetch(base+'?route=provider&id=00000000-0000-4000-8000-000000000002');assert.equal(publicProvider.status,200);assert.ok((await publicProvider.json()).data);
 x=await call('session');assert.equal(x.status,200);assert.equal(x.result.user_id,null);assert.ok(csrf);
+if(process.env.SQF_SMTP_ENABLED!=='1'){
+ const disabled=await call('register',{email:'blocked-no-smtp@example.invalid',password:'fixture-password-12345',name:'Cadastro de teste',account_type:'cliente',city_ibge:'2111300'});
+ assert.equal(disabled.status,503,'signup without email transport must be rejected');
+ assert.match(disabled.result.error,/e-mail/i);
+}
+
 assert.equal((await fetch(base+'?route=unsupported-method',{method:'GET'})).status,404,'unknown read route rejected');
 const unsupportedFormat=await fetch(base+'?route=profile',{method:'POST',headers:{Cookie:cookie,'X-CSRF-Token':csrf,'Content-Type':'text/plain'},body:'{}'});
 assert.equal(unsupportedFormat.status,415,'non-JSON mutation rejected');
