@@ -11,8 +11,14 @@ if [[ "${SQF_IMPORT_STAGING_ENABLED:-}" != "1" || "${SQF_IMPORT_STAGING_DATABASE
   echo "Refusing persistent import: set SQF_IMPORT_STAGING_ENABLED=1 and SQF_IMPORT_STAGING_DATABASE=sqf_import_stage" >&2
   exit 2
 fi
-if [[ "${SQF_PRIVATE_MEDIA_ROOT:-}" != "/tmp/sqf-import-stage-media" ]]; then
-  echo "Refusing staging media outside the dedicated temporary fixture directory" >&2
+scope="${SQF_LOCAL_ENGINE:-}"
+if [[ -n "$scope" && "$scope" != mysql80 && "$scope" != mariadb1011 ]]; then
+  echo "Invalid local engine scope" >&2
+  exit 2
+fi
+expected_root="/tmp/sqf-import${scope:+-$scope}-stage-media"
+if [[ "${SQF_PRIVATE_MEDIA_ROOT:-}" != "$expected_root" ]]; then
+  echo "Refusing staging media outside the dedicated temporary fixture directory: $expected_root" >&2
   exit 2
 fi
 if [[ -e "$SQF_PRIVATE_MEDIA_ROOT" || -L "$SQF_PRIVATE_MEDIA_ROOT" ]]; then
