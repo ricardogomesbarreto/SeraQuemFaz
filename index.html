@@ -10,7 +10,7 @@
 <link href="https://fonts.googleapis.com" rel="preconnect"/>
 <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&amp;family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
-<link href="assets/site.css" rel="stylesheet"/>
+<link href="assets/site.css?v=20261112-pwa-card" rel="stylesheet"/>
 <script defer src="assets/cities.js"></script><script defer src="assets/pricing.js"></script><script defer="" src="assets/site.js"></script>
 <script defer src="assets/backend-mode.js"></script><script defer src="assets/mysql-api-client.js"></script><script defer src="assets/auth-navigation.js"></script><link rel="manifest" href="manifest.webmanifest">
 </head>
@@ -47,57 +47,43 @@
 </div>
 </section>
 
-<!-- Área exclusiva para oferecer a instalação PWA; os demais fluxos da landing permanecem inalterados. -->
+<!-- Área de instalação PWA: identidade visual alinhada ao cartão dos profissionais. -->
 <section class="sqf-pwa-section" id="aplicativo" aria-labelledby="sqfPwaTitle">
   <div class="container">
     <div class="sqf-pwa-panel">
       <div class="sqf-pwa-intro">
-        <div class="sqf-pwa-devices" aria-hidden="true">
-          <div class="sqf-pwa-glow"></div>
-          <div class="sqf-pwa-laptop">
-            <div class="sqf-pwa-laptop-screen">
-              <img src="assets/brand/logo-horizontal.png" alt="" width="146" height="48" loading="lazy">
-              <strong>Encontre serviços<br>na sua cidade.</strong>
-              <span class="sqf-pwa-faux-search">⌕ &nbsp; Escolha sua cidade</span>
-              <span class="sqf-pwa-faux-tags"><i>Serviços</i><i>Profissionais</i></span>
-            </div>
-            <span class="sqf-pwa-laptop-base"></span>
-          </div>
-          <div class="sqf-pwa-phone">
-            <span class="sqf-pwa-phone-notch"></span>
-            <img src="assets/brand/icone-192.png" alt="" width="88" height="88" loading="lazy">
-            <strong>SERÁ QUEM FAZ?</strong>
-            <span>Serviços perto de você</span>
-          </div>
-          <span class="sqf-pwa-visual-spark sqf-pwa-visual-spark-one">✦</span>
-          <span class="sqf-pwa-visual-spark sqf-pwa-visual-spark-two">✦</span>
-        </div>
         <div class="sqf-pwa-copy">
-          <span class="sqf-pwa-kicker">◧ &nbsp; APLICATIVO DA PLATAFORMA</span>
+          <span class="sqf-pwa-kicker">APLICATIVO DA PLATAFORMA</span>
           <h2 id="sqfPwaTitle">Instale o aplicativo do <em>SERÁ QUEM FAZ?</em></h2>
           <p>Tenha a plataforma sempre à mão. Adicione o Será Quem Faz? ao celular ou computador diretamente pelo navegador, sem precisar baixar um aplicativo de uma loja.</p>
           <div class="sqf-pwa-actions">
             <button id="sqfInstallApp" class="button button-primary sqf-pwa-install-cta" type="button" hidden><span aria-hidden="true">↓</span> Instalar aplicativo</button>
-            <a class="button button-outline sqf-pwa-how-button" href="#sqfPwaSteps">Como instalar <span aria-hidden="true">↗</span></a>
+            <a class="button button-white sqf-pwa-how-button" href="#sqfPwaSteps">Como instalar <span aria-hidden="true">↗</span></a>
           </div>
-          <p class="sqf-pwa-compat">A instalação direta aparece quando oferecida pelo navegador. Caso contrário, consulte as instruções abaixo.</p>
+          <p class="sqf-pwa-compat">A instalação direta aparece quando oferecida pelo navegador. Se não aparecer, veja as instruções abaixo.</p>
+        </div>
+        <div class="sqf-pwa-art" aria-hidden="true">
+          <img src="assets/brand/simbolo.png" alt="" width="330" height="330" loading="lazy">
         </div>
       </div>
-      <div class="sqf-pwa-benefits" aria-label="Vantagens do aplicativo">
-        <div class="sqf-pwa-benefit"><span class="sqf-pwa-benefit-icon" aria-hidden="true">⚡</span><div><strong>Acesso rápido</strong><p>Abra a plataforma diretamente por um atalho.</p></div></div>
-        <div class="sqf-pwa-benefit"><span class="sqf-pwa-benefit-icon" aria-hidden="true">▦</span><div><strong>Na tela inicial</strong><p>Tenha o Será Quem Faz? à mão no celular ou computador.</p></div></div>
-        <div class="sqf-pwa-benefit"><span class="sqf-pwa-benefit-icon" aria-hidden="true">▯</span><div><strong>Experiência de aplicativo</strong><p>Navegue em uma janela própria nos dispositivos compatíveis.</p></div></div>
+      <div class="sqf-pwa-benefits" aria-label="Vantagens de instalar o aplicativo">
+        <div class="sqf-pwa-benefit"><span class="sqf-pwa-benefit-icon" aria-hidden="true">⚡</span><strong>Acesso rápido</strong></div>
+        <div class="sqf-pwa-benefit"><span class="sqf-pwa-benefit-icon" aria-hidden="true">▣</span><strong>Atalho na tela inicial</strong></div>
+        <div class="sqf-pwa-benefit"><span class="sqf-pwa-benefit-icon" aria-hidden="true">✓</span><strong>Experiência prática</strong></div>
       </div>
-      <div class="sqf-pwa-how" id="sqfPwaSteps">
-        <div class="sqf-pwa-how-heading"><span class="sqf-pwa-kicker">PASSO A PASSO</span><h3>É simples instalar.</h3></div>
-        <ol class="sqf-pwa-steps">
-          <li><span class="sqf-pwa-step-number">1</span><div><strong>Escolha instalar</strong><p>Clique no botão quando disponível ou use a opção de instalação do navegador.</p></div></li>
-          <li><span class="sqf-pwa-step-number">2</span><div><strong>Confirme no dispositivo</strong><p>Aceite a solicitação de instalação ou de adicionar à tela inicial.</p></div></li>
-          <li><span class="sqf-pwa-step-number">3</span><div><strong>Acesse pelo atalho</strong><p>Encontre a plataforma entre seus aplicativos ou na tela inicial.</p></div></li>
-        </ol>
-      </div>
-      <p class="sqf-pwa-footnote">◉ Disponível em navegadores compatíveis. Internet necessária para login, pesquisa e informações da conta; offline limitado a uma página informativa.</p>
     </div>
+    <div class="sqf-pwa-how" id="sqfPwaSteps">
+      <div class="sqf-pwa-how-heading">
+        <span class="sqf-pwa-kicker">PASSO A PASSO</span>
+        <h3>Como instalar no seu dispositivo</h3>
+      </div>
+      <ol class="sqf-pwa-steps">
+        <li><span class="sqf-pwa-step-number">1</span><div><strong>Escolha instalar</strong><p>Clique no botão quando disponível ou use a opção de instalação do navegador.</p></div></li>
+        <li><span class="sqf-pwa-step-number">2</span><div><strong>Confirme no dispositivo</strong><p>Aceite a solicitação de instalação ou de adicionar à tela inicial.</p></div></li>
+        <li><span class="sqf-pwa-step-number">3</span><div><strong>Acesse pelo atalho</strong><p>Encontre a plataforma entre seus aplicativos ou na tela inicial.</p></div></li>
+      </ol>
+    </div>
+    <p class="sqf-pwa-footnote">Disponível em navegadores compatíveis. Login, pesquisa e informações da conta exigem internet; o modo offline é limitado a uma página informativa.</p>
   </div>
 </section>
 <section aria-label="O que você encontra na plataforma" class="value-strip"><div class="container value-strip-inner"><div><span aria-hidden="true" class="value-icon">⌕</span><span><strong>Descubra serviços</strong><small>Catálogo de categorias em um só lugar</small></span></div><div><span aria-hidden="true" class="value-icon">◎</span><span><strong>Experiência sem complicações</strong><small>Pesquisa simples e acessível</small></span></div><div><span aria-hidden="true" class="value-icon">↗</span><span><strong>Uma comunidade em construção</strong><small>Preparada para novas oportunidades</small></span></div></div></section>
