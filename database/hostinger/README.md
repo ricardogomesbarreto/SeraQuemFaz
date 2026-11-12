@@ -32,3 +32,31 @@ RC.8 recupera instalação PWA, favoritos de profissionais, comparação de prop
 SMTP por TLS 465: SQF_SMTP_ENABLED, SQF_SMTP_USER, SQF_SMTP_PASSWORD e SQF_MAIL_FROM (mesma caixa), desativado por padrão. Homologue confirmação, recuperação e avisos com caixa autorizada. Checkout sandbox exige SQF_MP_CHECKOUT_ENABLED=1, credencial TEST-, SQF_SITE_URL HTTPS e flag checkout_enabled no banco descartável; não ativar em produção. A solicitação de ciclo não dispara renovação automática. Importador privado em backend/bin/import-snapshot.php, use dry-run e compare inventários antes de staging; rollback de produção ainda requer ensaio e plano de corte. Valide índices por EXPLAIN e latência no hPanel.
 
 RC.11: instalação limpa inclui migrations 001–008. Testar índice único de contrato atual em ambos os engines; renovar apenas depois de cancelamento confirmado e fim do período pago. Histórico preservado. A renovação exige novo checkout explícito; não há renovação automática de ciclo. Importação normalizada inclui 33 conjuntos, com teste relacional e mídia. Não liberar produção sem CI e homologação real.
+
+## Como criar os arquivos de upload do hPanel
+
+Execute `npm run build:hostinger` com Node.js 22+ na sua máquina ou baixe o artefato `hostinger-unlimited-staging-uploads` da execução **repository-audit** no GitHub Actions. A rotina gera `dist/hostinger-upload/` com:
+
+- `site-public_html.zip`: **somente** HTML, CSS, JS, imagens, PWA, regras `.htaccess` e entrada PHP da API. Extraia o conteúdo **dentro de** `public_html` do subdomínio de homologação.
+- `sqf-private.zip`: código PHP privado (dentro da pasta `sqf-private/`). Extraia no **diretório pai** de `public_html`, nunca dentro dela.
+- `01-instalar-banco.sql` e `02-verificar-banco.sql`: instalação **somente em banco novo/vazio** e conferência no phpMyAdmin.
+- `SHA256SUMS` e `LEIA-ME-HPANEL.txt`: hashes e sequência de instalação.
+
+**Não envie o ZIP gerado pelo botão Code → Download ZIP do GitHub ao assistente de migração de backups da Hostinger.** Ele contém arquivos de desenvolvimento e não preserva a separação obrigatória entre a raiz pública e o código privado. Use o Gerenciador de Arquivos do hPanel e configure o site como PHP/HTML. `config.php` com as credenciais reais não é fornecido pelos artefatos: crie-o manualmente a partir de `config.example.php` no diretório privado. O processo não instala automaticamente, não apaga arquivos existentes, não mexe em produção e não habilita cobranças.
+
+Na hospedagem, o caminho resolvido por `public_html/api/index.php` exige esta estrutura:
+
+```text
+dominio-ou-subdominio/
+├── public_html/
+│   ├── index.html
+│   ├── api/index.php
+│   ├── assets/
+│   └── .htaccess
+└── sqf-private/
+    ├── config.php                 # criado no hPanel, nunca enviado ao GitHub
+    ├── media/                     # criar com permissões restritas
+    └── backend/{src,bin,public}/
+```
+
+O ZIP público não contém bancos SQL, arquivos de testes, arquivos de configuração real ou código PHP privado. Antes de copiar arquivos sobre um site existente, faça backup, confirme o domínio/subdomínio de destino e homologue os fluxos, incluindo login, API, mídias e responsividade. A aprovação da CI, por si só, **não libera a implantação comercial**.
