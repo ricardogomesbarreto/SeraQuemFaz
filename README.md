@@ -1,10 +1,10 @@
-# SERÁ QUEM FAZ? — v3.14.0-rc.14
+# SERÁ QUEM FAZ? — v3.14.0-rc.15
 
 <p align="center"><img src="assets/brand/logo-horizontal.png" alt="Será Quem Faz?" width="380"></p>
 <p align="center"><strong>Encontre profissionais da sua cidade. Organize serviços, propostas e atendimentos em um só lugar.</strong></p>
 <p align="center">
-<a href="https://github.com/ricardogomesbarreto/SeraQuemFaz/actions/workflows/mysql-mariadb.yml"><img src="https://github.com/ricardogomesbarreto/SeraQuemFaz/actions/workflows/mysql-mariadb.yml/badge.svg?branch=feat/mysql-mariadb-migration" alt="CI MySQL/MariaDB"></a>
-<img src="https://img.shields.io/badge/PHP-8.1%2B-777BB4" alt="PHP">
+<a href="https://github.com/ricardogomesbarreto/SeraQuemFaz/actions/workflows/mysql-mariadb.yml"><img src="https://github.com/ricardogomesbarreto/SeraQuemFaz/actions/workflows/mysql-mariadb.yml/badge.svg?branch=main" alt="CI MySQL/MariaDB"></a>
+<img src="https://img.shields.io/badge/PHP-8.2%2B-777BB4" alt="PHP">
 <img src="https://img.shields.io/badge/MySQL-8.0-4479A1" alt="MySQL">
 <img src="https://img.shields.io/badge/MariaDB-10.11-003545" alt="MariaDB">
 </p>
@@ -18,15 +18,18 @@ O Será Quem Faz? conecta clientes a prestadores de serviços locais. Pesquisa p
 - [Estrutura do repositório](docs/ESTRUTURA-DO-REPOSITORIO.md): localização dos módulos, arquivos versionados e páginas mantidas por compatibilidade.
 - [Roteiro local MySQL 8.0 / MariaDB 10.11](docs/VALIDACAO-LOCAL-MYSQL-MARIADB.md): instalação das migrações `001–010` em bancos descartáveis, autenticação, solicitações recorrentes, integridade, importação fictícia e recuperação.
 - [Histórico das mudanças](CHANGELOG.md): diferencia implementações ainda **não publicadas** das versões já marcadas.
-- [Notas da pré-release v3.14.0-rc.14](docs/releases/v3.14.0-rc.14.md): pacote de homologação Hostinger, validação automatizada e limitações de produção. A tag e a release só são criadas após aprovação dos jobs da CI no commit de publicação.
+- [Notas da pré-release v3.14.0-rc.15](docs/releases/v3.14.0-rc.15.md): pacote de homologação Hostinger, validação automatizada e limitações de produção. Distribuição da pré-release por fluxo próprio de publicação, separado dos testes de integração.
 
-A organização e os novos testes foram adicionados à branch de migração. **A publicação de uma tag ou release validada exige a execução comprovada dos testes locais nos dois bancos.** Hostinger e produção serão considerados apenas após 100% de conversão e homologação técnica. Não há pagamentos reais ativados.
+A migração foi integrada à `main` pelos PRs #15 e #16. A distribuição para Hostinger é uma candidata de homologação; o acesso comercial depende de testes operacionais, segurança e rollback. Pagamentos reais permanecem desativados.
 
 ## Arquitetura oficial — Hostinger Unlimited
 
 HTML, CSS e JavaScript; API PHP 8.2+; PDO MySQL; MySQL 8.0 ou MariaDB 10.11, InnoDB e UTC. Identidades e sessões próprias, RBAC administrativo com MFA, mídia privada fora da raiz web e fila de notificações. Mercado Pago com checkout desativado durante homologação. Destino futuro: Hostinger Unlimited (não Premium). PHP permanece por reaproveitar o backend homologado; Node.js é suportado pelo plano, mas uma reescrita não é necessária. Node 22+ é usado no build e nos testes, não como runtime obrigatório.
 
-## v3.14.0-rc.14
+## v3.14.0-rc.15
+
+Correção da versão do cache PWA após integração dos PRs #15 e #16. Arquivos segregados para homologação na Hostinger Unlimited. Esta pré-release não autoriza operação comercial.
+
 
 Distribuição Hostinger em ZIPs separados, PHP 8.2+ para compatibilidade com o hPanel, validação de vínculos de mensagens importadas e suíte MySQL/MariaDB aprovada. A publicação comercial permanece bloqueada até os testes na hospedagem real.
 

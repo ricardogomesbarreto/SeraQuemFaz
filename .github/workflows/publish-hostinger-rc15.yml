@@ -1,0 +1,49 @@
+name: Publish Hostinger RC15 (release distribution only)
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/publish-hostinger-rc15.yml']
+permissions:
+  contents: write
+jobs:
+  publish-release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Assemble Hostinger upload assets
+        run: |
+          set -euo pipefail
+          node database/hostinger/build-install.mjs
+          node database/hostinger/build-candidate.mjs
+          node database/hostinger/package-upload.mjs
+      - name: Verify archive integrity (no integration test suite)
+        run: |
+          set -euo pipefail
+          node -e "const p=require('./package.json'),v=require('./database/candidate-version.json');if(p.version!=='3.14.0-rc.15'||v.version!==p.version||v.production!==false||v.deploymentAllowed!==false)process.exit(1)"
+          (cd dist/hostinger-upload && sha256sum -c SHA256SUMS)
+          unzip -t dist/hostinger-upload/site-public_html.zip >/dev/null
+          unzip -t dist/hostinger-upload/sqf-private.zip >/dev/null
+      - name: Publish immutable tag and pre-release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          tag=v3.14.0-rc.15
+          if git ls-remote --tags origin "refs/tags/$tag" | grep -q .; then
+            echo "Tag exists; refusing to overwrite" >&2
+            exit 1
+          fi
+          gh release create "$tag" \
+            dist/hostinger-upload/site-public_html.zip \
+            dist/hostinger-upload/sqf-private.zip \
+            dist/hostinger-upload/01-instalar-banco.sql \
+            dist/hostinger-upload/02-verificar-banco.sql \
+            dist/hostinger-upload/LEIA-ME-HPANEL.txt \
+            dist/hostinger-upload/SHA256SUMS \
+            --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" \
+            --title "Será Quem Faz? v3.14.0-rc.15 — Hostinger Unlimited" \
+            --notes-file docs/releases/v3.14.0-rc.15.md \
+            --prerelease --latest=false

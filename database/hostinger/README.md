@@ -33,7 +33,7 @@ SMTP por TLS 465: SQF_SMTP_ENABLED, SQF_SMTP_USER, SQF_SMTP_PASSWORD e SQF_MAIL_
 
 A instalação limpa desta pré-release inclui as migrações 001–010. Testar índice único de contrato atual em ambos os engines; renovar apenas depois de cancelamento confirmado e fim do período pago. Histórico preservado. A renovação exige novo checkout explícito; não há renovação automática de ciclo. Importação normalizada inclui 33 conjuntos, com teste relacional e mídia. Não liberar produção sem CI e homologação real.
 
-## Pré-release v3.14.0-rc.14 e hospedagem real
+## Pré-release v3.14.0-rc.15 e hospedagem real
 
 A tag e a release de homologação são publicadas **somente se** auditoria e jobs MySQL/MariaDB da mesma revisão passarem. Os arquivos da release são os ZIPs de instalação, scripts SQL e SHA256SUMS; o arquivo ZIP do repositório não é instalador. Na Hostinger selecione **site PHP/HTML personalizado**; não use o assistente que espera um backup de outro site. Se a versão MySQL/MariaDB disponível no hPanel divergir das versões exercitadas na CI, homologar novamente antes do uso.
 

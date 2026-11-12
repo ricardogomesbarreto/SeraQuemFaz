@@ -170,7 +170,7 @@ test('candidate release and Hostinger staging metadata remain internally consist
  const candidate=JSON.parse(read('database/candidate-version.json'));
  const profile=JSON.parse(read('database/hostinger/unlimited-profile.json'));
  assert.equal(pkg.version,candidate.version);
- assert.equal(pkg.version,'3.14.0-rc.14');
+ assert.equal(pkg.version,'3.14.0-rc.15');
  assert.equal(candidate.production,false);
  assert.equal(candidate.deploymentAllowed,false);
  assert.equal(profile.deploymentAllowed,false);
@@ -188,5 +188,5 @@ test('service worker cache version matches release manifest and PWA integration 
  const sw=read('service-worker.js');
  const pwa=read('database/tests/pwa-integration.mjs');
  assert.ok(sw.includes("const CACHE='"+expected+"'"),'service worker cache is out of sync with package version');
- assert.equal((pwa.match(/sqf-public-v3[.]14[.]0-rc[.]14/g)||[]).length,2,'PWA test must use current cache key for install and offline verification');
+ assert.equal((pwa.match(/sqf-public-v3[.]14[.]0-rc[.]15/g)||[]).length,2,'PWA test must use current cache key for install and offline verification');
 });

@@ -1,5 +1,13 @@
 # Histórico de mudanças
 
+## v3.14.0-rc.15 — pós-merge, PWA e Hostinger Unlimited (12/11/2026)
+
+- PR #15 integrado à main como base da homologação; PR #16 integrado com arquitetura PHP/MySQL/MariaDB, migrações e pacote Hostinger.
+- Cache PWA sincronizado com versão do projeto; atualização correspondente do teste de regressão.
+- Pacotes segregados site-public_html.zip e sqf-private.zip, instalação SQL, SHA-256, PHP 8.2+, checkout e cron reais desativados.
+- Tag e pré-release novas, sem substituir o histórico da v3.14.0-rc.14; a homologação comercial permanece pendente.
+
+
 ## v3.14.0-rc.14 — candidata Hostinger Unlimited (12/11/2026)
 
 - Geração de **dois ZIPs segregados** para envio manual pelo Gerenciador de Arquivos: frontend/API pública em `site-public_html.zip` e backend privado em `sqf-private.zip`. Arquivos de instalação SQL e hashes SHA-256 separados, sem credenciais no pacote.
