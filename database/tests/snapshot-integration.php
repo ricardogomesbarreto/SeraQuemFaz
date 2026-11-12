@@ -37,7 +37,7 @@ try{
     try{sqfImportSnapshot($db,$bad,$root);throw new RuntimeException('manifest accepted');}catch(DomainException $e){check(true,'mismatched media manifest rejected');}
     check((int)$db->query('SELECT COUNT(*) FROM sqf_auth_users')->fetchColumn()===0,'failed import rolls back');
     $relationalFailure=$snap;
-    $relationalFailure['sqf_request_messages'][0]['sender_id']='00000000-0000-4000-8000-000000000999';
+    $relationalFailure['tables']['sqf_request_messages'][0]['sender_id']='00000000-0000-4000-8000-000000000999';
     try{sqfImportSnapshot($db,$relationalFailure,$root);throw new RuntimeException('Broken relation accepted');}
     catch(PDOException|DomainException $e){check(true,'orphaned sender triggers transactional rollback');}
     check((int)$db->query('SELECT COUNT(*) FROM sqf_auth_users')->fetchColumn()===0,'relational failure leaves no partially imported identities');
@@ -45,9 +45,9 @@ try{
     // Existing profiles that are not participants cannot inject imported messages.
     $nonParticipant=$snap;
     $outsider='00000000-0000-4000-8000-000000000096';
-    $nonParticipant['sqf_auth_users'][]=['id'=>$outsider,'email'=>'snapshot-outsider@example.invalid'];
-    $nonParticipant['profiles'][]=['id'=>$outsider,'full_name'=>'Terceiro sem vínculo','account_type'=>'cliente'];
-    $nonParticipant['sqf_request_messages'][0]['sender_id']=$outsider;
+    $nonParticipant['tables']['sqf_auth_users'][]=['id'=>$outsider,'email'=>'snapshot-outsider@example.invalid'];
+    $nonParticipant['tables']['profiles'][]=['id'=>$outsider,'full_name'=>'Terceiro sem vínculo','account_type'=>'cliente'];
+    $nonParticipant['tables']['sqf_request_messages'][0]['sender_id']=$outsider;
     try{sqfImportSnapshot($db,$nonParticipant,$root);throw new RuntimeException('Unrelated sender accepted');}
     catch(DomainException $e){check(true,'existing non-participant sender rejected');}
     check((int)$db->query('SELECT COUNT(*) FROM sqf_auth_users')->fetchColumn()===0,'non-participant sender leaves destination empty');
