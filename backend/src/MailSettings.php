@@ -10,7 +10,8 @@ function sqfMailPrivateDir():string {
     $root=dirname(__DIR__,2);
     $override=PHP_SAPI==='cli'?(getenv('SQF_MAIL_SETTINGS_TEST_DIR')?:''):'';
     if($override!=='')$root=$override;
-    $doc=isset($_SERVER['DOCUMENT_ROOT'])?realpath((string)$_SERVER['DOCUMENT_ROOT']):false;
+    $documentRoot=trim((string)($_SERVER['DOCUMENT_ROOT']??''));
+    $doc=$documentRoot!==''?realpath($documentRoot):false;
     $real=realpath($root);
     if(!$real||($doc!==false&&($real===$doc||str_starts_with($real,$doc.DIRECTORY_SEPARATOR))))throw new RuntimeException('Diretório privado indisponível');
     return $real.'/mail-settings';
