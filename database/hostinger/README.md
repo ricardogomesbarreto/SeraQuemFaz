@@ -66,3 +66,61 @@ dominio-ou-subdominio/
 ```
 
 O ZIP público não contém bancos SQL, arquivos de testes, arquivos de configuração real ou código PHP privado. Antes de copiar arquivos sobre um site existente, faça backup, confirme o domínio/subdomínio de destino e homologue os fluxos, incluindo login, API, mídias e responsividade. A aprovação da CI, por si só, **não libera a implantação comercial**.
+
+
+## Administração — E-mails e notificações (configuração privada)
+
+O painel `admin.html` oferece **E-mails e notificações**, visível apenas para usuários
+com papel **admin** ativo e sessão MFA válida. Moderadores e clientes não têm acesso
+às credenciais ou aos controles. A API usa HTTPS, cookies seguros, CSRF e MFA.
+
+A configuração fica em `sqf-private/mail-settings/`, fora de `public_html` e é
+preservada entre deployments. `settings.json` contém a senha cifrada com Sodium/Secretbox;
+`mail.key` guarda a chave privada, ambos com permissão 0600, e a pasta usa 0700.
+Backups devem proteger os dois arquivos; eles não podem ser versionados ou
+disponibilizados pela web. A criptografia em repouso não protege contra
+comprometimento total da conta de hospedagem.
+
+### Primeira configuração sem login (SSH, uma vez)
+
+Execute via SSH interativo no diretório do domínio:
+
+    php sqf-private/backend/bin/setup-mail.php
+
+O assistente pede o e-mail da caixa Hostinger, a porta 465 (TLS) ou 587
+(STARTTLS) e a senha com entrada ocultada. O arquivo privado sobrepõe os
+valores legados de `SQF_SMTP_ENABLED` sem editar `config.php`. O assistente
+não funciona via navegador. Confirme a disponibilidade de PHP Sodium e cURL.
+A lista de servidores permitidos inclui `smtp.hostinger.com` e `smtp.titan.email`
+(ambos documentados pela Hostinger), evitando SSRF por destinos arbitrários.
+
+Depois de configurar, faça cadastro de um cliente de teste e confirme
+o e-mail. Provisione uma conta administrativa e TOTP conforme a governança
+administrativa da aplicação; abra `admin.html` para atualizar configurações.
+Os testes no painel enviam exclusivamente ao e-mail do administrador
+(máximo 3 testes/hora), com auditoria sem destinatários ou senhas.
+O painel também mostra status e totais da fila de notificações.
+`SQF_NOTIFICATIONS_ENABLED` continua desativado até homologação do worker;
+habilitar SMTP não habilita disparos automáticos nem pagamentos.
+
+Para mover a hospedagem, restaure os arquivos privados com permissões corretas.
+A configuração legada em `config.php` é usada apenas enquanto não houver
+`mail-settings/settings.json`. Testes isolados definem
+`SQF_MAIL_SETTINGS_TEST_DIR` apenas em PHP CLI, nunca em execução web.
+
+### Provisionar a primeira conta administrativa (uma única vez)
+
+Após a primeira conta ser cadastrada e seu e-mail ser **confirmado**, conecte-se
+por SSH e execute:
+
+    php sqf-private/backend/bin/provision-first-admin.php
+
+O assistente só funciona no terminal, só promove um usuário cujo e-mail já tenha sido
+confirmado e **somente se não existir administrador ativo**. É necessário digitar
+`PROVISIONAR`, registrar o segredo TOTP no seu aplicativo autenticador e validar um
+código gerado pelo próprio aplicativo antes da promoção. O segredo do primeiro
+administrador é armazenado cifrado em `sqf-private/mail-settings/staff-totp.json`,
+nunca na API ou no GitHub. Ele é apresentado apenas no terminal SSH durante a
+configuração; não salve o segredo em prints nem envie por chat. Se já existir um
+administrador ativo, o comando bloqueia a promoção, exigindo governança própria
+para recuperação/rotação. O segredo TOTP legado do `config.php` continua aceito.

@@ -32,7 +32,7 @@ function sqfDeliverNotifications(PDO $db,callable $send,int $limit=15):array {
     }finally{sqfQuery($db,'SELECT RELEASE_LOCK(?)',[$lock]);}
 }
 function sqfNotificationMail(string $email,string $id):bool {
-    $from=getenv('SQF_MAIL_FROM');$site=getenv('SQF_SITE_URL');
+    $from=sqfMailConfig()[2];$site=getenv('SQF_SITE_URL');
     if(!$from||!filter_var($from,FILTER_VALIDATE_EMAIL)||!$site||!filter_var($site,FILTER_VALIDATE_URL)||parse_url($site,PHP_URL_SCHEME)!=='https'||parse_url($site,PHP_URL_USER)!==null||parse_url($site,PHP_URL_PASS)!==null||parse_url($site,PHP_URL_QUERY)!==null||parse_url($site,PHP_URL_FRAGMENT)!==null)throw new RuntimeException('Configuração de e-mail indisponível');
     // No request description, documents, payment details or private messages in email.
     return sqfSmtpSend($email,'Nova atualização — Será Quem Faz?',"Você possui uma atualização na plataforma.\n\nAcesse sua conta: ".rtrim($site,'/')."/painel.html\n\nNão compartilhe senhas ou códigos por e-mail.");

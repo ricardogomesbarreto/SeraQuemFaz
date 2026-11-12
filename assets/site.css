@@ -1578,3 +1578,26 @@ body{min-width:320px}
 @media(max-width:760px){.sqf-pwa-section{padding:28px 0 48px}.sqf-pwa-panel{padding:33px 26px 27px}.sqf-pwa-intro{grid-template-columns:1fr}.sqf-pwa-art{display:grid;min-height:245px;margin-top:4px}.sqf-pwa-art img{width:min(238px,80%);max-height:290px}.sqf-pwa-copy h2{font-size:clamp(1.85rem,6vw,2.45rem)}.sqf-pwa-benefits{gap:12px 0}.sqf-pwa-benefit{flex:1 1 46%;padding:4px 12px}.sqf-pwa-benefit:not(:last-child){border-right:0}.sqf-pwa-benefit:first-child{padding-left:12px}.sqf-pwa-steps{grid-template-columns:1fr;gap:16px}}
 @media(max-width:480px){.sqf-pwa-panel{padding:27px 21px;border-radius:20px}.sqf-pwa-copy h2{font-size:clamp(1.65rem,7vw,2.2rem)}.sqf-pwa-copy>p:not(.sqf-pwa-compat){font-size:.92rem;line-height:1.68}.sqf-pwa-actions{align-items:stretch;flex-direction:column}.sqf-pwa-actions .button{width:100%;white-space:normal}.sqf-pwa-benefit{flex-basis:100%;padding:3px 0!important}.sqf-pwa-how{padding:20px 18px}.sqf-pwa-art{min-height:220px}.sqf-pwa-art img{width:min(220px,80%);max-height:255px}.sqf-pwa-footnote{text-align:left}}
 @media(prefers-reduced-motion:reduce){.sqf-pwa-section .button{transition:none}}
+
+/* Administração: configuração privada de e-mail, sem credenciais em HTML estático. */
+.sqf-mail-panel{margin-top:28px;padding:28px;background:#fff;border:1px solid #dbe6ed;border-radius:20px}
+.sqf-mail-panel>h2{color:#123652;margin:0 0 10px}
+.sqf-mail-panel>p{color:#61768b;max-width:900px}
+.sqf-mail-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:15px;margin:17px 0}
+.sqf-mail-field{display:flex;flex-direction:column;gap:7px;color:#153954;font-weight:700}
+.sqf-mail-field input,.sqf-mail-field select{display:block;width:100%;min-width:0;border:1px solid #cad9e6;border-radius:10px;background:#fff;padding:11px 12px;color:#193c55}
+.sqf-mail-field input:focus,.sqf-mail-field select:focus{outline:2px solid #f5832f;outline-offset:1px}
+.sqf-mail-field input[readonly]{background:#f1f5f8;color:#405a6d}
+.sqf-mail-toggle{display:flex;align-items:center;gap:10px;color:#123652;font-weight:700}
+.sqf-mail-toggle input{width:18px;height:18px;accent-color:#f5832f}
+.sqf-mail-summary{background:#f6f9fb;border:1px solid #dce7ef;border-radius:12px;padding:14px 16px;margin-top:14px}
+.sqf-mail-summary p{margin:7px 0 0;color:#587184;font-size:.92rem}
+.sqf-mail-state{color:#9d4422}.sqf-mail-state.is-ready{color:#127458}
+.sqf-mail-controls{display:flex;flex-wrap:wrap;gap:10px;margin:16px 0}
+.sqf-mail-feedback{min-height:22px;color:#125a49;font-weight:700}
+.sqf-mail-feedback.is-error{color:#a83628}
+.sqf-mail-diagnostics,.sqf-mail-audit{margin-top:12px;padding:13px 18px;background:#f6f9fb;border:1px solid #dce7ef;border-radius:12px}
+.sqf-mail-diagnostics h3,.sqf-mail-audit h3{margin:3px 0 10px;color:#123652}
+.sqf-mail-diagnostics p{margin:6px 0;color:#516f84}
+.sqf-mail-audit li{padding:4px 0;color:#516f84}
+@media(max-width:720px){.sqf-mail-grid{grid-template-columns:1fr}.sqf-mail-panel{padding:18px}.sqf-mail-controls{flex-direction:column}.sqf-mail-controls button{width:100%}}
