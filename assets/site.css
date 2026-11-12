@@ -1541,27 +1541,30 @@ body{min-width:320px}
 
 /* Landing PWA — cartão premium alinhado à chamada para profissionais, sem afetar outros componentes. */
 .sqf-pwa-section{padding:48px 0 70px;background:#fff}
-.sqf-pwa-panel{position:relative;isolation:isolate;overflow:hidden;padding:56px 62px 34px;border-radius:25px;color:#fff;background:linear-gradient(130deg,#103957 0%,#072943 100%);box-shadow:0 18px 44px rgba(7,41,67,.12)}
-.sqf-pwa-panel::before{content:"";position:absolute;z-index:-1;pointer-events:none;right:-125px;top:-205px;width:450px;height:450px;border:1px solid rgba(255,255,255,.16);border-radius:50%}
+.sqf-pwa-panel{position:relative;isolation:isolate;overflow:hidden;padding:56px 62px 34px;border-radius:25px;color:#fff;background:linear-gradient(130deg,#ff9d52 0%,#f5832f 56%,#e76b20 100%);box-shadow:0 18px 44px rgba(205,95,27,.2)}
+.sqf-pwa-panel::before{content:"";position:absolute;z-index:-1;pointer-events:none;right:-125px;top:-205px;width:450px;height:450px;border:1px solid rgba(255,255,255,.3);border-radius:50%}
 .sqf-pwa-intro{display:grid;grid-template-columns:minmax(0,1.24fr) minmax(0,.76fr);align-items:center;gap:35px}
 .sqf-pwa-copy{min-width:0}
-.sqf-pwa-kicker{display:inline-block;color:#ffc58f;font-size:.72rem;font-weight:800;letter-spacing:.13em;text-transform:uppercase}
-.sqf-pwa-copy h2{max-width:660px;margin:17px 0 20px;font-size:clamp(2rem,3.4vw,3.15rem);line-height:1.16;letter-spacing:-.045em;color:#fff}
-.sqf-pwa-copy h2 em{color:var(--orange,#f5832f);font-style:normal}
-.sqf-pwa-copy>p:not(.sqf-pwa-compat){max-width:610px;margin:0 0 25px;color:#cbdae3;font-size:1.02rem;line-height:1.8}
+.sqf-pwa-kicker{display:inline-block;color:#103957;font-size:.72rem;font-weight:800;letter-spacing:.13em;text-transform:uppercase}
+.sqf-pwa-copy h2{max-width:660px;margin:17px 0 20px;font-size:clamp(2rem,3.4vw,3.15rem);line-height:1.16;letter-spacing:-.045em;color:#103957}
+.sqf-pwa-copy h2 em{color:#fff;font-style:normal;text-shadow:0 1px 1px rgba(16,57,87,.25)}
+.sqf-pwa-copy>p:not(.sqf-pwa-compat){max-width:610px;margin:0 0 25px;color:#123954;font-size:1.02rem;line-height:1.8}
 .sqf-pwa-actions{display:flex;align-items:center;flex-wrap:wrap;gap:13px}
 .sqf-pwa-actions .button{min-height:49px}
+.sqf-pwa-actions .sqf-pwa-install-cta{color:#fff;background:#103957;border-color:#103957;box-shadow:0 8px 18px rgba(16,57,87,.22)}
+.sqf-pwa-actions .sqf-pwa-install-cta:hover{background:#092b46;border-color:#092b46;box-shadow:0 10px 24px rgba(16,57,87,.3)}
+.sqf-pwa-actions .sqf-pwa-how-button:hover{color:#092b46;background:#f4f8fa;border-color:#f4f8fa}
 .sqf-pwa-actions .button-white{color:#103957;background:#fff;border-color:#fff}
 .sqf-pwa-install-cta[hidden]{display:none!important}
-.sqf-pwa-compat{max-width:560px;margin:15px 0 0;color:#b7cbda;font-size:.78rem;line-height:1.55}
+.sqf-pwa-compat{max-width:560px;margin:15px 0 0;color:#153b55;font-size:.78rem;line-height:1.55}
 .sqf-pwa-art{position:relative;min-height:270px;display:grid;place-items:center}
 .sqf-pwa-art img{display:block;width:min(335px,100%);height:auto;max-height:340px;object-fit:contain;filter:drop-shadow(0 16px 28px rgba(8,43,68,.32))}
-.sqf-pwa-benefits{display:flex;align-items:center;flex-wrap:wrap;gap:0;margin-top:27px;padding-top:25px;border-top:1px solid rgba(255,255,255,.18)}
+.sqf-pwa-benefits{display:flex;align-items:center;flex-wrap:wrap;gap:0;margin-top:27px;padding-top:25px;border-top:1px solid rgba(16,57,87,.3)}
 .sqf-pwa-benefit{display:flex;align-items:center;gap:10px;padding:3px 21px;min-width:0}
 .sqf-pwa-benefit:first-child{padding-left:0}
-.sqf-pwa-benefit:not(:last-child){border-right:1px solid rgba(255,255,255,.27)}
-.sqf-pwa-benefit-icon{display:inline-grid;place-items:center;min-width:25px;color:#f5832f;font-size:1.45rem;font-weight:800}
-.sqf-pwa-benefit strong{font-weight:800;font-size:.84rem;color:#fff}
+.sqf-pwa-benefit:not(:last-child){border-right:1px solid rgba(16,57,87,.25)}
+.sqf-pwa-benefit-icon{display:inline-grid;place-items:center;min-width:25px;color:#103957;font-size:1.45rem;font-weight:800}
+.sqf-pwa-benefit strong{font-weight:800;font-size:.84rem;color:#103957}
 .sqf-pwa-how{display:grid;grid-template-columns:minmax(170px,.85fr) minmax(0,2.5fr);align-items:center;gap:24px;margin-top:22px;padding:24px 28px;border:1px solid #dce9f2;border-radius:17px;background:#f7fafc;scroll-margin-top:110px}
 .sqf-pwa-how-heading h3{margin:10px 0 0;color:#103957;font-size:1.22rem}
 .sqf-pwa-how .sqf-pwa-kicker{color:#c65c15}
