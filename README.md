@@ -13,6 +13,14 @@
 
 O Será Quem Faz? conecta clientes a prestadores de serviços locais. Pesquisa por município e categoria, perfis profissionais, orçamento, mensagens privadas, agenda, portfólio e avaliações compõem a plataforma. A publicação de prestadores depende de análise administrativa.
 
+## Organização e validação da conversão
+
+- [Estrutura do repositório](docs/ESTRUTURA-DO-REPOSITORIO.md): localização dos módulos, arquivos versionados e páginas mantidas por compatibilidade.
+- [Roteiro local MySQL 8.0 / MariaDB 10.11](docs/VALIDACAO-LOCAL-MYSQL-MARIADB.md): instalação das migrações `001–010` em bancos descartáveis, autenticação, solicitações recorrentes, integridade, importação fictícia e recuperação.
+- [Histórico das mudanças](CHANGELOG.md): diferencia implementações ainda **não publicadas** das versões já marcadas.
+
+A organização e os novos testes foram adicionados à branch de migração. **A publicação de uma tag ou release validada exige a execução comprovada dos testes locais nos dois bancos.** Hostinger e produção serão considerados apenas após 100% de conversão e homologação técnica. Não há pagamentos reais ativados.
+
 ## Arquitetura oficial — Hostinger Unlimited
 
 HTML, CSS e JavaScript; API PHP 8.1+; PDO MySQL; MySQL 8.0 ou MariaDB 10.11, InnoDB e UTC. Identidades e sessões próprias, RBAC administrativo com MFA, mídia privada fora da raiz web e fila de notificações. Mercado Pago com checkout desativado durante homologação. Destino futuro: Hostinger Unlimited (não Premium). PHP permanece por reaproveitar o backend homologado; Node.js é suportado pelo plano, mas uma reescrita não é necessária. Node 22+ é usado no build e nos testes, não como runtime obrigatório.
