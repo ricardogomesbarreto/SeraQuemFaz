@@ -85,6 +85,7 @@ jobs:
           php -l backend/src/Services.php
           php -l backend/src/Category.php
           php -l backend/src/CatalogDiagnostics.php
+          php -l backend/bin/onboarding-preflight.php
           php -l database/tests/registration-catalog-integration.php
           node --check assets/mysql-admin-catalog.js
           php -l backend/src/Professional.php
