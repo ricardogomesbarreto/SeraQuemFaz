@@ -159,7 +159,7 @@ test('Hostinger upload builder separates public site from private PHP and SQL',(
  assert.match(pkg.scripts['build:dist'],/package-upload[.]mjs/);
  assert.match(script,/site-public_html[.]zip/);
  assert.match(script,/sqf-private[.]zip/);
- assert.match(script,/sqf-private\/['+]x[.]name/);
+ assert.ok(script.includes("name:'sqf-private/'+x.name"));
  assert.match(script,/config[.]php/);
  assert.match(script,/SHA256SUMS/);
  assert.match(read('.github/workflows/mysql-mariadb.yml'),/hostinger-unlimited-staging-uploads/);
