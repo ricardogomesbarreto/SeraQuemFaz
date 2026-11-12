@@ -7,7 +7,7 @@ $db=sqfDatabase();
 $schema=(string)$db->query('SELECT DATABASE()')->fetchColumn();
 if(!in_array($schema,['sqf_test','sqf_import_stage','sqf_import_restore'],true))
     throw new RuntimeException('Use only a disposable conversion-test schema');
-$column=sqfQuery($db,"SELECT COUNT(*) FROM information_schema.columns WHERE table_schema=DATABASE() AND table_name='service_engagements' AND column_name='source_request_id'")->fetchColumn();
+$column=$db->query("SELECT COUNT(*) FROM information_schema.columns WHERE table_schema=DATABASE() AND table_name='service_engagements' AND column_name='source_request_id'")->fetchColumn();
 if((int)$column!==1)throw new RuntimeException('Migration 010 not applied');
 $ambiguous=(int)$db->query("SELECT COUNT(*) FROM (SELECT engagement_id FROM sqf_service_requests WHERE engagement_id IS NOT NULL GROUP BY engagement_id HAVING COUNT(*)>1) AS duplicates")->fetchColumn();
 $invalid=(int)$db->query("SELECT COUNT(*) FROM service_engagements e LEFT JOIN sqf_service_requests r ON r.id=e.source_request_id WHERE e.source_request_id IS NOT NULL AND (r.id IS NULL OR r.engagement_id IS NULL OR r.engagement_id<>e.id OR r.client_id<>e.client_id OR r.provider_id<>e.provider_id OR r.status<>'completed')")->fetchColumn();
