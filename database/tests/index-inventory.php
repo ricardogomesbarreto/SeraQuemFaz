@@ -11,6 +11,10 @@ $indexes=[
   'ix_sqf_reviews_provider_status_time'=>['provider_id','moderation_status','created_at','id'],
   'ix_sqf_reviews_moderation_queue'=>['moderation_status','created_at','id'],
  ],
+ 'service_engagements'=>[
+  'ix_service_engagement_pair_history'=>['client_id','provider_id'],
+  'uq_service_engagement_source_request'=>['source_request_id'],
+ ],
 ];
 $inspect=$db->prepare('SELECT column_name,seq_in_index,sub_part FROM information_schema.statistics WHERE table_schema=DATABASE() AND table_name=? AND index_name=? ORDER BY seq_in_index');
 foreach($indexes as $table=>$definitions){
@@ -20,6 +24,10 @@ foreach($indexes as $table=>$definitions){
   if(array_column($actual,'column_name')!==$columns)throw new RuntimeException('Missing or incomplete database index: '.$name);
   foreach($actual as $entry){
    if($entry['column_name']==='moderation_status'&&(int)$entry['sub_part']!==16)throw new RuntimeException('Unexpected moderation status prefix: '.$name);
+  }
+  if($name==='uq_service_engagement_source_request'){
+   $unique=sqfQuery($db,'SELECT MAX(non_unique) FROM information_schema.statistics WHERE table_schema=DATABASE() AND table_name=? AND index_name=?',[$table,$name])->fetchColumn();
+   if((int)$unique!==0)throw new RuntimeException('New engagement request key must be unique');
   }
   echo 'PASS: '.$table.'.'.$name.' ('.count($columns).' columns)'.PHP_EOL;
  }
