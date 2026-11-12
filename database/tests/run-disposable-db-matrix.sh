@@ -58,14 +58,14 @@ for spec in "mysql80:13306" "mariadb1011:13311"; do
     install_sql "$service" "$schema"
   done
   export SQF_DB_DSN="mysql:host=127.0.0.1;port=${port};dbname=sqf_test;charset=utf8mb4"
-  php -r '
+  SQF_LOCAL_ENGINE="$service" php -r '
     require "backend/src/Database.php";
     $db=sqfDatabase();$version=(string)$db->query("SELECT VERSION()")->fetchColumn();
     $target=getenv("SQF_LOCAL_ENGINE");
     if($target==="mysql80"&&!preg_match("/^8\\.0\\./",$version))throw new RuntimeException("Expected MySQL 8.0, got ".$version);
     if($target==="mariadb1011"&&!preg_match("/^10\\.11\\.[0-9]+.*MariaDB/i",$version))throw new RuntimeException("Expected MariaDB 10.11, got ".$version);
     echo "PASS: isolated ".$version." on sqf_test\n";
-  ' SQF_LOCAL_ENGINE="$service"
+  '
   php database/tests/integrity.php
   php database/tests/agenda-integration.php
   php database/tests/auth-integration.php
