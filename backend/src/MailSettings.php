@@ -74,13 +74,13 @@ function sqfMailValidateSettings(array $data):array {
     $password=$data['password']??null;
     // Restrict network destinations to known authenticated SMTP endpoint.
     // Additional servers require an explicit, audited backend allowlist update.
-    if(!is_bool($enabled)||$host!=='smtp.hostinger.com'||!in_array($port,[465,587],true)||
+    if(!is_bool($enabled)||!in_array($host,['smtp.hostinger.com','smtp.titan.email'],true)||!in_array($port,[465,587],true)||
        !in_array($security,['tls','starttls'],true)||
        ($port===465&&$security!=='tls')||($port===587&&$security!=='starttls')||
        !filter_var($from,FILTER_VALIDATE_EMAIL)||!filter_var($username,FILTER_VALIDATE_EMAIL)||
        $username!==$from||!is_string($password)||strlen($password)<1||strlen($password)>1024||
        preg_match('/[\r\n]/',$password)){
-        throw new DomainException('Configuração SMTP inválida: use smtp.hostinger.com, TLS 465 ou STARTTLS 587 e a mesma caixa autenticada como remetente.');
+        throw new DomainException('Configuração SMTP inválida: use smtp.hostinger.com ou smtp.titan.email, TLS 465 ou STARTTLS 587 e a mesma caixa autenticada como remetente.');
     }
     return compact('enabled','host','port','security','from','username','password');
 }
