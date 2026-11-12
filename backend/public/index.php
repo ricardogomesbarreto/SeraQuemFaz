@@ -157,6 +157,32 @@ try {
     if(str_starts_with($route,'staff/')){
       sqfRequireStaff($db,$actor);
       if((int)($_SESSION['staff_mfa_until']??0)<=time())respond(['error'=>'MFA administrativo obrigatório'],403);
+      if(str_starts_with($route,'staff/mail/')){
+        if(sqfRequireStaff($db,$actor)!=='admin')respond(['error'=>'Somente administradores podem gerenciar o envio de e-mails.'],403);
+        if($route==='staff/mail/settings'){
+          $settings=sqfMailSettingsStatus();
+          $queue=sqfQuery($db,'SELECT status,COUNT(*) AS total FROM sqf_notification_outbox GROUP BY status')->fetchAll(PDO::FETCH_ASSOC);
+          $settings['queue']=array_fill_keys(['pending','sent','failed','skipped'],0);
+          foreach($queue as $item)if(isset($settings['queue'][$item['status']]))$settings['queue'][$item['status']]=(int)$item['total'];
+          respond(['data'=>$settings]);
+        }
+        if($route==='staff/mail/save'){
+          sqfAuthLimit($db,'staff-mail-config:'.$actor,10,3600);
+          sqfMailSettingsSave($body,$actor);
+          respond(['data'=>sqfMailSettingsStatus()]);
+        }
+        if($route==='staff/mail/test'){
+          sqfAuthLimit($db,'staff-mail-test:'.$actor,3,3600);
+          $to=(string)sqfQuery($db,'SELECT email FROM sqf_auth_users WHERE id=?',[$actor])->fetchColumn();
+          if(!filter_var($to,FILTER_VALIDATE_EMAIL))respond(['error'=>'E-mail do administrador inválido'],400);
+          $ok=false;
+          try{$ok=sqfSmtpSend($to,'Teste de e-mail — Será Quem Faz?', "Esta é uma mensagem de teste de configuração SMTP.\nNenhuma alteração de conta ou pagamento foi realizada.");}
+          catch(Throwable $e){$ok=false;}
+          sqfMailAudit('delivery_test',$actor,$ok?'ok':'failed');
+          if(!$ok)respond(['error'=>'Falha no envio de teste. Confira a configuração SMTP e a caixa postal da Hostinger.'],503);
+          respond(['ok'=>true,'message'=>'Teste solicitado. Confira a caixa postal do administrador e a pasta de spam.']);
+        }
+      }
       if($route==='staff/metrics')respond(['data'=>sqfStaffMetrics($db,$actor)]);
       if($route==='staff/billing')respond(['data'=>sqfStaffBilling($db,$actor)]);
       if($route==='staff/providers')respond(['data'=>sqfStaffProviders($db,$actor)]);
