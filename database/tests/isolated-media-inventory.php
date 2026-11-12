@@ -4,9 +4,12 @@ declare(strict_types=1);
 require __DIR__.'/../../backend/src/Database.php';
 require __DIR__.'/../../backend/src/ImportSnapshot.php';
 
+$scope=(string)(getenv('SQF_LOCAL_ENGINE')?:'');
+if($scope!==''&&!in_array($scope,['mysql80','mariadb1011'],true))throw new RuntimeException('Unsupported local fixture engine');
+$rootPrefix=sys_get_temp_dir().'/sqf-import'.($scope!==''?'-'.$scope:'');
 $expectedRoots=[
-    'source'=>[getenv('SQF_PRIVATE_MEDIA_ROOT'),sys_get_temp_dir().'/sqf-import-stage-media'],
-    'restore'=>[getenv('SQF_RESTORE_MEDIA_ROOT'),sys_get_temp_dir().'/sqf-import-restore-media'],
+    'source'=>[getenv('SQF_PRIVATE_MEDIA_ROOT'),$rootPrefix.'-stage-media'],
+    'restore'=>[getenv('SQF_RESTORE_MEDIA_ROOT'),$rootPrefix.'-restore-media'],
 ];
 function physicalInventory(string $configured,string $expected):array {
     if($configured!==$expected||!is_dir($configured)||is_link($configured))throw new RuntimeException('Unapproved or missing isolated media root');
