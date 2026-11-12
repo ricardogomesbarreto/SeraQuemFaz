@@ -10,7 +10,14 @@ cd "$(dirname "$0")/../.."
 : "${SQF_PRIVATE_MEDIA_ROOT:?Set original private media directory}"
 : "${SQF_RESTORE_MEDIA_ROOT:?Set restored private media directory}"
 
-if [[ "$SQF_PRIVATE_MEDIA_ROOT" != "/tmp/sqf-import-stage-media" || "$SQF_RESTORE_MEDIA_ROOT" != "/tmp/sqf-import-restore-media" ]]; then
+scope="${SQF_LOCAL_ENGINE:-}"
+if [[ -n "$scope" && "$scope" != mysql80 && "$scope" != mariadb1011 ]]; then
+  echo "Invalid local engine scope" >&2
+  exit 2
+fi
+expected_source="/tmp/sqf-import${scope:+-$scope}-stage-media"
+expected_restore="/tmp/sqf-import${scope:+-$scope}-restore-media"
+if [[ "$SQF_PRIVATE_MEDIA_ROOT" != "$expected_source" || "$SQF_RESTORE_MEDIA_ROOT" != "$expected_restore" ]]; then
   echo "Refusing paths outside the dedicated fictional media directories" >&2
   exit 2
 fi
