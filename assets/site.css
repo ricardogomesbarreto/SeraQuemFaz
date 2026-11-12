@@ -952,7 +952,7 @@ body{min-width:320px}
 
 .site-footer a[hidden]{display:none!important}
 
-/* v3.9.3 — prévia editorial diferenciada de registros do Supabase. */
+/* Prévia editorial diferenciada dos registros do catálogo. */
 .catalog-reference-notice { border:1px solid #efc28c; border-left:4px solid #f18330; border-radius:16px; padding:16px 18px; background:#fffaf3; color:#173b57; margin:14px 0 20px; display:flex; flex-direction:column; align-items:flex-start; gap:9px; }
 .catalog-reference-notice[hidden] { display:none !important; }
 .catalog-reference-notice p { margin:0; line-height:1.65; }

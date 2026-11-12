@@ -1,0 +1,359 @@
+[
+  {
+    "id": "0bd5a044-3806-4716-9f29-df04afffd1d6",
+    "name": "Advogado",
+    "description": "Serviços jurídicos e consultoria legal",
+    "image_url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTn7J3PBBaeXv0AVe13oVkVYxRbm_HzQYdSP8CWdXvxHg&s=10",
+    "status": "active"
+  },
+  {
+    "id": "4aaa0630-4210-4081-a69e-31c3588b43e4",
+    "name": "Ar-Condicionado",
+    "description": "Instalação, limpeza e manutenção de ar-condicionado",
+    "image_url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ3L8yp1ChN54FhKBfdoesRDM4QscVEwG4cIQwQH3DG_0SDwF-tP-RSWI8&s=10",
+    "status": "active"
+  },
+  {
+    "id": "80610f6b-c955-42cb-942b-16b0397b8173",
+    "name": "Arquitetura",
+    "description": "Projetos arquitetônicos e consultoria",
+    "image_url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTYpEwYNaZkR6-bDeB0eiBUKUJFBk9XK_opGdmRXF29yA&s=10",
+    "status": "active"
+  },
+  {
+    "id": "24321ea0-bf6a-432c-87b1-f1380b20114f",
+    "name": "Automação Residencial",
+    "description": "Instalação e configuração de automação residencial",
+    "image_url": "https://dcdn-us.mitiendanube.com/stores/001/219/023/products/projeto-automacao-511-ebacc3fc2a03ed0b8315917312347688-1024-1024.webp",
+    "status": "active"
+  },
+  {
+    "id": "1fcda575-f22b-4d04-a461-ca376c0d3588",
+    "name": "Barbeiro",
+    "description": "Cortes masculinos e serviços de barbearia",
+    "image_url": "https://www.iped.com.br/img/cursos/60504/60504-1.jpg",
+    "status": "active"
+  },
+  {
+    "id": "b3f9d432-8322-4d1c-9488-c787f56e2448",
+    "name": "Buffet",
+    "description": "Alimentação e serviços de buffet para eventos",
+    "image_url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT1JsjsNLwRwyW3liZbY9Cq8ogSfY_VOnsi4jtLx4Qlsg&s=10",
+    "status": "active"
+  },
+  {
+    "id": "70950239-ca97-4eb2-8832-7c666c2783ce",
+    "name": "Cabeleireiro",
+    "description": "Cortes, penteados e tratamentos capilares",
+    "image_url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQPbyWF3XXZOvXEB3HxmbiLKFE1XBvJEUT6_b6gtPvpKw&s=10",
+    "status": "active"
+  },
+  {
+    "id": "e01cd5f5-77ff-4e7b-bc8c-81a65a0f9486",
+    "name": "Construção",
+    "description": "Serviços relacionados à construção civil",
+    "image_url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSMvPeVVVJXz-ASnpAN0OpyU09M3Z-m05sMbrBtsh2rBF218VX4egaWah0q&s=10",
+    "status": "active"
+  },
+  {
+    "id": "3f001790-f6d5-4c20-931d-940cef3d3e3f",
+    "name": "Contador",
+    "description": "Serviços contábeis e fiscais",
+    "image_url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTHgNxWchUVzkznoBCecnM9J3fpPDIhyKOvxTcDg-lHgA&s=10",
+    "status": "active"
+  },
+  {
+    "id": "e0cad3af-e745-4998-8705-7c8e65146a88",
+    "name": "Costureiro",
+    "description": "Confecção, ajustes e reparos de roupas",
+    "image_url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQsYbTcFuXZkHldl66_GmSnyze70fO2zFwyXq4H1OHOzisL-upebybeeHhP&s=10",
+    "status": "active"
+  },
+  {
+    "id": "c7139939-95bc-44c5-8cc6-1eb6607efe8f",
+    "name": "Decoração",
+    "description": "Decoração de ambientes e eventos",
+    "image_url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSqd4VEPOteZmy1jnGaVlxYrtja0tAdqtTWzemcNzRikdlrZxdwwb7m5YTW&s=10",
+    "status": "active"
+  },
+  {
+    "id": "dde911e7-56a7-4b0c-9784-25ace2963e4c",
+    "name": "Designer",
+    "description": "Design gráfico, identidade visual e criação de artes",
+    "image_url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSaF2_22ANWd2x-7BqYX3xBii3OxYSEmNvmHHmlkajaGTuHTmDv4TWYoGA&s=10",
+    "status": "active"
+  },
+  {
+    "id": "4a51a7f7-0059-4906-8710-93a2adc535aa",
+    "name": "DJ",
+    "description": "Serviços de DJ para festas e eventos",
+    "image_url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTKBu-k5e5MHCmCjaxQjPdEW7IYR78-EafP9zsQDw22tw&s=10",
+    "status": "active"
+  },
+  {
+    "id": "7affe0da-8ca1-4ef5-8d9c-c88f49370f09",
+    "name": "Editor de Vídeo",
+    "description": "Edição e pós-produção de vídeos",
+    "image_url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRmCoY6L-sraZ-hlDx_l522zEz8qk4gA_kElh1LDzlodQ&s=10",
+    "status": "active"
+  },
+  {
+    "id": "299c5804-05e2-4df2-8102-855c8e89529f",
+    "name": "Eletricista",
+    "description": "Serviços elétricos residenciais e comerciais",
+    "image_url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTJdX8Iauof2UYRO0UaIgPYAw6y8RFNtUB8gN0dbESmmUNu2A0c8S5GIvY8&s=10",
+    "status": "active"
+  },
+  {
+    "id": "a39cc36b-3715-41e3-bd62-1b5dd77086a9",
+    "name": "Eletrônica",
+    "description": "Reparo de equipamentos e dispositivos eletrônicos",
+    "image_url": "https://bkpsitecpsnew.blob.core.windows.net/uploadsitecps/sites/1/2020/11/high-angle-female-technician-with-electronics-soldering-iron-scaled.jpg",
+    "status": "active"
+  },
+  {
+    "id": "6a7aa51e-f1eb-4852-ab66-db04d1ae4308",
+    "name": "Encanador",
+    "description": "Instalação e manutenção hidráulica",
+    "image_url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQx1Qm_PixhrYGYAnxUXB5DQHyqWFaMYz-At0IR-ooYuA&s=10",
+    "status": "active"
+  },
+  {
+    "id": "1693a6f1-72b2-4aba-b5a2-dc795bc25545",
+    "name": "Engenharia",
+    "description": "Serviços e projetos de engenharia",
+    "image_url": "https://tse3.mm.bing.net/th/id/OIP.kaigdTHd2at287hUR3bEFgHaE8?r=0&rs=1&pid=ImgDetMain&o=7&rm=3",
+    "status": "active"
+  },
+  {
+    "id": "be88a33d-aa31-4e13-96cc-b304089e7f43",
+    "name": "Entregador",
+    "description": "Serviços de entrega e transporte",
+    "image_url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTWbdB8C_0x5pNozNTI82vt_wj-h22JGqvXPHzwCSL-RA&s=10",
+    "status": "active"
+  },
+  {
+    "id": "f0c1059d-9db3-4092-a39d-223bf5f69881",
+    "name": "Estofador",
+    "description": "Reforma e fabricação de estofados",
+    "image_url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR-xUNWZtHdTFDjOZif_VBcIH2W9-6gij59v2mszKR9iu_nJ0deVlMkkDE&s=10",
+    "status": "active"
+  },
+  {
+    "id": "ea9548c6-f927-4223-b8ad-4eb78c1100d1",
+    "name": "Eventos",
+    "description": "Serviços para festas, eventos e celebrações",
+    "image_url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTBoOfGQypfwq4OS-FCFerm0bxHubXWx_rcHBzd_ponSJ5yrqtylmCcyPP8&s=10",
+    "status": "active"
+  },
+  {
+    "id": "fec08339-fd09-4587-b99c-7079c2011cad",
+    "name": "Fotocópias e Impressões",
+    "description": "Cópias, impressões e digitalização de documentos",
+    "image_url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ3pgc8e0rC0XIFGvUUBP1ZxyppBEBvTSmqtyky6dd5dAElYzcnCt9prRC9&s=10",
+    "status": "active"
+  },
+  {
+    "id": "9376228e-8335-4c1a-9716-1eb990ca3016",
+    "name": "Fotógrafo",
+    "description": "Fotografia profissional e cobertura de eventos",
+    "image_url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTCYnd1yjwANxvK5_ChmFQon05smlY3uMQ95lFVMFDzLxm5BemSN2rLEUxf&s=10",
+    "status": "active"
+  },
+  {
+    "id": "a6ab5560-1cfe-42fd-8b46-adfb5a66f405",
+    "name": "Fotógrafo de Eventos",
+    "description": "Fotografia de casamentos, festas e eventos",
+    "image_url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTmpBwAjXOfcOFkLYoLgi3ZIob2FLOxNf1TH4g9-e1waw&s=10",
+    "status": "active"
+  },
+  {
+    "id": "61b00326-7655-4cad-a138-4fd7439310b9",
+    "name": "Gráfica",
+    "description": "Impressão, comunicação visual e materiais gráficos",
+    "image_url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQMu9RFfZRhdMMvS9_Umy3xsrkV0UmKz1ucWu6njx0mug&s=10",
+    "status": "active"
+  },
+  {
+    "id": "73334188-65c7-437e-abb3-3cef2b78c0c0",
+    "name": "Instalador de Câmeras",
+    "description": "Instalação de câmeras e sistemas de segurança",
+    "image_url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQUcEktOY3ykup5UhVnHsw7ykPpJwO7WsWqZgI91BQ2I-liCgJQ0zVoCcE&s=10",
+    "status": "active"
+  },
+  {
+    "id": "894d6b28-bc01-470f-9170-79a615d69665",
+    "name": "Instalador de Internet",
+    "description": "Instalação e manutenção de redes e internet",
+    "image_url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT82zNuud5S6z_8L8cYOgpFOa44ateoHwOD4asqUHLCRA&s=10",
+    "status": "active"
+  },
+  {
+    "id": "f3a6b8eb-a392-4f7e-8364-128b6cf391cd",
+    "name": "Instalador de TV",
+    "description": "Instalação de antenas, TVs e equipamentos",
+    "image_url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ8HKgXn9pYd-2knyiEyodth7hDODePwzo7_XBUbKSZ8HYS87GOYxgI4yMa&s=10",
+    "status": "active"
+  },
+  {
+    "id": "3908d829-da8b-46aa-acfb-2f14d0cc8099",
+    "name": "Jardineiro",
+    "description": "Manutenção e cuidados de jardins",
+    "image_url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSoRP9BzAjLHBRsi0fSv6WRxX5jXgxniERZJx0NBaTSKQ&s=10",
+    "status": "active"
+  },
+  {
+    "id": "2f617517-1a8d-4499-a73b-14c06668896c",
+    "name": "Limpeza",
+    "description": "Serviços de limpeza residencial e comercial",
+    "image_url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRoc1oqNL2zkFHyyGNP6H6JA5R-9KyuBmNBrRLtKddDlA&s=10",
+    "status": "active"
+  },
+  {
+    "id": "635d788e-d6cf-4c69-97b1-515a7b57952e",
+    "name": "Manicure e Pedicure",
+    "description": "Cuidados e estética das unhas",
+    "image_url": "https://cursos.ce.senac.br/wp-content/uploads/2022/05/shutterstock_1156016407.jpg",
+    "status": "active"
+  },
+  {
+    "id": "e389657a-abc3-4e25-bd05-9a17921f251b",
+    "name": "Manutenção",
+    "description": "Serviços gerais de manutenção e reparos",
+    "image_url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSsR_e4vE-u-hZ2eLGIFdupy57Q13LaZOkQkxDuA9etJRUYo9T00sEkvmLC&s=10",
+    "status": "active"
+  },
+  {
+    "id": "94e4e9e6-1931-4f0d-ad56-880a39cf3147",
+    "name": "Marceneiro",
+    "description": "Móveis planejados, reparos e trabalhos em madeira",
+    "image_url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTwYuRQ_M5NfxqBrByf3zHDOZBh48xnAvngFSwnNjeQLZrlGbY1ZPnPug&s=10",
+    "status": "active"
+  },
+  {
+    "id": "537a851a-b2ab-457b-9c7f-606b41cfe4d5",
+    "name": "Marketing",
+    "description": "Marketing digital e divulgação de empresas",
+    "image_url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT-QZ0ZY8CYa4Hmq-0hQIEZloWU9eDe8TWmJd6i4EiXICLCDlpWw3sjkg4&s=10",
+    "status": "active"
+  },
+  {
+    "id": "4b329c2e-4166-4c83-9aac-f339b462224f",
+    "name": "Massagista",
+    "description": "Serviços de massagem e relaxamento",
+    "image_url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRL_fcyrm4QGcS_xAAKlmrenZH0kTDDUs22QdWEmRXLBA&s=10",
+    "status": "active"
+  },
+  {
+    "id": "214b0bd9-3b7c-4214-b98f-1039280bb95b",
+    "name": "Mecânico",
+    "description": "Manutenção e reparação de veículos",
+    "image_url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS-TcBDGf5BttKer5kZ3psf87bmyFMN9QwAEJ8ckNF8PA&s=10",
+    "status": "active"
+  },
+  {
+    "id": "b358cfd2-901d-485f-8582-a56d7e9f2c60",
+    "name": "Motorista",
+    "description": "Transporte particular e profissional",
+    "image_url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTZTeDCImdVGvuGAi6bGsNSDJM-vyyPxq-_lBRLJj0m1w&s=10",
+    "status": "active"
+  },
+  {
+    "id": "37601919-56a8-4d09-8648-82dee845f61b",
+    "name": "Música",
+    "description": "Músicos, bandas e apresentações musicais",
+    "image_url": "https://www.infoescola.com/wp-content/uploads/2021/04/concerto_290796539.jpg",
+    "status": "active"
+  },
+  {
+    "id": "2e523c50-70c9-4c8e-8844-a69024cd0464",
+    "name": "Pedreiro",
+    "description": "Construção e serviços de alvenaria",
+    "image_url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT16qPMh3QFOLSS-2iC0q8rnddwRFUCERF4NveGMU8F-u4aeWRQ5hClEhI&s=10",
+    "status": "active"
+  },
+  {
+    "id": "21f727ab-f205-4d9c-9ba5-93876d04d8ee",
+    "name": "Pintor",
+    "description": "Pintura residencial, comercial e industrial",
+    "image_url": "https://cdn.pixabay.com/photo/2022/06/08/15/21/artist-7250697_1280.jpg",
+    "status": "active"
+  },
+  {
+    "id": "9f98ad8a-245d-49e6-958f-0b90f772f294",
+    "name": "Professor Particular",
+    "description": "Aulas particulares e reforço escolar",
+    "image_url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSXO6RKfASn0ZZZmjmh9O7xvs5TphHvJEOug_HlwrTS9BZs7NDe8M3yBmcV&s=10",
+    "status": "active"
+  },
+  {
+    "id": "57db1970-da74-4e02-8f93-bf411c78f7fd",
+    "name": "Redator",
+    "description": "Produção de textos e conteúdo",
+    "image_url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTp4eRQIGAJlatqbH5QDlQrZDEdCh81R4zyODN_RwTDtADj0CZuNDaO2xjp&s=10",
+    "status": "active"
+  },
+  {
+    "id": "e8f30fde-568d-4cc2-9c74-8e529b5bf8cc",
+    "name": "Segurança Eletrônica",
+    "description": "Alarmes, sensores e sistemas de monitoramento",
+    "image_url": "https://segware.com/wp-content/uploads/2024/04/Operacoes-de-Servicos-de-Seguranca-eficientes-1024x576.jpg",
+    "status": "active"
+  },
+  {
+    "id": "29015b5a-8cff-4f56-b4e2-8b1fff25b401",
+    "name": "Serralheiro",
+    "description": "Estruturas metálicas, portões e grades",
+    "image_url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSwFyPN2u7-4w4ukqvYBSe4LW2QymUL5rQm-xLVfOD0IceZHNAmSMj4Pb2g&s=10",
+    "status": "active"
+  },
+  {
+    "id": "7e8c2f10-a086-4d01-a310-888b18ce63cd",
+    "name": "Social Media",
+    "description": "Gestão de redes sociais e criação de conteúdo",
+    "image_url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTX5COmj7CjNESyZ1Q1dM_HdKqTMuSTRfkVp-UaNlBLsw&s=10",
+    "status": "active"
+  },
+  {
+    "id": "f8ca1a61-fe57-470a-88ed-e80ac0741169",
+    "name": "Técnico de Celular",
+    "description": "Manutenção e reparo de smartphones",
+    "image_url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTxEGcu_saDF1nReA9yOYwUy5T5BKcIkjOJMp4TxH3s7Z_zidfQfpqnUZFr&s=10",
+    "status": "active"
+  },
+  {
+    "id": "bb552adf-c28f-4987-8975-135d8caf95cc",
+    "name": "Técnico de Informática",
+    "description": "Manutenção e suporte em computadores e tecnologia",
+    "image_url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRszTHWIX0Cfu2RpSg4KRClCqNpEjD2_MlrPC8oA-BCPQ&s=10",
+    "status": "active"
+  },
+  {
+    "id": "f15da517-e832-42d4-8a08-494749f40555",
+    "name": "Técnico em Refrigeração",
+    "description": "Manutenção de geladeiras, freezers e equipamentos de refrigeração",
+    "image_url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSuWBsRd4ZiF7qoqkzZvDfoA5EXDQHWm3K5-fEH1BRX8t1v0yWiDSFivMy6&s=10",
+    "status": "active"
+  },
+  {
+    "id": "539d3ae2-6a5a-4a35-9191-734736f0b30c",
+    "name": "Topografia",
+    "description": "Levantamentos e serviços topográficos",
+    "image_url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRbCDjmDMVeh3r8TGyJ9WFiPe_LQ-JLTLSy5F_QZHvaHDkltRDGdS7GXMIa&s=10",
+    "status": "active"
+  },
+  {
+    "id": "97374541-8aa9-4d5d-8d19-58adca0afeb0",
+    "name": "Tradutor",
+    "description": "Tradução e interpretação de idiomas",
+    "image_url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSkU_Xe36VpCzJyZjgvNke0OyEvpCF0rr-ANBE4iDdWT9YEjfUucNiebln0&s=10",
+    "status": "active"
+  },
+  {
+    "id": "ed8ebc95-f5ef-4e76-9b9d-c0e41bff8f8b",
+    "name": "Videomaker",
+    "description": "Produção e edição de vídeos",
+    "image_url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRNijYkjDvCfHczVsP2uztuL0qjMJxbsRCPwdftMvPKX5ssxPkzA2ZD4LYe&s=10",
+    "status": "active"
+  }
+]

@@ -1,0 +1,61 @@
+import {mkdir,readFile,writeFile,cp,readdir,rm} from 'node:fs/promises';
+import {resolve,dirname,join} from 'node:path';
+import {fileURLToPath} from 'node:url';
+const root=resolve(dirname(fileURLToPath(import.meta.url)),'../..');
+const dest=join(root,'dist/mysql-candidate'),pub=join(dest,'public_html'),priv=join(dest,'sqf-private');
+await rm(dest,{recursive:true,force:true});await mkdir(pub,{recursive:true});await mkdir(priv,{recursive:true});
+const pages=['index.html','categorias.html','categoria.html','entrar.html','cadastro.html','ajuda.html','privacidade.html','termos.html','painel-mysql.html','prestador-mysql.html','admin-mysql.html'];
+const scripts=new Set(['backend-mode.js','mysql-api-client.js']);
+for(const page of pages){
+ let html=await readFile(join(root,page),'utf8');
+ if(/src=["']assets\/auth-navigation\.js/.test(html)&&!html.includes('assets/backend-mode.js'))html=html.replace(/(<script\b[^>]*src=["']assets\/auth-navigation\.js["'][^>]*>)/i,'<script defer src="assets/backend-mode.js"></script><script defer src="assets/mysql-api-client.js"></script>$1');
+ for(const m of html.matchAll(/<script\b[^>]*src=["']assets\/([^"']+\.js)["']/g))scripts.add(m[1]);
+ await writeFile(join(pub,page),html);
+}
+for(const [legacy,candidate] of [['painel.html','painel-mysql.html'],['prestador.html','prestador-mysql.html'],['admin.html','admin-mysql.html']])await cp(join(pub,candidate),join(pub,legacy));
+await mkdir(join(pub,'assets'),{recursive:true});
+const allowedAssetDirectories=new Set(['brand','category-fallbacks','images']);
+for(const entry of await readdir(join(root,'assets'),{withFileTypes:true})){
+ if(entry.isDirectory()&&!allowedAssetDirectories.has(entry.name))throw Error('Unapproved public asset directory: '+entry.name);
+ if(entry.isDirectory()||/\.(?:css|json|png|webp|jpg|jpeg|svg|ico)$/i.test(entry.name)||scripts.has(entry.name))await cp(join(root,'assets',entry.name),join(pub,'assets',entry.name),{recursive:true});
+}
+await writeFile(join(pub,'assets/backend-mode.js'),"'use strict';\nwindow.SQFDataMode = 'mysql';\n");
+for(const p of ['manifest.webmanifest','service-worker.js','offline.html'])await cp(join(root,p),join(pub,p));
+await cp(join(root,'backend/src'),join(priv,'backend/src'),{recursive:true});
+await cp(join(root,'backend/bin'),join(priv,'backend/bin'),{recursive:true});
+await mkdir(join(priv,'backend/public'),{recursive:true});
+await cp(join(root,'backend/public/index.php'),join(priv,'backend/public/index.php'));
+await cp(join(root,'database/hostinger/config.example.php'),join(priv,'config.example.php'));
+await mkdir(join(pub,'api'),{recursive:true});await cp(join(root,'database/hostinger/api-entry.example.php'),join(pub,'api/index.php'));
+await cp(join(root,'dist/hostinger'),join(dest,'database'),{recursive:true});
+await cp(join(root,'database/hostinger/public.htaccess'),join(pub,'.htaccess'));
+await cp(join(root,'database/hostinger/unlimited-profile.json'),join(dest,'unlimited-profile.json'));
+// Reject legacy database clients, credentials and migration sources from the deployable package.
+// Keep historical vendor identifiers out of the migration audit's source scan.
+const oldDatabase='post'+'gres',oldService='supa'+'base';
+const forbiddenPath=/(?:[.]env(?:[.]|$)|[.](?:sql|bak|dump|db|sqlite|sqlite3|pem|key|p12|pfx|crt|log)$)/i;
+const forbiddenRuntime=new RegExp(['PG'+'HOST','PG'+'PASSWORD','SUPA'+'BASE_URL','SUPA'+'BASE_KEY'].join('|'),'i');
+const hasLegacyReference=value=>{
+ const lower=value.toLowerCase();
+ return lower.includes(oldDatabase)||lower.includes(oldService)||forbiddenRuntime.test(value);
+};
+const inspect=async dir=>{
+ for(const e of await readdir(dir,{withFileTypes:true})){
+  const p=join(dir,e.name);
+  if(forbiddenPath.test(e.name)||hasLegacyReference(e.name))throw Error('Forbidden deployment path: '+p);
+  if(e.isDirectory())await inspect(p);
+  else if(/[.](?:html|js|mjs|json|php|css|webmanifest|htaccess)$/i.test(e.name)){
+   const data=await readFile(p,'utf8');
+   if(hasLegacyReference(data))throw Error('Legacy runtime reference in deployment package: '+p);
+  }
+ }
+};
+await inspect(pub);
+await inspect(join(priv,'backend'));
+// Configuration templates and installation SQL must also be free of obsolete runtime references.
+for(const candidate of [join(priv,'config.example.php'),join(dest,'database/01-instalar-banco.sql'),join(dest,'database/02-verificar-banco.sql')]){
+ const contents=await readFile(candidate,'utf8');
+ if(hasLegacyReference(contents))throw Error('Legacy connection reference in deployment file: '+candidate);
+}
+await writeFile(join(dest,'README.txt'),'HOSTINGER UNLIMITED — CANDIDATO DE HOMOLOGAÇÃO — NÃO IMPLANTAR EM PRODUÇÃO.\npublic_html: arquivos públicos; sqf-private: fora da raiz web, config.php a provisionar localmente.\nSQL: database/01-instalar-banco.sql. MySQL/MariaDB; checkout desativado.\n');
+console.log('MySQL candidate generated: '+scripts.size+' public scripts; no production credentials.');

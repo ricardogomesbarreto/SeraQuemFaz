@@ -1,0 +1,16 @@
+{
+  "provider": "Hostinger",
+  "plan": "Unlimited",
+  "backend": "PHP",
+  "database": [
+    "MySQL 8.0",
+    "MariaDB 10.11"
+  ],
+  "environment": "homologacao",
+  "deploymentAllowed": false,
+  "publicCache": "static-media-only",
+  "cron": "private CLI; disabled until homologation",
+  "limitsPolicy": "Confirm actual contracted limits in hPanel; do not assume unlimited CPU, database or mail throughput.",
+  "phpMinimum": "8.2",
+  "phpRecommended": "8.3 or newer, as supported by hPanel"
+}

@@ -7,31 +7,11 @@
     if (label !== undefined) node.textContent = String(label ?? '');
     return node;
   };
-  function publicUrl(client, bucket, path) {
-    if (typeof path !== 'string' || !/^[a-z0-9_-]+\/[a-z0-9_-]+\.(?:png|jpe?g|webp)$/i.test(path)) return null;
-    try {
-      const url = client.storage.from(bucket).getPublicUrl(path)?.data?.publicUrl;
-      const parsed = new URL(url);
-      const expected = new URL(window.SQFSupabase.url);
-      if (parsed.protocol !== 'https:' || parsed.host !== expected.host) return null;
-      return url;
-    } catch { return null; }
-  }
   const safeImg = (url, alt = '', className = '') => {
     const img = make('img', className);
     img.alt = alt; img.loading = 'lazy'; img.decoding = 'async'; img.referrerPolicy = 'no-referrer';
     img.src = url;
     return img;
-  };
-  const avatar = (client, path, name, className = '') => {
-    const box = make('div', `avatar ${className}`);
-    const url = publicUrl(client, 'sqf-avatars', path);
-    if (url) {
-      const photo = safeImg(url, `Foto de perfil de ${name}`);
-      photo.addEventListener('error', () => { photo.remove(); box.appendChild(safeImg('assets/brand/simbolo.png', 'Símbolo SERÁ QUEM FAZ?')); }, { once: true });
-      box.appendChild(photo);
-    } else box.appendChild(safeImg('assets/brand/simbolo.png', 'Símbolo SERÁ QUEM FAZ?'));
-    return box;
   };
   const stars = (score) => {
     const numeric = Number(score);
@@ -65,7 +45,7 @@
   const validId = (id) => typeof id === 'string' && /^[a-z0-9-]{1,80}$/i.test(id);
   const message = (error) => {
     console.warn('SERÁ QUEM FAZ?: falha de dados:', error?.message || error);
-    return 'Não foi possível carregar os dados. Verifique a conexão e se a migração SQL e as políticas RLS foram aplicadas no Supabase.';
+    return 'Não foi possível carregar os dados. Verifique a conexão da API e a instalação MySQL/MariaDB.';
   };
-  window.SQFProfiles = Object.freeze({ make, publicUrl, safeImg, avatar, stars, ratingLine, state, validId, message });
+  window.SQFProfiles = Object.freeze({ make, safeImg, stars, ratingLine, state, validId, message });
 })();

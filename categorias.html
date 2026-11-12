@@ -9,9 +9,9 @@
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&amp;family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
 <link href="assets/site.css" rel="stylesheet"/>
 <script defer="" src="assets/site.js"></script><script defer="" src="assets/utils.js"></script>
-<script defer="" src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script defer="" src="assets/supabase-config.js"></script><script defer src="assets/account-compat.js"></script><script defer src="assets/auth-navigation.js"></script><script defer src="assets/cities.js"></script><script defer src="assets/category-original-images.js"></script><script defer src="assets/catalog-preview.js"></script><script defer src="assets/category-search.js"></script><script defer="" src="assets/categories.js"></script><script defer src="assets/client-category-favorites.js"></script>
-<link rel="manifest" href="manifest.webmanifest"/></head>
+
+<script defer src="assets/backend-mode.js"></script><script defer src="assets/mysql-api-client.js"></script><script defer src="assets/auth-navigation.js"></script><script defer src="assets/cities.js"></script><script defer src="assets/category-original-images.js"></script><script defer src="assets/catalog-preview.js"></script><script defer src="assets/category-search.js"></script><script defer="" src="assets/categories.js"></script><script defer src="assets/client-category-favorites.js"></script>
+</head>
 <body class="catalog-page">
 <a class="skip-link" href="#conteudo">Pular para o conteúdo</a><header class="site-header">
 <div class="container header-inner">
@@ -60,7 +60,7 @@
 <div class="sqf-catalog-guidance"><strong>Como encontrar o profissional ideal</strong><p>Selecione município, escolha uma categoria e compare os perfis que realmente estiverem publicados. Avaliações e fotos aparecem somente quando cadastradas e liberadas.</p></div><section class="sqf-search-assistance" id="searchAssistance" hidden aria-labelledby="searchAssistanceTitle"><div><span class="section-kicker">BUSCA ASSISTIDA</span><h3 id="searchAssistanceTitle">Você procurava alguma destas áreas?</h3><p class="muted">Sugestões de grafia baseadas apenas nas categorias ativas do catálogo.</p></div><div id="searchAssistanceOptions" class="sqf-search-assistance-options"></div></section><div class="catalog-quick-picks" id="popularSearches" aria-label="Atalhos para áreas de serviço" hidden></div>
 <div aria-busy="true" aria-live="polite" class="category-results category-results-v2" id="categorias"><div class="status-panel">Carregando categorias...</div></div>
 <div class="catalog-pagination" id="paginationControls" hidden><button class="button button-outline" id="loadMore" type="button">Mostrar mais categorias <span aria-hidden="true">↓</span></button><span class="pagination-summary" id="paginationSummary"></span></div>
-<div class="catalog-disclaimer"><span aria-hidden="true">ⓘ</span><p>Selecione uma área para conhecer a descrição dos serviços, os prestadores que optaram por publicar seus perfis e suas avaliações. A disponibilidade depende de cadastros ativos e da configuração do Supabase.</p></div>
+<div class="catalog-disclaimer"><span aria-hidden="true">ⓘ</span><p>Selecione uma área para conhecer a descrição dos serviços, os prestadores que optaram por publicar seus perfis e suas avaliações. A disponibilidade depende de cadastros ativos e da disponibilidade da plataforma.</p></div>
 </div>
 </div>
 </div>

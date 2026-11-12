@@ -1,0 +1,14 @@
+{
+  "version": "3.14.0-rc.14",
+  "status": "homologacao",
+  "database": [
+    "MySQL 8.0",
+    "MariaDB 10.11"
+  ],
+  "production": false,
+  "deploymentAllowed": false,
+  "hosting": {
+    "provider": "Hostinger",
+    "plan": "Unlimited"
+  }
+}

@@ -38,14 +38,11 @@
       } else missing();
       document.getElementById('categoryProviderCount').textContent = 'Prévia editorial';
       document.getElementById('sqfProviderFilters').hidden = true;
-      ui.state(results, 'Área de referência', 'Esta apresentação é ilustrativa. Não há profissionais cadastrados ou avaliações associados a esta prévia. O administrador precisa configurar as categorias públicas no Supabase para disponibilizar a busca real.');
+      ui.state(results, 'Área de referência', 'Esta apresentação é ilustrativa. Não há profissionais cadastrados ou avaliações associados a esta prévia. O administrador precisa instalar o catálogo no banco MySQL/MariaDB para disponibilizar a busca real.');
       state.hidden = true; content.hidden = false;
       return;
     }
-    const client = window.getSQFClient();
-    const { data: category, error: e1 } = await client.from('categories')
-      .select('id,name,description,image_url,status').eq('id', id).eq('status','active').maybeSingle();
-    if (e1) throw e1;
+    const category=(await window.SQFMySQL.categories()).data.find(item=>item.id===id);
     if (!category) { state.textContent = 'Categoria não encontrada ou indisponível.'; return; }
     document.title = `${category.name} | SERÁ QUEM FAZ?`;
     document.getElementById('categoryName').textContent = category.name || 'Área de serviço';
@@ -67,50 +64,15 @@
       img.addEventListener('error', missing, { once: true });
       imageBox.replaceChildren(img);
     } else missing();
+    {const hint=document.getElementById('sqfNewRequestHint');hint.href='painel-mysql.html#requests';document.getElementById('providersError').textContent='Não foi possível consultar os prestadores. Tente novamente.';}
     state.hidden = true; content.hidden = false;
     try {
-    const { data: services, error: e2 } = await client.from('provider_services')
-      .select('provider_id,service_title,description,is_active').eq('category_id', String(category.id)).eq('is_active',true);
-    if (e2) throw e2;
-    const ids = [...new Set((services || []).map(item => item.provider_id))];
+    const bundle=(await window.SQFMySQL.category(id,city.id)).data;if(!bundle)throw new Error('Categoria indisponível');
+    const {services,profiles,reviews}=bundle, reviewsAvailable=true;
     results.replaceChildren();
-    let profiles = [], reviews = [], reviewsAvailable = true;
-    if (ids.length) {
-      const [{ data: pro, error: ep }, { data: rev, error: er }] = await Promise.all([
-        client.from('profiles').select('id,full_name,city,city_ibge,bio,avatar_path,created_at').in('id',ids).eq('account_type','prestador').eq('is_public',true).eq('city_ibge',city.id),
-        client.rpc('sqf_public_reviews', { p_provider_ids: ids })
-      ]);
-      if(ep)throw ep;
-      profiles = pro || [];
-      if(er){
-        // Uma falha no endpoint de avaliações não pode esconder profissionais
-        // publicados ou transformar indisponibilidade temporária em nota zero.
-        reviewsAvailable=false;
-        reviews=[];
-        console.warn('Avaliações temporariamente indisponíveis; mostrando somente perfis publicados.');
-      }else{
-        reviews = rev || [];
-      }
-    }
-    const details = new Map();
-    if(ids.length){
-      try{
-        const {data:professional,error:e}=await client.from('provider_professional_details')
-          .select('provider_id,specialties,service_mode').in('provider_id',ids);
-        if(!e)for(const detail of professional||[])details.set(detail.provider_id,detail);
-      }catch{console.warn('Filtro profissional adicional indisponível');}
-    }
+    const details=new Map(bundle.details.map(item=>[item.provider_id,item]));
     const photoOwners=new Set(),photoCounts=new Map();
-    if(ids.length){
-      const {data:photoRows,error:photoError}=await client.from('portfolio_photos')
-        .select('provider_id').in('provider_id',ids).limit(1000);
-      const control=document.getElementById('sqfOnlyPortfolio');
-      if(photoError){if(control)control.disabled=true;}
-      else for(const photo of photoRows||[]){
-        photoOwners.add(photo.provider_id);
-        photoCounts.set(photo.provider_id,(photoCounts.get(photo.provider_id)||0)+1);
-      }
-    }
+    for(const photo of bundle.photos){photoOwners.add(photo.provider_id);photoCounts.set(photo.provider_id,(photoCounts.get(photo.provider_id)||0)+1);}
     const cards=[];
     const filterBox=document.getElementById('sqfProviderFilters');
     const specialtyFilter=document.getElementById('sqfSpecialtyFilter');
@@ -200,9 +162,9 @@
     for (const pro of profiles) {
       const card = ui.make('article','provider-card');
       const link = ui.make('a','provider-card-link');
-      link.href = `prestador.html?id=${encodeURIComponent(pro.id)}&cidade=${encodeURIComponent(city.id)}`;
+      link.href = `prestador-mysql.html?id=${encodeURIComponent(pro.id)}&cidade=${encodeURIComponent(city.id)}`;
       const top = ui.make('div','provider-card-top');
-      top.append(ui.avatar(client,pro.avatar_path,pro.full_name));
+      {const box=ui.make('div','avatar');const img=ui.safeImg(Number(pro.has_avatar)===1?window.SQFMySQL.mediaUrl('avatar',pro.id):'assets/brand/simbolo.png','Foto de '+pro.full_name);box.append(img);top.append(box);}
       const name = ui.make('div');
       const local=pro.city || window.SQFCities.format(city);
       name.append(ui.make('h3','',pro.full_name || 'Profissional'),ui.make('p','provider-card-local',`⌖ ${local}`));
@@ -229,7 +191,7 @@
       if(count)link.append(ui.make('span','sqf-has-portfolio',
         count+' '+(count===1?'foto de trabalho':'fotos de trabalhos')));
       const completeness=Number(Boolean(pro.bio?.trim()&&pro.bio.trim().length>=60))
-        +Number(Boolean(pro.avatar_path))+Number(serviceCount>1)+Number(publicReviews.length>0)+Number(count>0);
+        +Number(Boolean(Number(pro.has_avatar)))+Number(serviceCount>1)+Number(publicReviews.length>0)+Number(count>0);
       card.append(link);results.append(card);
       cards.push({card,profile:pro,services:servicesForPro,rating,
         reviewCount:publicReviews.length,serviceCount,completeness,
@@ -241,5 +203,5 @@
       document.getElementById('categoryProviderCount').textContent = 'Prestadores indisponíveis';
       console.warn('Não foi possível carregar os prestadores:', providerError?.message || providerError);
     }
-  } catch (error) { state.textContent = error?.message?.includes('municíp') || error?.message?.includes('IBGE') ? 'Não foi possível carregar o cadastro de cidades do IBGE. Confira sua conexão e tente novamente.' : ui.message(error); }
+  } catch (error) { state.textContent = error?.message?.includes('municíp') || error?.message?.includes('IBGE') ? 'Não foi possível carregar o cadastro de cidades do IBGE. Confira sua conexão e tente novamente.' : 'Não foi possível carregar os dados MySQL. Tente novamente.'; }
 })();

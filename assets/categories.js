@@ -370,30 +370,9 @@
   });
 
   async function queryLiveCategories() {
-    let clientError;
-    try {
-      const client=window.getSQFClient();
-      const {data,error}=await client.from('categories')
-        .select('id,name,description,image_url,status,created_at')
-        .eq('status', 'active').order('name',{ascending:true});
-      if(error)throw error;
-      if(Array.isArray(data))return data;
-    } catch(error){clientError=error;}
-    // Recuperação sem biblioteca CDN: acesso GET somente à coleção pública com RLS.
-    const cfg=window.SQFSupabase;
-    if(!cfg?.url||!cfg?.publishableKey||typeof fetch!=='function')throw clientError||new Error('API pública indisponível');
-    const api=new URL('/rest/v1/categories',cfg.url);
-    api.searchParams.set('select','id,name,description,image_url,status,created_at');
-    api.searchParams.set('status','eq.active');
-    api.searchParams.set('order','name.asc');
-    const response=await fetch(api.href,{
-      method:'GET',mode:'cors',cache:'no-store',credentials:'omit',
-      headers:{apikey:cfg.publishableKey,accept:'application/json'}
-    });
-    if(!response.ok)throw new Error(`Catálogo público indisponível (HTTP ${response.status})`);
-    const data=await response.json();
-    if(!Array.isArray(data))throw new Error('Resposta inválida da API pública');
-    return data;
+    const result=await window.SQFMySQL.categories();
+    if(!Array.isArray(result.data))throw new Error('Resposta inválida da API MySQL');
+    return result.data;
   }
 
   async function init() {
@@ -405,7 +384,7 @@
       allCategories = remote.length ? remote : referenceCatalog.slice();
       updateFacets();
     } catch (error) {
-      // Falhas de rede e RLS não são 'zero profissionais': sinalizar a indisponibilidade.
+      // Falhas de rede e API não são 'zero profissionais': sinalizar a indisponibilidade.
       referenceMode = 'error';
       allCategories = referenceCatalog.slice();
       failure = !allCategories.length;

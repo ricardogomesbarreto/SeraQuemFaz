@@ -7,7 +7,7 @@
     .replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase('pt-BR')
     .replace(/[^a-z0-9]+/g,' ').trim().replace(/\s+/g,' ');
   // Correspondências editoriais: a existência de cada destino é validada
-  // contra os dados ativos retornados pelo Supabase antes de ser mostrada.
+  // contra os dados ativos retornados pela API MySQL antes de ser mostrada.
   const aliases=Object.freeze([
     ['faxina',['Limpeza']],
     ['diarista',['Limpeza']],

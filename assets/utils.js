@@ -13,7 +13,7 @@
       return url.protocol === 'https:' ? url.href : null;
     } catch { return null; }
   };
-  // Fonte original do catálogo v3.0: image_url da categoria no Supabase.
+  // Fonte original do catálogo v3.0: image_url da categoria no banco MySQL/MariaDB.
   // Nunca associar uma foto a outra profissão por regex: o cadastro é a fonte da verdade.
   const categoryImage = (entity) => safeImageUrl(entity && typeof entity === 'object' ? entity.image_url : null);
   const isValidEmail = (value) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(value || '').trim()) && String(value).length <= 254;

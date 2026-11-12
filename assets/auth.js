@@ -1,5 +1,6 @@
 'use strict';
 (() => {
+  const minPassword=12;
   const utils = window.SQFUtils;
   const $ = (id) => document.getElementById(id);
   const status = (id, value, error = false) => {
@@ -18,10 +19,6 @@
     if (!button.dataset.label) button.dataset.label = button.textContent;
     button.textContent = running ? 'Aguarde...' : button.dataset.label;
   };
-  function clientOrError() {
-    try { return window.getSQFClient(); }
-    catch { status('message', 'O serviço de autenticação está indisponível. Atualize a página ou tente novamente mais tarde.', true); return null; }
-  }
   document.querySelectorAll('[data-toggle-password]').forEach(button => {
     button.addEventListener('click', () => {
       const field = $(button.dataset.togglePassword);
@@ -32,11 +29,12 @@
       button.setAttribute('aria-pressed', String(show));
     });
   });
-  const localProtocolNotice = $('authLocalProtocolNotice');
-  const localOrUnpublished = !window.SQFAuthRedirect?.publicRedirect();
-  if (localProtocolNotice && (location.protocol === 'file:' || localOrUnpublished)) localProtocolNotice.hidden = false;
-  const verificationRedirect = (page) => window.SQFAuthRedirect?.publicRedirect(page) || null;
   const signup = $('signupForm');
+  {
+    if(signup){$('password').minLength=12;$('password').placeholder='Mínimo 12 caracteres';}
+    const code=$('emailCode');if(code){code.pattern='[0-9a-f]{64}';code.maxLength=64;code.minLength=64;code.inputMode='text';code.placeholder='Código de 64 caracteres';const label=document.querySelector('label[for="emailCode"]');if(label)label.textContent='Código de 64 caracteres';const hint=$('emailCodeForm')?.querySelector('p.muted');if(hint)hint.textContent='Informe o código recebido por e-mail. Ele expira após 30 minutos.';}
+    const reset=$('resetPassword');if(reset){reset.minLength=12;reset.placeholder='Mínimo 12 caracteres';const label=document.createElement('label');label.textContent='Código de recuperação recebido por e-mail';const token=document.createElement('input');token.id='mysqlResetToken';token.required=true;token.minLength=64;token.maxLength=64;token.autocomplete='one-time-code';label.append(token);reset.parentNode.insertBefore(label,reset);}
+  }
   let signupInFlight = false;
   if (signup) {
     if (new URLSearchParams(location.search).get('tipo') === 'prestador') $('accountType').value = 'prestador';
@@ -47,7 +45,7 @@
         $('lastName').value.trim().length >= 2,
         utils.isValidEmail($('email').value.trim()),
         Boolean(picker?.getSelected()),
-        $('password').value.length >= 8,
+        $('password').value.length >= minPassword,
         Boolean($('confirmPassword').value) && $('confirmPassword').value === $('password').value
       ].filter(Boolean).length;
       $('signupProgress').value=good;
@@ -74,25 +72,15 @@
       requireField('firstNameError',first.length < 2 || first.length > 60,'Informe um nome válido (2 a 60 caracteres).');
       requireField('lastNameError',last.length < 2 || last.length > 80,'Informe um sobrenome válido (2 a 80 caracteres).');
       requireField('emailError',!utils.isValidEmail(email),'Informe um e-mail válido.');
-      requireField('passwordError',password.length < 8,'Use uma senha com pelo menos 8 caracteres.');
+      requireField('passwordError',password.length < minPassword,`Use uma senha com pelo menos ${minPassword} caracteres.`);
       requireField('confirmPasswordError',password !== $('confirmPassword').value,'As senhas devem ser iguais.');
       if (!selectedCity) { cityPicker?.validate(); valid = false; }
       if (!valid) return;
-      const client = clientOrError(); if (!client) return;
       signupInFlight = true;
       const button = $('submitBtn'); busy(button,true);
       try {
-        const redirect = verificationRedirect('entrar.html');
-        const { data, error } = await client.auth.signUp({
-          email, password,
-          options:{ ...(redirect ? {emailRedirectTo:redirect} : {}), data: { full_name: `${first} ${last}`, account_type: type === 'prestador' ? 'prestador' : 'cliente', city: window.SQFCities.format(selectedCity), city_ibge: selectedCity.id } }
-        });
-        if (error) throw error;
-        if (!data?.user) throw new Error('Resposta de cadastro incompleta.');
-        if (data.session) location.assign('painel.html');
-        else status('message', redirect
-          ? 'Cadastro recebido. Confirme seu e-mail pelo link enviado ou utilize o código de seis dígitos, se estiver disponível na mensagem.'
-          : 'Cadastro recebido. Se o e-mail trouxer um código de seis dígitos, confirme pela tela de acesso. Links para localhost podem validar o e-mail, mas não conseguem abrir o site no celular. Após confirmar, volte aqui e entre normalmente.');
+        await window.SQFMySQL.register(email,password,`${first} ${last}`,type,selectedCity.id);
+        status('message','Cadastro recebido. Confira o código de confirmação no e-mail e use a tela de acesso.');
       } catch (error) {
         console.warn('Cadastro não concluído:', error?.message);
         status('message',window.SQFAuthFeedback.message(error, 'signup'),true);
@@ -101,10 +89,8 @@
   }
   const login = $('loginForm');
   if (login) {
-    const client = clientOrError();
     const resetForm = $('resetForm');
-    const requestId=utils.requestIdFromSearch(location.search);
-    const destination=requestId ? `painel.html?solicitacao=${requestId}#sqfRequestPortal` : 'painel.html';
+    const destination='painel-mysql.html';
     const otpForm=$('emailCodeForm');
     const showCodeForm=()=>{
       if(!otpForm)return;
@@ -122,18 +108,12 @@
       event.preventDefault();
       const email=$('codeEmail').value.trim();
       const token=$('emailCode').value.trim();
-      if(!utils.isValidEmail(email)||!/^[0-9]{6}$/.test(token)){
-        status('codeMessage','Informe seu e-mail e o código de seis dígitos enviado pelo Supabase.',true);return;
+      if(!utils.isValidEmail(email)||!/^[0-9a-f]{64}$/.test(token)){
+        status('codeMessage','Informe o e-mail e o código de 64 caracteres.',true);return;
       }
-      const current=client||clientOrError();if(!current)return;
       const button=$('verifyEmailCode');busy(button,true);
       try{
-        const {data,error}=await current.auth.verifyOtp({email,token,type:'email'});
-        if(error)throw error;
-        status('codeMessage','E-mail confirmado com sucesso. Você pode entrar na sua conta.');
-        if(data?.session){location.assign(destination);return;}
-        showLoginForm();$('email').value=email;
-        status('message','E-mail confirmado. Entre com sua senha.');
+        await window.SQFMySQL.verify(token);showLoginForm();$('email').value=email;status('message','E-mail confirmado. Entre com sua senha.');
       }catch(error){
         status('codeMessage',window.SQFAuthFeedback.message(error,'confirm'),true);
       }finally{busy(button,false);}
@@ -142,11 +122,6 @@
       login.hidden = true; resetForm.hidden = false;
       status('message','');
     };
-    if (client) {
-      client.auth.onAuthStateChange((event) => { if (event === 'PASSWORD_RECOVERY') showRecoveryForm(); });
-      // A confirmação de recuperação é acionada apenas pelo evento PASSWORD_RECOVERY do SDK.
-      // Estar autenticado não é prova de que o usuário abriu um link de recuperação.
-    }
     login.addEventListener('submit',async(event) => {
       event.preventDefault();
       ['emailError','passwordError'].forEach(id => fieldError(id,'')); status('message','');
@@ -154,13 +129,10 @@
       if (!utils.isValidEmail(email)) fieldError('emailError','Informe um e-mail válido.');
       if (!password) fieldError('passwordError','Informe sua senha.');
       if (!utils.isValidEmail(email) || !password) return;
-      const current = client || clientOrError(); if (!current) return;
       signupInFlight = true;
       const button = $('submitBtn'); busy(button,true);
       try {
-        const { data, error } = await current.auth.signInWithPassword({ email, password });
-        if (error || !data?.session) throw error || new Error('Nenhuma sessão retornada.');
-        location.assign(destination);
+        await window.SQFMySQL.login(email,password);location.assign(destination);
       } catch (error) {
         console.warn('Autenticação não concluída:',error?.message);
         status('message',window.SQFAuthFeedback.message(error,'login'),true);
@@ -170,13 +142,9 @@
       const email = $('email').value.trim();
       if (!utils.isValidEmail(email)) { fieldError('emailError','Digite seu e-mail para solicitar a recuperação.'); $('email').focus(); return; }
       fieldError('emailError','');
-      const current = client || clientOrError(); if (!current) return;
       const button = $('forgotBtn'); busy(button,true);
       try {
-        const redirect = verificationRedirect('entrar.html?recuperar=1');
-        const { error } = await current.auth.resetPasswordForEmail(email,redirect?{redirectTo:redirect}:{});
-        if (error) throw error;
-        status('message','Se houver uma conta associada, você receberá um e-mail com instruções para redefinir sua senha.');
+        await window.SQFMySQL.requestReset(email);showRecoveryForm();status('resetMessage','Se a conta existir, confira o código recebido por e-mail.');
       } catch (error) {
         console.warn('Recuperação não iniciada:', error?.message);
         status('message',window.SQFAuthFeedback.message(error,'reset'),true);
@@ -185,18 +153,9 @@
     resetForm.addEventListener('submit',async(event) => {
       event.preventDefault();
       const password = $('resetPassword').value;
-      if (password.length < 8) { status('resetMessage','Use pelo menos 8 caracteres.',true); return; }
-      const current = client || clientOrError(); if (!current) return;
-      const { data } = await current.auth.getSession();
-      if (!data?.session) { status('resetMessage','O link expirou ou não é válido. Solicite outro e-mail de recuperação.',true); return; }
-      const button = resetForm.querySelector('button[type="submit"]'); busy(button,true);
-      try {
-        const { error } = await current.auth.updateUser({ password });
-        if (error) throw error;
-        status('resetMessage','Senha atualizada. Você pode acessar sua conta.');
-        resetForm.hidden = true; login.hidden = false;
-      } catch (error) { console.warn('Senha não atualizada:',error?.message);status('resetMessage','Não foi possível atualizar a senha.',true); }
-      finally { busy(button,false); }
+      if (password.length < minPassword) { status('resetMessage',`Use pelo menos ${minPassword} caracteres.`,true); return; }
+      const button=resetForm.querySelector('button[type="submit"]');busy(button,true);
+      try{await window.SQFMySQL.reset($('mysqlResetToken').value.trim(),password);showLoginForm();status('message','Senha atualizada. Entre novamente.');}catch(error){status('resetMessage',error.message,true);}finally{busy(button,false);}
     });
   }
 })();

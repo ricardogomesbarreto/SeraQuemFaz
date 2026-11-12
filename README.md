@@ -1,170 +1,83 @@
-# SERÁ QUEM FAZ? — v3.13.1
+# SERÁ QUEM FAZ? — v3.14.0-rc.14
 
+<p align="center"><img src="assets/brand/logo-horizontal.png" alt="Será Quem Faz?" width="380"></p>
+<p align="center"><strong>Encontre profissionais da sua cidade. Organize serviços, propostas e atendimentos em um só lugar.</strong></p>
 <p align="center">
-  <img src="assets/brand/logo-horizontal.png" alt="Logomarca do Será Quem Faz?" width="380">
-</p>
-<p align="center">
-  <strong>Encontre profissionais da sua cidade. Organize serviços, propostas e atendimentos em um só lugar.</strong>
-</p>
-<p align="center">
-  <a href="https://github.com/ricardogomesbarreto/SeraQuemFaz/releases/latest"><img src="https://img.shields.io/github/v/release/ricardogomesbarreto/SeraQuemFaz?label=release" alt="Última release"></a>
-  <a href="https://github.com/ricardogomesbarreto/SeraQuemFaz/actions/workflows/ci.yml"><img src="https://github.com/ricardogomesbarreto/SeraQuemFaz/actions/workflows/ci.yml/badge.svg?branch=main" alt="CI"></a>
-  <img src="https://img.shields.io/badge/Frontend-HTML%2FCSS%2FJS-e34f26" alt="HTML CSS JavaScript">
-  <img src="https://img.shields.io/badge/PostgreSQL-4169e1?logo=postgresql&logoColor=white" alt="PostgreSQL">
-  <img src="https://img.shields.io/badge/Supabase-3ecf8e?logo=supabase&logoColor=white" alt="Supabase">
-  <img src="https://img.shields.io/badge/Node-22%20%7C%2024-339933" alt="Node 22 e 24">
-</p>
-<p align="center">
-  <a href="#proposta-de-valor">Sobre</a> · <a href="#funcionalidades-e-estágio-atual">Funcionalidades</a> · <a href="#executar-localmente">Executar</a> · <a href="#arquitetura">Arquitetura</a> · <a href="#roadmap-proposto">Roadmap</a>
+<a href="https://github.com/ricardogomesbarreto/SeraQuemFaz/actions/workflows/mysql-mariadb.yml"><img src="https://github.com/ricardogomesbarreto/SeraQuemFaz/actions/workflows/mysql-mariadb.yml/badge.svg?branch=feat/mysql-mariadb-migration" alt="CI MySQL/MariaDB"></a>
+<img src="https://img.shields.io/badge/PHP-8.1%2B-777BB4" alt="PHP">
+<img src="https://img.shields.io/badge/MySQL-8.0-4479A1" alt="MySQL">
+<img src="https://img.shields.io/badge/MariaDB-10.11-003545" alt="MariaDB">
 </p>
 
-## Proposta de valor
+## Sobre
 
-O **Será Quem Faz?** aproxima clientes e prestadores de serviços locais. O projeto começou em Santa Inês (MA) e utiliza um cadastro nacional de municípios para facilitar a descoberta de profissionais. O catálogo com sidebar permite pesquisar cidade e categoria, consultar perfis publicados, serviços, portfólio e avaliações. O cliente solicita orçamento, acompanha a conversa e a agenda; o prestador organiza propostas e atendimentos no seu painel.
+O Será Quem Faz? conecta clientes a prestadores de serviços locais. Pesquisa por município e categoria, perfis profissionais, orçamento, mensagens privadas, agenda, portfólio e avaliações compõem a plataforma. A publicação de prestadores depende de análise administrativa.
 
-A plataforma não presta o serviço, não certifica idoneidade ou qualificação e não garante preços ou resultados. A publicação depende de análise administrativa. A operação comercial ainda não foi homologada.
+## Organização e validação da conversão
 
-## Última versão · v3.13.1
+- [Estrutura do repositório](docs/ESTRUTURA-DO-REPOSITORIO.md): localização dos módulos, arquivos versionados e páginas mantidas por compatibilidade.
+- [Roteiro local MySQL 8.0 / MariaDB 10.11](docs/VALIDACAO-LOCAL-MYSQL-MARIADB.md): instalação das migrações `001–010` em bancos descartáveis, autenticação, solicitações recorrentes, integridade, importação fictícia e recuperação.
+- [Histórico das mudanças](CHANGELOG.md): diferencia implementações ainda **não publicadas** das versões já marcadas.
+- [Notas da pré-release v3.14.0-rc.14](docs/releases/v3.14.0-rc.14.md): pacote de homologação Hostinger, validação automatizada e limitações de produção. A tag e a release só são criadas após aprovação dos jobs da CI no commit de publicação.
 
-A v3.13.1 acrescenta proteção transacional contra sobreposição de atendimentos confirmados, por cliente e por prestador. Propostas não reservam horários; duas confirmações concorrentes não podem ocupar o mesmo intervalo. A CI executa Node 22, Node 24 e um teste PostgreSQL 16 com sessões concorrentes.
+A organização e os novos testes foram adicionados à branch de migração. **A publicação de uma tag ou release validada exige a execução comprovada dos testes locais nos dois bancos.** Hostinger e produção serão considerados apenas após 100% de conversão e homologação técnica. Não há pagamentos reais ativados.
 
-**[Notas da release](docs/versoes/RELEASE-NOTES-v3.13.1.md)** · [Histórico completo](CHANGELOG.md) · [Todas as releases](https://github.com/ricardogomesbarreto/SeraQuemFaz/releases)
+## Arquitetura oficial — Hostinger Unlimited
 
-| Download | Finalidade |
-| --- | --- |
-| [Site v3.13.1](https://github.com/ricardogomesbarreto/SeraQuemFaz/releases/download/v3.13.1/SeraQuemFaz_site_v3.13.1.zip) | Frontend estático para testar ou hospedar |
-| [Código v3.13.1](https://github.com/ricardogomesbarreto/SeraQuemFaz/releases/download/v3.13.1/SeraQuemFaz_codigo_v3.13.1.zip) | Desenvolvimento, SQL, testes, CI e documentação |
+HTML, CSS e JavaScript; API PHP 8.2+; PDO MySQL; MySQL 8.0 ou MariaDB 10.11, InnoDB e UTC. Identidades e sessões próprias, RBAC administrativo com MFA, mídia privada fora da raiz web e fila de notificações. Mercado Pago com checkout desativado durante homologação. Destino futuro: Hostinger Unlimited (não Premium). PHP permanece por reaproveitar o backend homologado; Node.js é suportado pelo plano, mas uma reescrita não é necessária. Node 22+ é usado no build e nos testes, não como runtime obrigatório.
 
-## Funcionalidades e estágio atual
+## v3.14.0-rc.14
 
-| Módulo | Recursos | Estado |
-| --- | --- | --- |
-| Catálogo | Busca por município/categoria, sinônimos, sugestões, filtros, avaliações e portfólio | Implementado; depende de perfis aprovados |
-| Cliente | Perfil, favoritos, atividades, comparação de orçamentos, agenda, configurações e LGPD | Implementado; homologação multiusuário pendente |
-| Prestador | Perfil, serviços ativos e estimativas, portfólio por serviço, verificação, propostas e métricas | Implementado; publicação depende de análise |
-| Contratação | Solicitações, conversas, anexos privados, orçamento, eventos, aceite e conclusão | Implementado; ciclo completo pendente |
-| Agenda | Propor, confirmar, recusar, cancelar; filtros e conflito transacional | Migração aplicada; teste concorrente isolado aprovado |
-| Confiança | Avaliações moderadas, respostas, contestação, documentos privados e suporte | Implementado; operação administrativa pendente |
-| Administração | Filas de moderação, decisões, MFA, indicadores e CSV | Implementado; designação de operador pendente |
-| PWA | Manifesto, instalação em HTTPS/localhost, cache de conteúdo público | Implementação básica; atualização/offline a homologar |
-| Notificações | Avisos internos, preferências e fila de e-mail | Estrutura disponível; envio externo desativado |
-| Assinaturas | Fluxos e regras de Mercado Pago, faturamento e reconciliação | Checkout desativado; homologação financeira pendente |
+Distribuição Hostinger em ZIPs separados, PHP 8.2+ para compatibilidade com o hPanel, validação de vínculos de mensagens importadas e suíte MySQL/MariaDB aprovada. A publicação comercial permanece bloqueada até os testes na hospedagem real.
 
-### Como funciona
 
-**Cliente:** escolher município e categoria → consultar perfil publicado → solicitar orçamento → conversar e comparar propostas → aceitar → agendar → confirmar conclusão → avaliar.
+Candidato exclusivo MySQL/MariaDB. Distribuição isolada, instalação SQL consolidada, testes PHP/HTTP/Chromium, integridade e restauração de banco descartável. O código histórico foi preservado no histórico Git; não faz parte do caminho de instalação atual.
 
-**Prestador:** criar conta → preencher perfil e cadastrar serviços → enviar documentação/análise quando exigida → aprovação administrativa → receber solicitações → propor orçamento → acompanhar atendimento.
+| Módulo | Estado |
+|---|---|
+| Catálogo, perfil, solicitações, mensagens, agenda | Implementação candidata; CI obrigatória |
+| Serviços, portfólio, avaliações, moderação | Implementação candidata; CI obrigatória |
+| Segurança de conta, preferências, avisos | Implementação candidata; entrega real pendente |
+| Assinaturas e faturamento | Leitura e reconciliação preparadas; checkout e sandbox pendentes |
+| Migração de contas | Pré-validação sem persistência; transferência integral pendente |
 
-**Administração:** acessar `admin.html` com uma conta designada e MFA, revisar solicitações de publicação, moderação, suporte e indicadores. O frontend não concede privilégios administrativos por si só.
+## Executar e testar
 
-## Estado técnico — auditoria de 10/11/2026
-
-- 16 releases oficiais (v3.9.11–v3.13.1), 32 arquivos ZIP; CI da main aprovada com 226 testes Node e o teste PostgreSQL de agenda.
-- Supabase: 40 tabelas públicas com RLS habilitada, 51 categorias ativas e 5.571 municípios. Há 2 clientes, 2 prestadores, nenhum profissional elegível para publicação e nenhuma solicitação registrada.
-- Não há membros administrativos designados nem Edge Functions implantadas. A cobrança obrigatória está desativada.
-- RLS e CI não equivalem a homologação real. Ainda são necessários testes com contas distintas, revisão de privilégios, proteção da main e operação administrativa.
-
-A evidência, os riscos e os critérios de conclusão estão no [relatório de auditoria e roadmap](docs/operacao/AUDITORIA-ROADMAP-20261110.md).
-
-## Arquitetura
-
-| Camada | Tecnologia e responsabilidade |
-| --- | --- |
-| Interface | HTML, CSS, JavaScript modular; páginas estáticas e navegação por tela em `painel.html` |
-| Identidade | Supabase Auth, confirmação de e-mail e MFA administrativo |
-| Dados | PostgreSQL, RLS, RPCs, constraints e transações |
-| Arquivos | Supabase Storage; buckets privados para conta, cliente, anexos e documentos |
-| Integrações | Edge Functions TypeScript para Mercado Pago e notificações; segredos exclusivamente no servidor |
-| Qualidade | GitHub Actions, Node 22/24, testes Node, fixture PostgreSQL e testes browser existentes |
-| Distribuição | ZIP do site e ZIP do código; hospedagem estática em HTTPS |
-
-O navegador usa chave **publicável** do Supabase; autorização e regras decisivas ficam no banco, não no JavaScript. A chave service_role, tokens de pagamento e segredos de webhook jamais devem integrar o frontend. A arquitetura estática é intencional: não exige servidor Node para servir as páginas.
-
-## Executar localmente
-
-Requisitos: navegador moderno, Git, Node.js 22 ou 24, Python 3 para servidor HTTP e zip/unzip para empacotar.
+Requisitos: Node 22+, PHP 8.2+ (PDO MySQL, mbstring, GD/WebP, cURL, fileinfo, Argon2id), MySQL 8.0 ou MariaDB 10.11.
 
 ```bash
-git clone https://github.com/ricardogomesbarreto/SeraQuemFaz.git
-cd SeraQuemFaz
-python3 -m http.server 8080 --bind 127.0.0.1
+npm run verify:local
+npm run test:db:disposable
 ```
 
-Abra `http://127.0.0.1:8080/`. No Windows, execute `py -m http.server 8080 --bind 127.0.0.1`. Se baixar o ZIP do site, entre na pasta extraída que contém `index.html`. Não abra por file://: login, redirecionamentos e PWA dependem de um contexto HTTP/HTTPS adequado.
+A segunda rotina exige Docker Compose v2 e PHP com `pdo_mysql` e executa as migrações `001–010` **somente em containers descartáveis na máquina local**. Consulte o [roteiro das duas engines](docs/VALIDACAO-LOCAL-MYSQL-MARIADB.md) antes de executar. A importação fictícia persistida e o ensaio completo de recuperação são etapas adicionais, não incluídas automaticamente nessa rotina.
 
-**Atenção:** a configuração atual aponta para o Supabase conectado. Para desenvolvimento, use um projeto de homologação separado, ajuste URL/chave publicável em `assets/supabase-config.js` e configure as URLs autorizadas do Auth. Não use dados pessoais reais para testes.
+Para gerar os **arquivos separados de homologação da Hostinger**, execute `npm run build:hostinger`. Os ZIPs e SQL de `dist/hostinger-upload/` são exclusivos para subdomínio de testes, **não para produção**. Consulte [o roteiro de instalação no hPanel](database/hostinger/README.md#como-criar-os-arquivos-de-upload-do-hpanel). Não utilize o ZIP integral do repositório como backup de site.
 
-### Testes e empacotamento
+## Homologação e publicação
 
-```bash
-npm run verify       # Sintaxe e testes Node
-npm test             # Suíte Node
-npm run build:dist   # Dois arquivos ZIP
-```
+Não é release comercial. A instalação em subdomínio isolado com banco vazio e dados fictícios pode ser utilizada para homologação após aprovação da CI e do preflight. A publicação comercial e o acesso público permanecem bloqueados até o aceite integral. CI nos dois engines, paridade funcional, checkout/cancelamento/ciclo, sandbox, SMTP, migração de dados e arquivos, recuperação de contas, backup/restauração e LGPD são gates obrigatórios. Não publicar dados pessoais, credenciais ou snapshots no repositório.
 
-O job PostgreSQL executa `bash tests/postgres/appointment-concurrency.sh` em banco descartável; **não execute a fixture no banco conectado**. Os testes browser em Python/Playwright precisam de ambiente próprio e não fazem parte da CI atual. Veja [homologação](docs/operacao/HOMOLOGACAO-v3.12.0.md) e [CI](https://github.com/ricardogomesbarreto/SeraQuemFaz/actions/workflows/ci.yml).
+## Preparação para o Unlimited
 
-Os ZIPs são versionados a partir de package.json; somente o pacote do site deve ir para o diretório público. O build não implanta serviços, migra o Supabase ou ativa pagamentos.
+O pacote inclui perfil de hospedagem, regras de cache restritas a imagens públicas e diagnóstico CLI privado `php sqf-private/backend/bin/hostinger-preflight.php`. Confira os limites contratados no hPanel, configure HTTPS/CDN apenas para recursos públicos, backups diários, cron privado e transporte de e-mail após homologação. O diagnóstico não autoriza produção.
 
-## Organização do repositório
+## Recursos recuperados na RC.8
 
-```text
-SeraQuemFaz/
-├── index.html, categorias.html, categoria.html, prestador.html
-├── cadastro.html, entrar.html, painel.html, admin.html
-├── ajuda.html, termos.html, privacidade.html
-├── assets/           # JS, CSS, marcas, imagens e cadastro municipal
-├── supabase/
-│   ├── migrations/   # Histórico SQL incremental
-│   ├── applied/      # Registros de consolidação já aplicada
-│   ├── diagnostics/  # Diagnósticos de leitura
-│   ├── functions/    # Integrações server-side
-│   └── tests/        # Testes SQL
-├── tests/            # Node, browser e PostgreSQL isolado
-├── scripts/          # Build, municípios e publicação
-├── docs/             # Guias, relatórios, versões, roadmap
-├── .github/workflows/
-├── manifest.webmanifest, service-worker.js
-└── package.json, version.txt
-```
+PWA instalável com fallback offline genérico e cache exclusivo de imagens estáticas; favoritos de profissionais; comparação de propostas abertas; indicadores de visualizações autenticadas, solicitações, propostas e atendimentos. Todos os dados e permissões são consultados pela API PHP/MySQL/MariaDB. Node.js permanece disponível para build, CI e aplicações complementares, sem duplicar o backend. Novos testes precisam confirmar a homologação.
 
-## Banco de dados e privacidade
+A administração recupera também indicadores agregados e exportação CSV sem dados pessoais; testes de concorrência do catálogo em CI registram latência local, não desempenho no hPanel.
 
-O banco consolidado inclui perfis, `sqf_account_settings`, serviços, verificações, solicitações, mensagens, agenda, avaliações, suporte e faturamento. **NÃO repita o histórico SQL** de migrations/ no projeto consolidado. A migração histórica 03 possui assinatura incompatível de `sqf_request_verification()`; novas mudanças devem partir de um diff do banco, backup e ambiente de homologação. Consulte [Supabase](supabase/README.md).
+## RC.9 — exclusividade do runtime
 
-- RLS protege dados por papel e titularidade; funções privilegiadas exigem auditoria de autorização por objeto.
-- Fotos de cliente/conta e anexos/documentos são privados. Avatares profissionais e portfólio possuem buckets públicos: links diretos conhecidos podem continuar acessíveis independentemente da publicação no catálogo. Não armazenar documentos pessoais nesses buckets.
-- LGPD: fluxos de acesso, correção e exclusão de dados; definir retenção, responsáveis e operação de atendimento antes do lançamento.
-- O cadastro municipal versionado contém 5.571 registros; origem e SHA-256 em `assets/municipios-br.meta.json`. `npm run cities:update` consulta o IBGE; não significa sincronização contínua. Revisar mudanças antes de publicar.
-- As imagens externas históricas exigem auditoria: direitos de uso não estão garantidos. Confirmar licenças e substituir recursos quando necessário.
-- A PWA não disponibiliza contas, mensagens, anexos ou administração offline.
+Autenticação, navegação, catálogo, detalhes, favoritos e imagens utilizam apenas a API PHP/MySQL/MariaDB. Removidos caminhos de compatibilidade inativos; auditoria bloqueia referências ao banco anterior e SDK legado no runtime. PWA e recursos recuperados da RC.8 preservados. A nova CI deve confirmar a regressão completa. Hostinger Unlimited permanece o destino; produção bloqueada.
 
-Leia [SECURITY.md](SECURITY.md), [segurança administrativa](docs/seguranca/PAINEL-ADMINISTRATIVO-SEGURANCA.md) e [auditoria de imagens](docs/catalogo/AUDITORIA-IMAGENS-CATALOGO.md).
+## RC.10 — consolidação operacional
 
-## Modelo comercial
+SMTP autenticado Hostinger com TLS; checkout inicial e cancelamento via API de teste, desativados por padrão; solicitação de mudança de ciclo preserva vigência sem cobrança imediata (renovação automática ainda pendente). Migration 007: índices e solicitação de ciclo. Importador privado de snapshot normalizado com contagem, FK, hashes de mídia e rollback; persistência apenas em staging explicitamente habilitado. Testes simulados e restauração de arquivos em CI. Nenhum dado real importado ou pagamento/e-mail enviado. CI e homologação real obrigatórias.
 
-O modelo prevê mensalidade do prestador, mantendo a conta do cliente e o acompanhamento de contratações. **Nenhuma cobrança real está ativada.** Quando habilitada após homologação, a vigência verificada condicionará novas oportunidades e publicação, preservando o acesso autorizado a atendimentos existentes. Cancelar renovação preserva o período pago; estornos e contestações requerem reconciliação.
+Exportação resumida dos dados da própria conta e [plano de recuperação e corte](database/hostinger/RECOVERY.md) adicionados. A resposta integral a direitos do titular e o ensaio de rollback real ainda exigem validação.
 
-O checkout, os webhooks, a conciliação, o envio automático de e-mail e a hospedagem definitiva ficam para a etapa final. Consulte [homologação financeira](docs/financeiro/HOMOLOGACAO-FINANCEIRA-v3.9.0.md).
+## RC.11 — histórico de assinaturas e renovação segura
 
-## Roadmap proposto
-
-| Versão | Prioridade |
-| --- | --- |
-| v3.13.2 | Baseline de banco reproduzível, governança, segurança e contas de homologação |
-| v3.14.0 | Contratação ponta a ponta, propostas detalhadas e testes multiusuário |
-| v3.14.1 | Disponibilidade semanal, bloqueios e reagendamento sem perder reserva confirmada |
-| v3.15.0 | Busca regional, portfólio, acessibilidade, responsividade e PWA |
-| v3.16.0 | Suporte, notificações em sandbox, métricas, monitoramento e recuperação |
-| v3.17.0 | Mercado Pago em sandbox e homologação financeira |
-| v4.0.0-rc.1 | Candidata em staging HTTPS, segurança e aceite formal |
-| v4.0.0 | Liberação comercial condicionada aos gates anteriores |
-
-O [roadmap detalhado](docs/operacao/AUDITORIA-ROADMAP-20261110.md) define evidências e critérios de aceite. Estas versões são propostas de planejamento, não releases existentes. Não promover a v4.0.0 apenas porque o código passou na CI.
-
-## Documentação e contribuição
-
-[Índice da documentação](docs/README.md) · [Como contribuir](CONTRIBUTING.md) · [Segurança](SECURITY.md) · [Notas por versão](docs/versoes/) · [Histórico](CHANGELOG.md)
-
-**Licenciamento:** a licença do código e os direitos de distribuição das imagens devem ser formalizados pelo mantenedor. Repositório público não significa licença aberta automática.
+Uma assinatura atual por prestador, contratos e faturas históricos preservados (migration 008). Nova contratação manual somente depois de cancelamento confirmado e fim da vigência paga; ciclo solicitado respeitado, sem cobrança antecipada. Testes sintéticos de renovação, duplicidade, histórico e importação relacional com mídia. Integração sandbox/SMTP real, migração real e homologação completa continuam obrigatórias.

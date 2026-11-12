@@ -18,3 +18,36 @@ previews-v*/
 
 # Pacotes para publicação, gerados por scripts/build-distribution.sh
 dist/
+
+# Configuração privada e segredos do backend PHP
+/backend/config.php
+/backend/config.local.php
+/sqf-private/
+/public_html/
+.secrets/
+*.pem
+*.key
+*.p12
+*.pfx
+
+# Dados pessoais, bancos temporários e exportações locais
+/backups/
+/snapshots/
+/uploads/
+/private-media/
+/private_media/
+*.sql.gz
+*.sql.bak
+*.dump
+*.db
+*.sqlite
+*.sqlite3
+*.tar.gz
+*.zip
+
+# Artefatos locais de medição e depuração
+.performance/
+*.prof
+*.trace
+phpunit.xml
+phpunit.xml.local

@@ -1,0 +1,231 @@
+name: MySQL MariaDB integration
+on:
+  pull_request:
+  push:
+    branches: [feat/mysql-mariadb-migration]
+permissions:
+  contents: read
+jobs:
+  repository-audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm run verify
+      - run: npm run build:dist
+      - name: Validate Hostinger upload archives
+        run: |
+          unzip -t dist/hostinger-upload/site-public_html.zip
+          unzip -t dist/hostinger-upload/sqf-private.zip
+          (cd dist/hostinger-upload && sha256sum -c SHA256SUMS)
+          unzip -Z1 dist/hostinger-upload/site-public_html.zip | grep -Fx '.htaccess'
+          unzip -Z1 dist/hostinger-upload/site-public_html.zip | grep -Fx 'api/index.php'
+          unzip -Z1 dist/hostinger-upload/sqf-private.zip | grep -Fx 'sqf-private/backend/src/Database.php'
+          if unzip -Z1 dist/hostinger-upload/site-public_html.zip | grep -E '(^|/)(sqf-private|config\.php|\.env)(/|$)'; then exit 1; fi
+      - name: Publish staging uploads for manual review
+        uses: actions/upload-artifact@v4
+        with:
+          name: hostinger-unlimited-staging-uploads
+          path: dist/hostinger-upload/
+          retention-days: 14
+  database:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        image: ['mysql:8.0', 'mariadb:10.11']
+    services:
+      database:
+        image: ${{ matrix.image }}
+        env:
+          MYSQL_ROOT_PASSWORD: sqf-ci-only
+          MYSQL_DATABASE: sqf_test
+          MYSQL_USER: sqf_ci
+          MYSQL_PASSWORD: sqf-ci-user-only
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -psqf-ci-only"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install PHP PDO driver
+        run: sudo apt-get update && sudo apt-get install -y php-cli php-mysql php-mbstring php-gd php-curl
+      - name: Install browser testing dependencies
+        run: |
+          npm install --no-save --package-lock=false playwright@1.56.1
+          npx playwright install --with-deps chromium
+      - name: Generate Hostinger SQL package
+        run: |
+          node database/hostinger/build-install.mjs
+          (cd dist/hostinger && sha256sum -c SHA256SUMS)
+      - name: Import consolidated Hostinger installer with database-scoped user
+        run: docker exec -i ${{ job.services.database.id }} sh -c 'mysql -usqf_ci -p"$MYSQL_PASSWORD" sqf_test' < dist/hostinger/01-instalar-banco.sql
+      - name: Store Hostinger SQL installer
+        uses: actions/upload-artifact@v4
+        with:
+          name: hostinger-sql-${{ matrix.image == 'mysql:8.0' && 'mysql' || 'mariadb' }}
+          path: dist/hostinger/
+          retention-days: 14
+      - name: Lint and integration
+        env:
+          SQF_DB_DSN: mysql:host=127.0.0.1;port=3306;dbname=sqf_test;charset=utf8mb4
+          SQF_DB_USER: sqf_ci
+          SQF_DB_PASSWORD: sqf-ci-user-only
+          SQF_PRIVATE_MEDIA_ROOT: /tmp/sqf-private-media
+          SQF_STAFF_TOTP_SECRETS: '{"00000000-0000-4000-8000-000000000003":"3132333435363738393031323334353637383930","00000000-0000-4000-8000-000000000099":"4142434445464748494a4b4c4d4e4f5051525354"}'
+        run: |
+          php -l backend/src/Agenda.php
+          php -l backend/src/Database.php
+          php -l backend/src/Marketplace.php
+          php -l backend/src/Services.php
+          php -l backend/src/Category.php
+          php -l backend/src/Professional.php
+          php -l backend/src/AccountCases.php
+          php -l backend/src/AccountSecurity.php
+          php -l backend/src/Billing.php
+          php -l backend/src/MercadoPago.php
+          php -l backend/src/Notifications.php
+          php -l backend/src/MigrationPreflight.php
+          php -l backend/bin/notifications.php
+          php -l backend/bin/preflight-identities.php
+          php -l backend/bin/hostinger-preflight.php
+          php -l backend/bin/maintenance.php
+          php -l backend/src/Maintenance.php
+          php -l backend/src/Engagement.php
+          php -l backend/src/Moderation.php
+          php -l backend/src/PrivateMedia.php
+          php -l database/tests/private-media-integration.php
+          php -l database/tests/agenda-integration.php
+          php -l backend/src/Auth.php
+          php -l backend/src/Mail.php
+          php -l backend/src/SubscriptionActions.php
+          php -l backend/src/ImportSnapshot.php
+          php -l backend/src/PrivacyExport.php
+          php -l backend/bin/import-snapshot.php
+          php database/tests/mail-unit.php
+          php -l backend/public/index.php
+          php -l database/seed/import-public.php
+          php database/seed/import-public.php
+          php database/tests/migration-preflight.php
+          php database/tests/snapshot-integration.php
+          php database/tests/agenda-integration.php
+          php database/tests/auth-integration.php
+          mkdir -m 700 -p /tmp/sqf-private-media
+          php database/tests/private-media-integration.php
+          php database/tests/subscription-actions.php
+          php database/tests/notifications-integration.php
+          php database/tests/maintenance-integration.php
+
+          php database/tests/browser-fixture.php
+          php database/tests/integrity.php
+          node database/hostinger/build-candidate.mjs
+          STAGING_ROOT="$PWD/dist/mysql-candidate/public_html"
+          test -f "$STAGING_ROOT/assets/mysql-api-client.js"
+          test ! -e "$STAGING_ROOT/assets/account.js"
+          test -f "$STAGING_ROOT/service-worker.js"
+          test -f "$STAGING_ROOT/manifest.webmanifest"
+          test -f "$STAGING_ROOT/api/index.php"
+          test -f "$STAGING_ROOT/.htaccess"
+          test -f "$PWD/dist/mysql-candidate/unlimited-profile.json"
+          test -f "$PWD/dist/mysql-candidate/sqf-private/backend/src/Database.php"
+          mkdir -m 700 "$PWD/dist/mysql-candidate/sqf-private/media"
+          SQF_PRIVATE_MEDIA_ROOT="$PWD/dist/mysql-candidate/sqf-private/media" php -r 'require "dist/mysql-candidate/sqf-private/backend/src/PrivateMedia.php"; echo sqfMediaRoot().PHP_EOL;'
+          SQF_PREFLIGHT_CI=1 SQF_PRIVATE_MEDIA_ROOT="$PWD/dist/mysql-candidate/sqf-private/media" php "$PWD/dist/mysql-candidate/sqf-private/backend/bin/hostinger-preflight.php"
+          rmdir "$PWD/dist/mysql-candidate/sqf-private/media"
+          printf '<?php // CI inherits disposable configuration from environment.\n' > "$PWD/dist/mysql-candidate/sqf-private/config.php"
+          SQF_ALLOW_INSECURE_LOCAL=1 php -S 127.0.0.1:8080 -t "$STAGING_ROOT" database/tests/browser-router.php >/tmp/sqf-http.log 2>&1 &
+          trap 'kill $! 2>/dev/null || true; cat /tmp/sqf-http.log' EXIT
+          for i in $(seq 1 20); do curl -fsS 'http://127.0.0.1:8080/index.php?route=session' >/dev/null && break; sleep 1; done
+          node --check assets/mysql-api-client.js
+          node --check assets/auth.js
+          node --check assets/auth-navigation.js
+          node --check assets/mysql-dashboard.js
+          node --check assets/category-detail.js
+          node --check assets/client-category-favorites.js
+          node --check assets/mysql-public-provider.js
+          node --check assets/mysql-admin.js
+          node database/tests/http-integration.mjs
+          SQF_ALLOW_INSECURE_LOCAL=1 SQF_MP_WEBHOOK_ENABLED=1 SQF_MP_WEBHOOK_SECRET=fixture-webhook-secret SQF_MP_ACCESS_TOKEN= php -S 127.0.0.1:8081 -t "$STAGING_ROOT" database/tests/browser-router.php >/tmp/sqf-webhook.log 2>&1 &
+          WEBHOOK_PID=$!
+          for i in $(seq 1 20); do curl -fsS 'http://127.0.0.1:8081/index.php?route=session' >/dev/null && break; sleep 1; done
+          node database/tests/webhook-http.mjs
+          kill "$WEBHOOK_PID"
+          node database/tests/browser-integration.mjs
+          node database/tests/pwa-integration.mjs
+          node database/tests/public-load.mjs
+          php database/tests/integrity.php
+          # Restore only the disposable CI database into a second isolated schema.
+          docker exec ${{ job.services.database.id }} sh -c 'mysqldump -uroot -p"$MYSQL_ROOT_PASSWORD" --single-transaction --skip-lock-tables sqf_test' > /tmp/sqf-ci-backup.sql
+          docker exec ${{ job.services.database.id }} sh -c 'mysql -uroot -p"$MYSQL_ROOT_PASSWORD" -e "CREATE DATABASE sqf_restore CHARACTER SET utf8mb4 COLLATE utf8mb4_bin; GRANT ALL PRIVILEGES ON sqf_restore.* TO sqf_ci;"'
+          docker exec -i ${{ job.services.database.id }} sh -c 'mysql -uroot -p"$MYSQL_ROOT_PASSWORD" sqf_restore' < /tmp/sqf-ci-backup.sql
+          SQF_RESTORE_DSN='mysql:host=127.0.0.1;port=3306;dbname=sqf_restore;charset=utf8mb4' php database/tests/restore-check.php
+          SQF_DB_DSN='mysql:host=127.0.0.1;port=3306;dbname=sqf_restore;charset=utf8mb4' php database/tests/integrity.php
+          mkdir -m 700 /tmp/sqf-restored-media
+          cp -a /tmp/sqf-private-media/. /tmp/sqf-restored-media/
+          SQF_RESTORE_MEDIA_ROOT=/tmp/sqf-restored-media php database/tests/media-restore.php
+          rm -rf /tmp/sqf-restored-media
+          rm -f /tmp/sqf-ci-backup.sql "$PWD/dist/mysql-candidate/sqf-private/config.php"
+
+      - name: Store isolated candidate package
+        uses: actions/upload-artifact@v4
+        with:
+          name: mysql-candidate-${{ matrix.image == 'mysql:8.0' && 'mysql' || 'mariadb' }}
+          path: dist/mysql-candidate/
+          retention-days: 14
+
+  publish-hostinger-prerelease:
+    # One explicit publication commit; never run for PRs, ordinary pushes or main.
+    if: >-
+      github.event_name == 'push' &&
+      github.ref == 'refs/heads/feat/mysql-mariadb-migration' &&
+      github.event.head_commit.message == 'release(hostinger): publish v3.14.0-rc.14'
+    needs: [repository-audit, database]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: hostinger-unlimited-staging-uploads
+          path: release-assets
+      - name: Verify approved staging release assets and version
+        shell: bash
+        run: |
+          set -euo pipefail
+          node -e "const p=require('./package.json');const c=require('./database/candidate-version.json');if(p.version!=='3.14.0-rc.14'||c.version!==p.version||c.production!==false||c.deploymentAllowed!==false)process.exit(1)"
+          (cd release-assets && sha256sum -c SHA256SUMS)
+          unzip -t release-assets/site-public_html.zip >/dev/null
+          unzip -t release-assets/sqf-private.zip >/dev/null
+          test -s release-assets/01-instalar-banco.sql
+          test -s release-assets/02-verificar-banco.sql
+          test -f docs/releases/v3.14.0-rc.14.md
+      - name: Create immutable tag and prerelease from tested commit
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          tag="v3.14.0-rc.14"
+          if git ls-remote --tags origin "refs/tags/$tag" | grep -q .; then
+            echo "Tag $tag already exists; refusing to move or recreate it." >&2
+            exit 1
+          fi
+          gh release create "$tag" \
+            release-assets/site-public_html.zip \
+            release-assets/sqf-private.zip \
+            release-assets/01-instalar-banco.sql \
+            release-assets/02-verificar-banco.sql \
+            release-assets/SHA256SUMS \
+            release-assets/LEIA-ME-HPANEL.txt \
+            --repo "$GITHUB_REPOSITORY" \
+            --target "$GITHUB_SHA" \
+            --title "Será Quem Faz? v3.14.0-rc.14 — Hostinger Unlimited (homologação)" \
+            --notes-file docs/releases/v3.14.0-rc.14.md \
+            --prerelease \
+            --latest=false
