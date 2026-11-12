@@ -6,7 +6,8 @@ function sqfQuery(PDO $db,string $sql,array $args=[]): PDOStatement {
     $s=$db->prepare($sql); $s->execute($args); return $s;
 }
 function sqfPublicPredicate(): string {
-    return "p.account_type='prestador' AND p.is_public=1 AND v.status='approved' AND (
+    return "p.account_type='prestador' AND p.is_public=1 AND v.status='approved' AND
+       EXISTS(SELECT 1 FROM sqf_auth_users au WHERE au.id=p.id AND au.email_confirmed_at IS NOT NULL) AND (
        EXISTS(SELECT 1 FROM sqf_billing_settings b WHERE b.singleton=1 AND b.require_paid_subscription=0)
        OR EXISTS(SELECT 1 FROM sqf_billing_subscriptions s JOIN sqf_billing_invoices i ON i.subscription_id=s.id
          WHERE s.user_id=p.id AND i.status='approved' AND i.currency=s.currency AND i.amount_cents=s.price_cents
@@ -17,7 +18,7 @@ function sqfProviderPublic(PDO $db,string $id): bool {
 }
 function sqfCatalog(PDO $db,string $city): array {
     if (!preg_match('/^[0-9]{7}$/D',$city)) throw new DomainException('Município inválido');
-    return sqfQuery($db,'SELECT p.id,p.full_name,p.city,p.city_ibge,p.bio FROM profiles p JOIN provider_verifications v ON v.provider_id=p.id WHERE p.city_ibge=? AND '.sqfPublicPredicate().' ORDER BY p.full_name,p.id LIMIT 100',[$city])->fetchAll(PDO::FETCH_ASSOC);
+    return sqfQuery($db,'SELECT p.id,p.full_name,p.city,p.city_ibge,p.bio FROM profiles p JOIN provider_verifications v ON v.provider_id=p.id WHERE p.city_ibge=? AND '.sqfPublicPredicate().' AND EXISTS(SELECT 1 FROM provider_services ps WHERE ps.provider_id=p.id AND ps.is_active=1) ORDER BY p.full_name,p.id LIMIT 100',[$city])->fetchAll(PDO::FETCH_ASSOC);
 }
 function sqfTxn(PDO $db,callable $fn): mixed {
     $db->beginTransaction();
