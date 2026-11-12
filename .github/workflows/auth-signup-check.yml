@@ -34,8 +34,14 @@ jobs:
           php -l backend/public/index.php
           php -l backend/src/Auth.php
           php -l backend/src/Mail.php
+          php -l backend/src/MailSettings.php
+          php -l backend/bin/setup-mail.php
+          node --check assets/mysql-admin-mail.js
           node --check assets/auth.js
           node --check assets/auth-feedback.js
           node --check assets/mysql-api-client.js
       - name: Run source and UI regression unit tests
-        run: npm test
+        run: |
+          npm test
+          php database/tests/mail-unit.php
+          php database/tests/mail-settings-unit.php
