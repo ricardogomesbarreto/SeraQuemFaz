@@ -152,3 +152,15 @@ test('recurring service engagements preserve existing reviews while creating dis
  assert.match(integration,/repeat service cannot be reviewed twice/);
  assert.match(read('database/tests/run-isolated-import.sh'),/engagement-integrity[.]php/);
 });
+
+test('Hostinger upload builder separates public site from private PHP and SQL',()=>{
+ const script=read('database/hostinger/package-upload.mjs');
+ const pkg=JSON.parse(read('package.json'));
+ assert.match(pkg.scripts['build:dist'],/package-upload[.]mjs/);
+ assert.match(script,/site-public_html[.]zip/);
+ assert.match(script,/sqf-private[.]zip/);
+ assert.match(script,/sqf-private\/['+]x[.]name/);
+ assert.match(script,/config[.]php/);
+ assert.match(script,/SHA256SUMS/);
+ assert.match(read('.github/workflows/mysql-mariadb.yml'),/hostinger-unlimited-staging-uploads/);
+});
