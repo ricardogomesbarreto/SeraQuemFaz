@@ -26,7 +26,7 @@ Abra **Settings > Secrets and variables > Actions**, no repositorio `ricardogome
 - `HOSTINGER_SSH_PRIVATE_KEY`: conteudo da chave privada de deploy gerada no Ubuntu.
 - `HOSTINGER_SSH_KNOWN_HOSTS`: entrada SSH do servidor obtida e verificada como descrito acima.
 
-Ao final, crie a variavel `HOSTINGER_AUTO_DEPLOY_ENABLED` = `true` e execute manualmente **Actions > Deploy seguro - Hostinger homologacao > Run workflow** para conferir a primeira implantacao. A partir de entao, commits na branch `main` que afetem o site/backend acionarao o deploy automaticamente.
+Mantenha primeiro `HOSTINGER_AUTO_DEPLOY_ENABLED` = `false`. Em **Actions > Deploy seguro - Hostinger homologacao > Run workflow**, escolha a branch `main` e deixe `publicar` **desmarcado**. O workflow valida a geracao do pacote e nao conecta na Hostinger. Depois de conferir o job e o backup da hospedagem, execute novamente o workflow com `publicar` **marcado** para a primeira publicacao manual controlada; confira logs e site. Somente apos isso altere `HOSTINGER_AUTO_DEPLOY_ENABLED` para `true`. A partir de entao, commits na branch `main` que afetem o site/backend acionarao o deploy automaticamente.
 
 ## Regras de seguranca
 
