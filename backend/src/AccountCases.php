@@ -3,12 +3,21 @@ declare(strict_types=1);
 require_once __DIR__.'/Moderation.php';
 function sqfVerificationStatus(PDO $db,string $actor):array {
     if(sqfQuery($db,'SELECT account_type FROM profiles WHERE id=?',[$actor])->fetchColumn()!=='prestador')throw new DomainException('Somente prestadores');
-    $row=sqfQuery($db,'SELECT status,requested_at,reviewed_at FROM provider_verifications WHERE provider_id=?',[$actor])->fetch(PDO::FETCH_ASSOC);
-    return $row?:['status'=>'pending','requested_at'=>null,'reviewed_at'=>null];
+    $row=sqfQuery($db,'SELECT status,requested_at,reviewed_at FROM provider_verifications WHERE provider_id=?',[$actor])->fetch(PDO::FETCH_ASSOC)
+        ?:['status'=>'pending','requested_at'=>null,'reviewed_at'=>null];
+    $profile=sqfQuery($db,'SELECT city_ibge,is_public FROM profiles WHERE id=?',[$actor])->fetch(PDO::FETCH_ASSOC);
+    $row['email_confirmed']=(bool)sqfQuery($db,'SELECT email_confirmed_at IS NOT NULL FROM sqf_auth_users WHERE id=?',[$actor])->fetchColumn();
+    $row['city_selected']=is_array($profile)&&preg_match('/^[0-9]{7}$/D',(string)($profile['city_ibge']??''))===1;
+    $row['services_active']=(int)sqfQuery($db,'SELECT COUNT(*) FROM provider_services WHERE provider_id=? AND is_active=1',[$actor])->fetchColumn();
+    $row['identity_document_accepted']=(bool)sqfQuery($db,"SELECT 1 FROM sqf_verification_documents WHERE provider_id=? AND document_kind='identity_evidence' AND status='accepted' LIMIT 1",[$actor])->fetchColumn();
+    $row['publication_enabled']=(bool)($profile['is_public']??false);
+    $row['catalog_visible']=$row['city_selected']&&$row['services_active']>0&&sqfProviderPublic($db,$actor);
+    $row['paid_subscription_required']=(bool)sqfQuery($db,'SELECT require_paid_subscription FROM sqf_billing_settings WHERE singleton=1')->fetchColumn();
+    return $row;
 }
 function sqfStaffProviders(PDO $db,string $actor):array {
     sqfRequireStaff($db,$actor);
-    return sqfQuery($db,"SELECT p.id,p.full_name,p.city,p.is_public,v.status,v.requested_at,(SELECT COUNT(*) FROM sqf_verification_documents d WHERE d.provider_id=p.id AND d.document_kind='identity_evidence' AND d.status='accepted') AS accepted_identity FROM profiles p JOIN provider_verifications v ON v.provider_id=p.id WHERE p.account_type='prestador' ORDER BY v.requested_at DESC LIMIT 100")->fetchAll(PDO::FETCH_ASSOC);
+    return sqfQuery($db,"SELECT p.id,p.full_name,p.city,p.is_public,v.status,v.requested_at,(SELECT COUNT(*) FROM sqf_verification_documents d WHERE d.provider_id=p.id AND d.document_kind='identity_evidence' AND d.status='accepted') AS accepted_identity,(SELECT COUNT(*) FROM provider_services s WHERE s.provider_id=p.id AND s.is_active=1) AS active_services,(SELECT au.email_confirmed_at IS NOT NULL FROM sqf_auth_users au WHERE au.id=p.id) AS email_confirmed,p.city_ibge FROM profiles p JOIN provider_verifications v ON v.provider_id=p.id WHERE p.account_type='prestador' ORDER BY v.requested_at DESC LIMIT 100")->fetchAll(PDO::FETCH_ASSOC);
 }
 function sqfStaffProviderDecide(PDO $db,string $actor,string $id,string $state,string $note):void {
     $note=trim($note);

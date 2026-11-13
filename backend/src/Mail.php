@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 /** Authenticated SMTP over implicit TLS; no fallback to unauthenticated mail. */
 require_once __DIR__.'/MailSettings.php';
+require_once __DIR__.'/PhpMailFallback.php';
 function sqfMailConfig():array {
     $c=sqfMailRuntimeConfig();
     $user=(string)$c['username'];$pass=(string)$c['password'];$from=(string)$c['from'];
@@ -14,6 +15,18 @@ function sqfMailConfig():array {
         throw new RuntimeException('Envio de e-mail não configurado');
     }
     return [$user,$pass,$from,$host,$port,$security];
+}
+function sqfMailReady():void {
+    $config=sqfMailRuntimeConfig();
+    if($config['enabled']){sqfMailConfig();return;}
+    if(sqfPhpMailIsActive())return;
+    throw new RuntimeException('Envio de e-mail não configurado');
+}
+function sqfDeliverMail(string $to,string $subject,string $body):bool {
+    sqfMailReady();
+    // Never silently downgrade a configured but failing SMTP connection.
+    if(sqfMailRuntimeConfig()['enabled'])return sqfSmtpSend($to,$subject,$body);
+    return sqfPhpMailSend($to,$subject,$body);
 }
 function sqfMailMessage(string $from,string $to,string $subject,string $body):string {
     if(!filter_var($from,FILTER_VALIDATE_EMAIL)||!filter_var($to,FILTER_VALIDATE_EMAIL)||preg_match('/[\r\n]/',$subject)||strlen($subject)>180||strlen($body)>16000)throw new DomainException('Mensagem inválida');
@@ -32,5 +45,5 @@ function sqfSmtpSend(string $to,string $subject,string $body):bool {
 }
 function sqfAuthMail(string $email,string $token,string $purpose):void {
     if(!in_array($purpose,['verify','reset'],true)||!preg_match('/^[0-9a-f]{64}$/D',$token))throw new DomainException('Código inválido');
-    if(!sqfSmtpSend($email,'Código de segurança — Será Quem Faz?', 'Código de '.($purpose==='verify'?'confirmação':'recuperação').': '.$token."\nVálido por 30 minutos."))throw new RuntimeException('Envio indisponível');
+    if(!sqfDeliverMail($email,'Código de segurança — Será Quem Faz?', 'Código de '.($purpose==='verify'?'confirmação':'recuperação').': '.$token."\nVálido por 30 minutos."))throw new RuntimeException('Envio indisponível');
 }

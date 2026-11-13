@@ -34,6 +34,10 @@ jobs:
           php -l backend/public/index.php
           php -l backend/src/Auth.php
           php -l backend/src/Mail.php
+          php -l backend/src/PhpMailFallback.php
+          php -l backend/src/AdminBootstrap.php
+          php -l backend/bin/bootstrap-first-admin.php
+          php -l backend/bin/setup-mail-fallback.php
           php -l backend/src/MailSettings.php
           php -l backend/bin/setup-mail.php
           php -l backend/bin/provision-first-admin.php
@@ -47,5 +51,6 @@ jobs:
         run: |
           npm test
           php database/tests/mail-unit.php
+          php database/tests/phpmail-fallback-unit.php
           php database/tests/mail-settings-unit.php
           php database/tests/staff-secrets-unit.php

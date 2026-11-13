@@ -1613,3 +1613,17 @@ body{min-width:320px}
 .sqf-catalog-diagnostic-results h3{margin:0 0 12px}
 .sqf-catalog-diagnostic-results p{margin:6px 0}
 @media(max-width:720px){.sqf-catalog-diagnostics{padding:18px}.sqf-catalog-diagnostic-form .city-picker,.sqf-catalog-diagnostic-form button{width:100%}}
+
+.sqf-admin-login,.sqf-admin-denied{max-width:630px;margin:22px 0;padding:25px;border:1px solid #dce6ed;border-radius:18px;background:#fff}
+.sqf-admin-login form{display:grid;gap:12px;margin:16px 0}
+.sqf-admin-login label{font-weight:700;color:#153954}
+.sqf-admin-login input{display:block;width:100%;padding:12px;border:1px solid #c7d8e5;border-radius:10px}
+.sqf-admin-login form button{justify-self:start}
+.sqf-provider-readiness{margin:12px 0 20px}
+.sqf-provider-readiness h3{margin:0 0 12px}
+.sqf-provider-readiness-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;list-style:none;padding:0}
+.sqf-provider-readiness-list li{padding:12px;border:1px solid #dfe6ee;background:#f6f8fb;border-radius:12px}
+.sqf-provider-readiness-list li.is-done{border-color:#b1d9c6;background:#f2fbf6}
+.sqf-provider-readiness-list strong{display:block;color:#153954}
+.sqf-provider-readiness-list span{display:block;color:#687e8e;font-size:.89rem;margin-top:5px}
+@media(max-width:640px){.sqf-admin-login,.sqf-admin-denied{padding:16px}.sqf-admin-login form button{width:100%}}

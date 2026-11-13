@@ -16,14 +16,23 @@ $report=[
   'visible_in_santa_ines_ma'=>false,
   'any_public_provider_with_service'=>false,
   'ready_for_registration'=>false,
-  'mail_delivery_proven'=>false
+  'mail_delivery_proven'=>false,
+  'phpmail_recipient_verified'=>false,
+  'administrator_exists'=>false,
+  'provider_accounts_present'=>false,
+  'providers_awaiting_verification'=>false
 ];
-try {sqfMailConfig();$report['mail_transport_configured']=true;}
+try {sqfMailReady();$report['mail_transport_configured']=true;}
+catch(Throwable $e){/* Fail closed; no exception or secret is printed. */}
+try {$report['phpmail_recipient_verified']=sqfPhpMailIsActive();}
 catch(Throwable $e){/* Fail closed; no exception or secret is printed. */}
 try {
   $db=sqfDatabase();
   $report['database_connected']=true;
   $report['municipalities_ready']=(int)$db->query('SELECT COUNT(*) FROM sqf_ibge_municipalities')->fetchColumn()>=5500;
+  $report['administrator_exists']=(int)$db->query("SELECT COUNT(*) FROM sqf_admin_members WHERE role='admin'")->fetchColumn()>0;
+  $report['provider_accounts_present']=(int)$db->query("SELECT COUNT(*) FROM profiles WHERE account_type='prestador'")->fetchColumn()>0;
+  $report['providers_awaiting_verification']=(int)$db->query("SELECT COUNT(*) FROM provider_verifications WHERE status='pending'")->fetchColumn()>0;
   $report['categories_ready']=(int)$db->query("SELECT COUNT(*) FROM categories WHERE status='active'")->fetchColumn()>=51;
   $predicate=sqfPublicPredicate();
   $query='SELECT 1 FROM profiles p JOIN provider_verifications v ON v.provider_id=p.id WHERE '. $predicate .

@@ -142,6 +142,8 @@ function sqfMailAudit(string $event,string $actor,string $result):void {
 function sqfMailSettingsStatus():array {
     $config=sqfMailRuntimeConfig();
     $saved=sqfMailSettingsRead();
+    $phpFallback=function_exists('sqfPhpMailIsActive')&&sqfPhpMailIsActive();
+    $smtpReady=$config['enabled']&&function_exists('curl_init')&&$config['password']!==''&&filter_var($config['from'],FILTER_VALIDATE_EMAIL)!==false;
     $events=[];
     $log=sqfMailStorageDir().'/mail-audit.log';
     if(is_file($log)&&!is_link($log)&&filesize($log)<262144){
@@ -149,8 +151,10 @@ function sqfMailSettingsStatus():array {
         foreach($lines as $line){$event=json_decode($line,true);if(is_array($event)&&isset($event['event'],$event['result'],$event['at']))$events[]=['at'=>$event['at'],'event'=>$event['event'],'result'=>$event['result']];}
     }
     return [
-        'enabled'=>(bool)$config['enabled'],
-        'configured'=>function_exists('curl_init')&&$config['password']!==''&&filter_var($config['from'],FILTER_VALIDATE_EMAIL)!==false,
+        'enabled'=>(bool)$config['enabled']||$phpFallback,
+        'configured'=>$smtpReady||(!$config['enabled']&&$phpFallback),
+        'transport'=>$config['enabled']?'smtp':($phpFallback?'phpmail':'none'),
+        'phpmail_homologation'=>$phpFallback,
         'host'=>$config['host'],'port'=>$config['port'],'security'=>$config['security'],
         'from'=>$config['from'],'username'=>$config['username'],
         'password_configured'=>$config['password']!=='',

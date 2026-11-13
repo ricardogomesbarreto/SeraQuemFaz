@@ -75,6 +75,13 @@
    queue.append(el('h2','Verificação de prestadores'));
    for(const item of (await api.staffProviders()).data){
      const card=el('article');card.className='card';card.append(el('h3',item.full_name),el('p',item.city+' · '+item.status+' · Identidade aceita: '+Number(item.accepted_identity)));
+     const ready=[];
+     if(!Number(item.email_confirmed))ready.push('e-mail não confirmado');
+     if(!item.city_ibge)ready.push('município não informado');
+     if(!Number(item.accepted_identity))ready.push('identificação ainda não aceita');
+     if(!Number(item.active_services))ready.push('nenhum serviço ativo');
+     if(ready.length)card.append(el('p','Pendências de publicação: '+ready.join(' · ')));
+     else if(item.status!=='approved')card.append(el('p','Documentação e serviços prontos; resta decisão administrativa fundamentada.'));
      const decision=el('form'),select=el('select'),note=el('textarea');note.required=true;note.minLength=20;note.maxLength=1000;
      for(const [value,label] of [['approved','Aprovar'],['rejected','Rejeitar'],['suspended','Suspender']]){const o=el('option',label);o.value=value;select.append(o);}
      const submit=el('button','Registrar decisão');submit.type='submit';submit.className='button button-primary';decision.append(select,note,submit);card.append(decision);queue.append(card);
@@ -100,10 +107,62 @@
    identity.textContent=isAdmin?'Administrador':'Moderador';account.hidden=false;
    updateNavigation();form.hidden=true;status.textContent='Fila de moderação carregada.';
  }
- form.addEventListener('submit',async event=>{event.preventDefault();const submit=form.querySelector('button');submit.disabled=true;try{await api.staffMfa(form.elements.code.value);form.reset();await load();}catch(e){status.textContent=e.message;}finally{submit.disabled=false;}});
+ const loginSection=document.getElementById('staffLoginSection');
+ const loginForm=document.getElementById('staffLoginForm');
+ const denied=document.getElementById('staffDenied');
+ const switchAccount=document.getElementById('staffSwitchAccount');
+ const showLogin=()=>{
+   queue.replaceChildren();queue.hidden=true;navigation.hidden=true;account.hidden=true;
+   form.hidden=true;denied.hidden=true;loginSection.hidden=false;
+   status.textContent='Informe as credenciais da conta administrativa.';
+ };
+ const showDenied=()=>{
+   queue.replaceChildren();queue.hidden=true;navigation.hidden=true;account.hidden=true;
+   form.hidden=true;loginSection.hidden=true;denied.hidden=false;
+   status.textContent='A conta conectada não possui privilégios administrativos.';
+ };
+ const begin=async()=>{
+   queue.hidden=false;loginSection.hidden=true;denied.hidden=true;form.hidden=true;
+   try{await load();}
+   catch(error){
+     if(error.message==='MFA administrativo obrigatório'){
+       queue.replaceChildren();queue.hidden=true;navigation.hidden=true;
+       form.hidden=false;status.textContent='Informe o código de 6 dígitos do seu aplicativo autenticador.';
+       form.elements.code.focus();
+     }else if(error.message==='Acesso administrativo negado'){
+       showDenied();
+     }else{
+       queue.replaceChildren();queue.hidden=true;
+       status.textContent=error.message||'Não foi possível verificar o acesso administrativo.';
+     }
+   }
+ };
+ loginForm?.addEventListener('submit',async event=>{
+   event.preventDefault();
+   const button=loginForm.querySelector('button[type="submit"]');button.disabled=true;
+   status.textContent='Autenticando com segurança...';
+   try{
+     await api.login(loginForm.elements.email.value.trim(),loginForm.elements.password.value);
+     loginForm.elements.password.value='';
+     await begin();
+   }catch(e){status.textContent=e.message||'Não foi possível entrar. Confira o e-mail e a senha.';}
+   finally{button.disabled=false;}
+ });
+ switchAccount?.addEventListener('click',async()=>{
+   switchAccount.disabled=true;
+   try{await api.logout();showLogin();}
+   catch(e){status.textContent=e.message||'Não foi possível encerrar a sessão.';}
+   finally{switchAccount.disabled=false;}
+ });
+ form.addEventListener('submit',async event=>{
+   event.preventDefault();const submit=form.querySelector('button');submit.disabled=true;
+   try{await api.staffMfa(form.elements.code.value);form.reset();await begin();}
+   catch(e){status.textContent=e.message||'Código inválido ou expirado.';}
+   finally{submit.disabled=false;}
+ });
  try{
    if(window.SQFDataMode!=='mysql')throw new Error('Ambiente MySQL não ativado.');
-   if(!(await api.session()).user_id){location.replace('entrar.html');return;}
-   try{await load();}catch(e){if(e.message!=='MFA administrativo obrigatório')throw e;form.hidden=false;status.textContent='Confirme a autenticação de dois fatores.';}
+   if(!(await api.session()).user_id)showLogin();
+   else await begin();
  }catch(e){status.textContent=e.message||'Acesso indisponível';}
 })();
