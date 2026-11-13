@@ -110,6 +110,21 @@ jobs:
             echo "::warning::Preflight operacional não disponível; verificar PHP CLI na Hostinger."
           fi
 
+      - name: Smoke test da entrada administrativa (sem redirecionamento)
+        if: ${{ github.event_name == 'push' || inputs.publicar == true }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          base='https://deeppink-hawk-778631.hostingersite.com'
+          for page in admin.html admin-mysql.html; do
+            status="$(curl --silent --show-error --max-time 25 \
+              -o /tmp/sqf-admin-live.html -w '%{http_code}' "$base/$page")"
+            test "$status" = '200'
+            grep -Fq 'id="staffLoginForm"' /tmp/sqf-admin-live.html
+            grep -Fq 'id="staffMfa"' /tmp/sqf-admin-live.html
+            echo "PASS: $page HTTP 200, login e MFA presentes sem redirecionamento"
+          done
+          rm -f /tmp/sqf-admin-live.html
       - name: Smoke test nao destrutivo da API publica
         if: ${{ github.event_name == 'push' || inputs.publicar == true }}
         run: |
