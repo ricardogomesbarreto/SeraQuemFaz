@@ -103,7 +103,7 @@ try {
       switch($route){
         case 'register':
           // Reject before touching the database when confirmation mail is not configured.
-          try { sqfMailConfig(); }
+          try { sqfMailReady(); }
           catch(RuntimeException $e) {
             error_log('SQF registration blocked: mail transport unavailable');
             respond(['error'=>'Cadastro temporariamente indisponível: envio de e-mail não configurado.'],503);
@@ -133,7 +133,7 @@ try {
           respond(['user_id'=>$identity['id'],'csrf'=>$_SESSION['csrf']]);
         case 'request-reset':
         case 'resend-verification':
-          try { sqfMailConfig(); }
+          try { sqfMailReady(); }
           catch(RuntimeException $e) {
             error_log('SQF auth email request blocked: mail transport unavailable');
             respond(['error'=>'Envio de e-mail temporariamente indisponível.'],503);
@@ -177,7 +177,7 @@ try {
           $to=(string)sqfQuery($db,'SELECT email FROM sqf_auth_users WHERE id=?',[$actor])->fetchColumn();
           if(!filter_var($to,FILTER_VALIDATE_EMAIL))respond(['error'=>'E-mail do administrador inválido'],400);
           $ok=false;
-          try{$ok=sqfSmtpSend($to,'Teste de e-mail — Será Quem Faz?', "Esta é uma mensagem de teste de configuração SMTP.\nNenhuma alteração de conta ou pagamento foi realizada.");}
+          try{$ok=sqfDeliverMail($to,'Teste de e-mail — Será Quem Faz?', "Esta é uma mensagem de teste de configuração SMTP.\nNenhuma alteração de conta ou pagamento foi realizada.");}
           catch(Throwable $e){$ok=false;}
           sqfMailAudit('delivery_test',$actor,$ok?'ok':'failed');
           if(!$ok)respond(['error'=>'Falha no envio de teste. Confira a configuração SMTP e a caixa postal da Hostinger.'],503);
