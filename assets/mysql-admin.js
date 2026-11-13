@@ -3,7 +3,7 @@
  const api=window.SQFMySQL,status=document.getElementById('staffStatus'),form=document.getElementById('staffMfa'),queue=document.getElementById('staffQueue');
  const el=(tag,text)=>{const n=document.createElement(tag);if(text!==undefined)n.textContent=text;return n;};
  const navigation=document.getElementById('staffNavigation'),account=document.getElementById('staffAccount'),identity=document.getElementById('staffIdentity'),logout=document.getElementById('staffLogout');
- logout.addEventListener('click',async()=>{logout.disabled=true;try{await api.logout();location.replace('entrar.html');}catch(error){status.textContent=error.message;logout.disabled=false;}});
+ logout.addEventListener('click',async()=>{logout.disabled=true;try{await api.logout();showLogin();}catch(error){status.textContent=error.message;}finally{logout.disabled=false;}});
  function updateNavigation(){
    navigation.replaceChildren();
    const sections=queue.querySelectorAll('h2');
@@ -105,23 +105,45 @@
    if(isAdmin&&window.SQFAdminCatalog)queue.append(await window.SQFAdminCatalog.panel(api));
    if(isAdmin&&window.SQFAdminMail)queue.append(await window.SQFAdminMail.panel(api));
    identity.textContent=isAdmin?'Administrador':'Moderador';account.hidden=false;
-   updateNavigation();form.hidden=true;status.textContent='Fila de moderação carregada.';
+   updateNavigation();form.hidden=true;status.textContent='Fila de moderação carregada.';enterWorkspace();
  }
  const loginSection=document.getElementById('staffLoginSection');
  const loginForm=document.getElementById('staffLoginForm');
  const denied=document.getElementById('staffDenied');
  const switchAccount=document.getElementById('staffSwitchAccount');
+ const authLayout=document.getElementById('staffAuthLayout');
+ const workspace=document.getElementById('staffWorkspace');
+ const authSlot=document.getElementById('staffAuthStatusSlot');
+ const workspaceSlot=document.getElementById('staffWorkspaceStatusSlot');
+ const enterAuth=()=>{
+   workspace.hidden=true;authLayout.hidden=false;authSlot.append(status);
+ };
+ const enterWorkspace=()=>{
+   authLayout.hidden=true;workspace.hidden=false;workspaceSlot.append(status);
+ };
+ const passwordReveal=document.getElementById('staffShowPassword');
+ passwordReveal?.addEventListener('click',()=>{
+   const field=document.getElementById('staffLoginPassword');
+   const visible=field.type==='password';
+   field.type=visible?'text':'password';
+   passwordReveal.textContent=visible?'Ocultar':'Mostrar';
+   passwordReveal.setAttribute('aria-label',visible?'Ocultar senha':'Mostrar senha');
+   passwordReveal.setAttribute('aria-pressed',String(visible));
+ });
  const showLogin=()=>{
+   enterAuth();
    queue.replaceChildren();queue.hidden=true;navigation.hidden=true;account.hidden=true;
    form.hidden=true;denied.hidden=true;loginSection.hidden=false;
    status.textContent='Informe as credenciais da conta administrativa.';
  };
  const showDenied=()=>{
+   enterAuth();
    queue.replaceChildren();queue.hidden=true;navigation.hidden=true;account.hidden=true;
    form.hidden=true;loginSection.hidden=true;denied.hidden=false;
    status.textContent='A conta conectada não possui privilégios administrativos.';
  };
  const begin=async()=>{
+   enterAuth();
    queue.hidden=false;loginSection.hidden=true;denied.hidden=true;form.hidden=true;
    try{await load();}
    catch(error){
