@@ -107,11 +107,16 @@ jobs:
           php -l database/tests/agenda-integration.php
           php -l backend/src/Auth.php
           php -l backend/src/Mail.php
+          php -l backend/src/PhpMailFallback.php
+          php -l backend/src/AdminBootstrap.php
+          php -l backend/bin/bootstrap-first-admin.php
+          php -l backend/bin/setup-mail-fallback.php
           php -l backend/src/SubscriptionActions.php
           php -l backend/src/ImportSnapshot.php
           php -l backend/src/PrivacyExport.php
           php -l backend/bin/import-snapshot.php
           php database/tests/mail-unit.php
+          php database/tests/phpmail-fallback-unit.php
           php -l backend/public/index.php
           php -l database/seed/import-public.php
           php database/seed/import-public.php
@@ -125,6 +130,7 @@ jobs:
           php database/tests/notifications-integration.php
           php database/tests/maintenance-integration.php
 
+          php database/tests/first-admin-bootstrap-integration.php
           php database/tests/browser-fixture.php
           php database/tests/registration-catalog-integration.php
           php database/tests/integrity.php
