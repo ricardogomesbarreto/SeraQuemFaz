@@ -150,7 +150,8 @@ try{
  // Ordinary accounts must never see administrative queues or MFA controls.
  for(const [actor,label] of [[client,'client'],[provider,'provider']]){
    await actor.page.goto(origin+'/admin-mysql.html');
-   await actor.page.locator('#staffStatus').getByText('Acesso administrativo negado',{exact:true}).waitFor();
+   await actor.page.locator('#staffDenied').waitFor({state:'visible'});
+    await actor.page.locator('#staffDenied').getByRole('heading',{name:'Conta sem permissão administrativa'}).waitFor();
    assert.equal(await actor.page.locator('#staffMfa').isVisible(),false);
    assert.equal(await actor.page.locator('#staffQueue').locator('article').count(),0);
    await widthCheck(actor.page,label+' denied admin page');
@@ -190,8 +191,11 @@ await staff.context.close();
  const fixturePath=join(tmpdir(),'sqf-browser-admin-password');
  const fixturePassword=readFileSync(fixturePath,'utf8');
  unlinkSync(fixturePath);
- await login(administrator.page,'browser-admin@example.invalid',fixturePassword);
  await administrator.page.goto(origin+'/admin-mysql.html');
+ await administrator.page.locator('#staffLoginSection').waitFor({state:'visible'});
+ await administrator.page.locator('#staffLoginEmail').fill('browser-admin@example.invalid');
+ await administrator.page.locator('#staffLoginPassword').fill(fixturePassword);
+ await administrator.page.locator('#staffLoginForm button[type=submit]').click();
  await administrator.page.locator('#staffMfa').waitFor({state:'visible'});
  assert.equal(await administrator.page.locator('#staffQueue article').count(),0);
  const adminCounter=Buffer.alloc(8);adminCounter.writeBigUInt64BE(BigInt(Math.floor(Date.now()/30000)));
@@ -229,7 +233,9 @@ await staff.context.close();
  console.log('PASS: administrator MFA, metrics CSV, finance, privacy, support and responsive dashboard');
  const guest=await makePage();
  await guest.page.goto(origin+'/admin-mysql.html');
- await guest.page.waitForURL('**/entrar.html');
+ await guest.page.locator('#staffLoginSection').waitFor({state:'visible'});
+ assert.equal(new URL(guest.page.url()).pathname,'/admin-mysql.html');
+ assert.equal(await guest.page.locator('#staffQueue article').count(),0);
  await guest.context.close();
  console.log('PASS: guest, client and provider cannot access administrative queues');
  await client.page.goto(origin+'/painel-mysql.html');
