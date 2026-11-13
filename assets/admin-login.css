@@ -1,0 +1,71 @@
+/* Admin auth page — mirrors the public sign-in system while isolating private screens. */
+.sqf-admin-page{min-height:100dvh;background:#fff}
+.sqf-admin-page [hidden]{display:none!important}
+.sqf-admin-auth-layout{display:grid;grid-template-columns:47% 53%;min-height:calc(100dvh - 87px)}
+.sqf-admin-hero{position:relative;min-height:610px;overflow:hidden;isolation:isolate;background:#233949}
+.sqf-admin-hero-photo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 31%;z-index:-2}
+.sqf-admin-hero::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(8,33,50,.03) 8%,rgba(8,33,50,.25) 35%,rgba(8,33,50,.88) 100%),linear-gradient(90deg,rgba(9,41,62,.10),transparent 78%);z-index:-1}
+.sqf-admin-hero-content{position:absolute;left:clamp(26px,5vw,86px);right:clamp(24px,4vw,72px);bottom:clamp(43px,7vh,93px);max-width:610px;color:#fff}
+.sqf-admin-hero .section-kicker{color:#ffb57b;letter-spacing:.13em;font-size:.71rem;font-weight:800}
+.sqf-admin-hero h1{color:#fff;font:800 clamp(2.7rem,4.6vw,5rem)/1.13 Manrope,sans-serif;letter-spacing:-.055em;margin:24px 0}
+.sqf-admin-hero h1 em{font-style:normal;color:#ff9850}
+.sqf-admin-hero p{color:#f6fbff;max-width:540px;line-height:1.75;font-size:1.03rem;font-weight:500}
+.sqf-admin-auth-content{display:flex;align-items:center;justify-content:center;padding:56px clamp(26px,6vw,100px);min-width:0}
+.sqf-admin-auth-card{width:min(465px,100%);min-width:0}
+.sqf-admin-auth-card>.back-link{margin-bottom:34px}
+.sqf-admin-auth-card>.section-kicker{margin-bottom:9px}
+.sqf-admin-auth-card h2{font-size:clamp(2rem,2.65vw,2.6rem);font-weight:800;color:#123b58;margin:9px 0 12px;line-height:1.18}
+.sqf-admin-auth-card>.muted{margin-bottom:24px;line-height:1.7}
+.sqf-admin-feedback{min-height:1.6em;margin:0 0 16px;font-size:.88rem;color:#49677c;line-height:1.6}
+.sqf-admin-auth-card .form-field{margin:0 0 21px}
+.sqf-admin-auth-card .form-field label{display:block;color:#183f5a;font-size:.85rem;font-weight:700;margin-bottom:9px}
+.sqf-admin-auth-card .form-field>input,.sqf-admin-auth-card .password-field input{width:100%;height:50px;border:1px solid #dbe4e9;border-radius:9px;padding:10px 14px;outline:0;color:#183b54;background:#fff}
+.sqf-admin-auth-card .form-field>input:focus,.sqf-admin-auth-card .password-field:focus-within input{border-color:#f5832f;box-shadow:0 0 0 3px #f5832f22}
+.sqf-admin-auth-card .password-field{position:relative;display:flex;align-items:center}
+.sqf-admin-auth-card .password-field input{padding-right:84px}
+.sqf-admin-auth-card .password-field button{position:absolute;right:12px;z-index:1;border:0;background:transparent;padding:9px 3px;font-weight:800;font-size:.76rem;color:#d95511}
+.sqf-admin-auth-card .button-block{min-height:50px;margin-top:16px}
+.sqf-admin-secondary-actions{text-align:center;margin-top:26px;padding-bottom:25px;border-bottom:1px solid #e6ebee}
+.sqf-admin-secondary-actions a{color:#d95712;font-size:.83rem;font-weight:700}
+.sqf-admin-auth-footnote{display:flex;align-items:center;gap:10px;margin-top:26px;color:#6d8190;font-size:.79rem;line-height:1.55}
+.sqf-admin-auth-footnote svg{color:#dd6a2c;flex:none}
+.sqf-admin-auth-card [hidden]{display:none!important}
+.sqf-admin-auth-card #staffMfa h3,.sqf-admin-auth-card #staffDenied h3{margin:13px 0 9px;color:#123b58}
+.sqf-admin-auth-card #staffMfa .muted{margin:0 0 19px}
+.sqf-admin-mfa-icon{display:grid;place-items:center;background:#fff4e8;color:#d76c2c;border-radius:12px;font-size:1.5rem;width:52px;height:52px;margin:7px 0 13px}
+.sqf-admin-auth-card #staffDenied .button-block{margin-top:12px}
+.sqf-admin-workspace{padding-top:48px;padding-bottom:70px}
+.sqf-admin-dashboard-heading{display:flex;justify-content:space-between;align-items:center;gap:25px;flex-wrap:wrap;margin-bottom:22px}
+.sqf-admin-dashboard-heading h1{color:#123b58;font-size:clamp(2.2rem,3.5vw,3.2rem);margin:8px 0}
+.sqf-admin-dashboard-heading .muted{margin:0}
+.sqf-admin-dashboard-heading #staffAccount{display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+.sqf-admin-dashboard-heading #staffIdentity{font-weight:700;color:#123b58;margin:0}
+.sqf-admin-workspace #staffNavigation{margin:16px 0 23px}
+.sqf-admin-workspace #staffNavigation ul{display:flex;gap:10px;flex-wrap:wrap;padding:0;list-style:none}
+.sqf-admin-workspace #staffNavigation a{display:inline-block;color:#16415d;background:#f1f5f8;border:1px solid #dfe7ed;border-radius:22px;padding:8px 14px;font-size:.82rem;font-weight:700}
+.sqf-admin-workspace #staffQueue{display:grid;gap:18px}
+.sqf-admin-workspace #staffQueue>.card{margin-bottom:0}
+.sqf-admin-dashboard-bottom{margin-top:30px;color:#d85f19;font-weight:700}
+@media(max-width:1050px){.sqf-admin-auth-layout{grid-template-columns:46% 54%}.sqf-admin-hero h1{font-size:clamp(2.2rem,4.6vw,3.6rem)}.sqf-admin-auth-content{padding:42px clamp(22px,4vw,65px)}}
+@media(max-width:760px){.sqf-admin-auth-layout{grid-template-columns:1fr;min-height:0}.sqf-admin-hero{min-height:280px}.sqf-admin-hero-photo{object-position:center 23%}.sqf-admin-hero::after{background:linear-gradient(180deg,rgba(9,34,53,.15),rgba(9,34,53,.88))}.sqf-admin-hero-content{left:25px;right:25px;bottom:21px}.sqf-admin-hero h1{font-size:clamp(1.9rem,7vw,2.7rem);margin:10px 0}.sqf-admin-hero p{font-size:.81rem;line-height:1.55;margin-bottom:0}.sqf-admin-auth-content{padding:32px 22px 52px}.sqf-admin-auth-card>.back-link{margin-bottom:20px}.sqf-admin-auth-card h2{font-size:2rem}.sqf-admin-workspace{padding-top:25px}}
+@media(max-width:420px){.sqf-admin-hero{min-height:250px}.sqf-admin-hero h1{font-size:1.75rem}.sqf-admin-hero .section-kicker{font-size:.59rem}.sqf-admin-hero p{font-size:.76rem}.sqf-admin-auth-content{padding:26px 20px 46px}}
+@media(prefers-reduced-motion:reduce){.sqf-admin-page *, .sqf-admin-page *::before,.sqf-admin-page *::after{scroll-behavior:auto;transition:none!important}}
+
+/* Force a true minmax(0, 1fr) track for dynamic cards: prevents intrinsic
+   form controls and long admin labels from widening the 320px viewport. */
+.sqf-admin-workspace,.sqf-admin-workspace #staffQueue,.sqf-admin-workspace #staffNavigation{min-width:0;max-width:100%}
+.sqf-admin-workspace #staffQueue{grid-template-columns:minmax(0,1fr)}
+.sqf-admin-workspace #staffQueue>*,
+.sqf-admin-workspace #staffQueue .card,
+.sqf-admin-workspace #staffQueue article,
+.sqf-admin-workspace #staffQueue form,
+.sqf-admin-workspace .sqf-admin-dashboard-heading>*{min-width:0;max-width:100%;overflow-wrap:anywhere}
+.sqf-admin-workspace .button,.sqf-admin-workspace button,
+.sqf-admin-workspace input,.sqf-admin-workspace select,
+.sqf-admin-workspace textarea{max-width:100%}
+.sqf-admin-workspace button,.sqf-admin-workspace .button{white-space:normal;text-align:center}
+.sqf-admin-workspace #staffNavigation ul{min-width:0}
+@media(max-width:480px){.sqf-admin-workspace .sqf-mail-grid,.sqf-admin-workspace .sqf-catalog-diagnostic-form{grid-template-columns:minmax(0,1fr);min-width:0}
+.sqf-admin-workspace .sqf-mail-controls{min-width:0}
+.sqf-admin-workspace .sqf-catalog-diagnostic-form .city-picker{min-width:0}
+.sqf-admin-workspace #staffNavigation a{max-width:100%;white-space:normal}}
