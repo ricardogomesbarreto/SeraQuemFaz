@@ -1,15 +1,92 @@
 <!doctype html>
-<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Administração | Será Quem Faz?</title><link rel="icon" href="assets/brand/favicon.ico"><link rel="stylesheet" href="assets/site.css?v=20261112-catalog-check"><script defer src="assets/backend-mode.js"></script><script defer src="assets/mysql-api-client.js"></script><script defer src="assets/cities.js"></script><script defer src="assets/mysql-admin-catalog.js"></script><script defer src="assets/mysql-admin-mail.js"></script><script defer src="assets/mysql-admin.js"></script></head>
-<body><header class="site-header"><div class="container"><a href="index.html"><img src="assets/brand/logo-horizontal.png" alt="Será Quem Faz?" width="180"></a></div></header><main class="container dashboard-main"><h1>Painel administrativo</h1><p class="muted">Acesso restrito a administradores e moderadores. Confirme sua identidade para consultar as filas autorizadas.</p><p id="staffStatus" role="status">Verificando sessão…</p><section class="card sqf-admin-login" id="staffLoginSection" hidden>
-<h2>Acessar a administração</h2>
-<p>Entre com a conta administrativa. O acesso exige senha e confirmação pelo aplicativo autenticador.</p>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#113a59"><meta name="description" content="Acesso seguro à administração do Será Quem Faz?">
+<meta name="robots" content="noindex,nofollow">
+<title>Entrar na administração | SERÁ QUEM FAZ?</title>
+<link rel="icon" href="assets/brand/favicon.ico">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/site.css"><link rel="stylesheet" href="assets/admin-login.css?v=20261113">
+<script defer src="assets/backend-mode.js"></script>
+<script defer src="assets/mysql-api-client.js"></script>
+<script defer src="assets/cities.js"></script>
+<script defer src="assets/mysql-admin-catalog.js"></script>
+<script defer src="assets/mysql-admin-mail.js"></script>
+<script defer src="assets/mysql-admin.js"></script>
+<script defer src="assets/site.js"></script>
+</head>
+<body class="auth-page sqf-admin-page">
+<a class="skip-link" href="#conteudo">Pular para o conteúdo</a>
+<header class="site-header">
+<div class="container header-inner">
+<a class="brand" href="index.html" aria-label="SERÁ QUEM FAZ? — página inicial">
+<img class="brand-logo" src="assets/brand/logo-horizontal.png" alt="SERÁ QUEM FAZ?" width="240" height="80"></a>
+<button class="menu-toggle" type="button" aria-label="Abrir menu" aria-controls="site-menu" aria-expanded="false"><span></span><span></span><span></span></button>
+<nav class="site-nav" id="site-menu" aria-label="Menu principal">
+<a href="index.html">Início</a><a href="categorias.html">Catálogo e pesquisa</a>
+<a href="index.html#como-funciona">Como funciona</a><a href="index.html#profissionais">Para profissionais</a>
+<div class="nav-actions"><a href="index.html" class="button button-primary">Voltar ao site <span aria-hidden="true">↗</span></a></div>
+</nav>
+</div>
+</header>
+<main id="conteudo">
+<div class="sqf-admin-auth-layout" id="staffAuthLayout">
+<section class="sqf-admin-hero" aria-labelledby="adminHeroTitle">
+<img class="sqf-admin-hero-photo" src="assets/images/admin-advogado.webp" alt="" width="1122" height="1402" loading="eager" decoding="async">
+<div class="sqf-admin-hero-content">
+<span class="section-kicker">Um ambiente seguro de gestão</span>
+<h1 id="adminHeroTitle">Conexões melhores começam com <em>confiança.</em></h1>
+<p>Acompanhe a plataforma, aprove profissionais e cuide da qualidade de cada atendimento.</p>
+</div>
+</section>
+<section class="sqf-admin-auth-content" aria-label="Identificação administrativa">
+<div class="sqf-admin-auth-card">
+<a class="back-link" href="index.html">← Voltar ao início</a>
+<span class="section-kicker">Área de administração</span>
+<h2>Entre no painel administrativo</h2>
+<p class="muted">Acesso reservado à equipe autorizada do SERÁ QUEM FAZ?.</p>
+<div id="staffAuthStatusSlot"><p id="staffStatus" role="status" aria-live="polite" class="sqf-admin-feedback">Verificando sessão…</p></div>
+<section id="staffLoginSection" hidden aria-label="Entrar com a conta administrativa">
 <form id="staffLoginForm" autocomplete="on">
-<label for="staffLoginEmail">E-mail do administrador</label>
-<input id="staffLoginEmail" name="email" autocomplete="username" type="email" maxlength="254" required placeholder="seu@email.com">
-<label for="staffLoginPassword">Senha</label>
-<input id="staffLoginPassword" name="password" autocomplete="current-password" type="password" required>
-<button class="button button-primary" type="submit">Entrar na administração</button>
+<div class="form-field"><label for="staffLoginEmail">E-mail</label>
+<input type="email" id="staffLoginEmail" name="email" placeholder="seu@email.com" autocomplete="username" inputmode="email" maxlength="254" required></div>
+<div class="form-field"><label for="staffLoginPassword">Senha</label>
+<div class="password-field">
+<input type="password" id="staffLoginPassword" name="password" placeholder="Sua senha" autocomplete="current-password" minlength="12" required>
+<button class="show-password" type="button" id="staffShowPassword" aria-label="Mostrar senha" aria-pressed="false">Mostrar</button>
+</div></div>
+<button class="button button-primary button-block" type="submit">Entrar na administração <span aria-hidden="true">→</span></button>
 </form>
-<p class="muted">Primeiro acesso: o responsável pela hospedagem deve criar uma conta administrativa pelo assistente seguro de SSH, disponível na documentação de instalação. O cadastro público não concede permissões administrativas.</p>
-<a href="entrar.html?recuperar=1">Recuperar acesso à conta</a>
-</section><section class="card sqf-admin-denied" id="staffDenied" hidden><h2>Conta sem permissão administrativa</h2><p>Esta conta pode acessar seu painel normal, mas não possui permissão administrativa. Somente uma conta autorizada pode consultar as configurações e aprovar prestadores.</p><p><a class="button button-outline" href="painel-mysql.html">Ir para meu painel</a></p><button class="button button-outline" id="staffSwitchAccount" type="button">Entrar com outra conta</button></section><form id="staffMfa" hidden aria-describedby="staffStatus"><label>Código do autenticador <input name="code" required inputmode="numeric" pattern="[0-9]{6}" maxlength="6" autocomplete="one-time-code"></label><button class="button button-primary" type="submit">Confirmar acesso</button></form><div id="staffAccount" hidden><p id="staffIdentity"></p><button id="staffLogout" class="button button-outline" type="button">Sair da administração</button></div><nav id="staffNavigation" aria-label="Seções administrativas" hidden></nav><section id="staffQueue" aria-label="Filas administrativas" aria-live="polite"></section><p><a href="painel-mysql.html">Voltar ao painel</a></p></main></body></html>
+<div class="sqf-admin-secondary-actions"><a href="entrar.html?recuperar=1">Esqueci minha senha</a></div>
+</section>
+<form id="staffMfa" hidden aria-describedby="staffStatus">
+<div class="sqf-admin-mfa-icon" aria-hidden="true">✳</div>
+<h3>Confirme sua identidade</h3>
+<p class="muted">Digite os 6 dígitos exibidos no seu aplicativo autenticador para concluir o acesso.</p>
+<div class="form-field"><label for="staffTotpCode">Código de segurança</label>
+<input id="staffTotpCode" name="code" required inputmode="numeric" pattern="[0-9]{6}" minlength="6" maxlength="6" autocomplete="one-time-code" placeholder="000000"></div>
+<button class="button button-primary button-block" type="submit">Confirmar e acessar painel <span aria-hidden="true">→</span></button>
+</form>
+<section id="staffDenied" hidden>
+<h3>Conta sem permissão administrativa</h3>
+<p>Esta conta pode acessar seu painel comum, mas não possui autorização para administrar a plataforma.</p>
+<a class="button button-outline button-block" href="painel-mysql.html">Ir para meu painel</a>
+<button class="button button-primary button-block" id="staffSwitchAccount" type="button">Entrar com outra conta</button>
+</section>
+<div class="sqf-admin-auth-footnote"><svg aria-hidden="true" viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
+<span>Ambiente restrito, com autenticação e proteção adicional por MFA.</span></div>
+</div>
+</section>
+</div>
+<div class="container dashboard-main sqf-admin-workspace" id="staffWorkspace" hidden>
+<div class="sqf-admin-dashboard-heading"><div><span class="section-kicker">Gestão da plataforma</span><h1>Painel administrativo</h1><p class="muted">Acompanhe usuários, prestadores, verificações e notificações.</p></div>
+<div id="staffAccount" hidden><p id="staffIdentity"></p><button id="staffLogout" class="button button-outline" type="button">Sair da administração</button></div></div>
+<div id="staffWorkspaceStatusSlot"></div>
+<nav id="staffNavigation" aria-label="Seções administrativas" hidden></nav>
+<section id="staffQueue" aria-label="Filas administrativas" aria-live="polite"></section>
+<p class="sqf-admin-dashboard-bottom"><a href="index.html">← Voltar ao site</a></p>
+</div>
+</main>
+</body></html>
