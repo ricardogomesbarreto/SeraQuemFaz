@@ -44,9 +44,11 @@
       from.value=data.from||'';username.value=data.username||'';
       password.value='';password.placeholder=data.password_configured?'Senha protegida — deixe vazio para manter':'Informe a senha da caixa de e-mail';
       summary.replaceChildren();
-      const state=node('strong',data.enabled&&data.configured?'Envio configurado':'Envio indisponível');
+      const transport=data.transport==='phpmail'?'PHP mail básico — homologação':data.transport==='smtp'?'SMTP autenticado':'Nenhum';
+      const state=node('strong',data.enabled&&data.configured?'Envio configurado ('+transport+')':'Envio indisponível');
       state.className=data.enabled&&data.configured?'sqf-mail-state is-ready':'sqf-mail-state';
       summary.append(state,node('p','Origem: '+(data.source==='private'?'Configuração privada do painel':'Configuração inicial da hospedagem')+' · Última alteração: '+datestr(data.updated_at)));
+      if(data.transport==='phpmail')summary.append(node('p','Modo de teste de baixo volume habilitado por SSH após confirmação de um código recebido. Para uso regular, configure o SMTP autenticado.'));
       diag.replaceChildren(node('h3','Diagnóstico de notificações'));
       const q=data.queue||{};
       diag.append(node('p','Trabalhador de notificações: '+(data.notifications_worker_enabled?'Habilitado':'Desativado até homologação')));
