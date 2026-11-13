@@ -75,6 +75,13 @@
    queue.append(el('h2','Verificação de prestadores'));
    for(const item of (await api.staffProviders()).data){
      const card=el('article');card.className='card';card.append(el('h3',item.full_name),el('p',item.city+' · '+item.status+' · Identidade aceita: '+Number(item.accepted_identity)));
+     const ready=[];
+     if(!Number(item.email_confirmed))ready.push('e-mail não confirmado');
+     if(!item.city_ibge)ready.push('município não informado');
+     if(!Number(item.accepted_identity))ready.push('identificação ainda não aceita');
+     if(!Number(item.active_services))ready.push('nenhum serviço ativo');
+     if(ready.length)card.append(el('p','Pendências de publicação: '+ready.join(' · ')));
+     else if(item.status!=='approved')card.append(el('p','Documentação e serviços prontos; resta decisão administrativa fundamentada.'));
      const decision=el('form'),select=el('select'),note=el('textarea');note.required=true;note.minLength=20;note.maxLength=1000;
      for(const [value,label] of [['approved','Aprovar'],['rejected','Rejeitar'],['suspended','Suspender']]){const o=el('option',label);o.value=value;select.append(o);}
      const submit=el('button','Registrar decisão');submit.type='submit';submit.className='button button-primary';decision.append(select,note,submit);card.append(decision);queue.append(card);
