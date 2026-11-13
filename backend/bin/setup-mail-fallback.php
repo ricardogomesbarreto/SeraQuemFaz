@@ -6,6 +6,7 @@ if(PHP_SAPI!=='cli'){http_response_code(404);exit;}
 if(!defined('STDIN')||!stream_isatty(STDIN)){fwrite(STDERR,"Execute via SSH com terminal interativo.\n");exit(2);}
 if(is_file(__DIR__.'/../../config.php'))require __DIR__.'/../../config.php';
 require_once __DIR__.'/../src/Mail.php';
+require_once __DIR__.'/../src/Auth.php';
 function sqfAskMail(string $label):string {
  fwrite(STDOUT,$label.': ');
  $value=fgets(STDIN);if($value===false)throw new RuntimeException('Entrada encerrada');
