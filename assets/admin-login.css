@@ -50,3 +50,22 @@
 @media(max-width:760px){.sqf-admin-auth-layout{grid-template-columns:1fr;min-height:0}.sqf-admin-hero{min-height:280px}.sqf-admin-hero-photo{object-position:center 23%}.sqf-admin-hero::after{background:linear-gradient(180deg,rgba(9,34,53,.15),rgba(9,34,53,.88))}.sqf-admin-hero-content{left:25px;right:25px;bottom:21px}.sqf-admin-hero h1{font-size:clamp(1.9rem,7vw,2.7rem);margin:10px 0}.sqf-admin-hero p{font-size:.81rem;line-height:1.55;margin-bottom:0}.sqf-admin-auth-content{padding:32px 22px 52px}.sqf-admin-auth-card>.back-link{margin-bottom:20px}.sqf-admin-auth-card h2{font-size:2rem}.sqf-admin-workspace{padding-top:25px}}
 @media(max-width:420px){.sqf-admin-hero{min-height:250px}.sqf-admin-hero h1{font-size:1.75rem}.sqf-admin-hero .section-kicker{font-size:.59rem}.sqf-admin-hero p{font-size:.76rem}.sqf-admin-auth-content{padding:26px 20px 46px}}
 @media(prefers-reduced-motion:reduce){.sqf-admin-page *, .sqf-admin-page *::before,.sqf-admin-page *::after{scroll-behavior:auto;transition:none!important}}
+
+/* Force a true minmax(0, 1fr) track for dynamic cards: prevents intrinsic
+   form controls and long admin labels from widening the 320px viewport. */
+.sqf-admin-workspace,.sqf-admin-workspace #staffQueue,.sqf-admin-workspace #staffNavigation{min-width:0;max-width:100%}
+.sqf-admin-workspace #staffQueue{grid-template-columns:minmax(0,1fr)}
+.sqf-admin-workspace #staffQueue>*,
+.sqf-admin-workspace #staffQueue .card,
+.sqf-admin-workspace #staffQueue article,
+.sqf-admin-workspace #staffQueue form,
+.sqf-admin-workspace .sqf-admin-dashboard-heading>*{min-width:0;max-width:100%;overflow-wrap:anywhere}
+.sqf-admin-workspace .button,.sqf-admin-workspace button,
+.sqf-admin-workspace input,.sqf-admin-workspace select,
+.sqf-admin-workspace textarea{max-width:100%}
+.sqf-admin-workspace button,.sqf-admin-workspace .button{white-space:normal;text-align:center}
+.sqf-admin-workspace #staffNavigation ul{min-width:0}
+@media(max-width:480px){.sqf-admin-workspace .sqf-mail-grid,.sqf-admin-workspace .sqf-catalog-diagnostic-form{grid-template-columns:minmax(0,1fr);min-width:0}
+.sqf-admin-workspace .sqf-mail-controls{min-width:0}
+.sqf-admin-workspace .sqf-catalog-diagnostic-form .city-picker{min-width:0}
+.sqf-admin-workspace #staffNavigation a{max-width:100%;white-space:normal}}
