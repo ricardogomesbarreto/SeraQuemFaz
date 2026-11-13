@@ -180,7 +180,8 @@ assert.equal(await staff.page.locator('#staffNavigation').getByText('Resumo fina
 await staff.page.locator('#staffLogout').click();
 await staff.page.waitForURL('**/entrar.html');
 await staff.page.goto(origin+'/admin-mysql.html');
-await staff.page.waitForURL('**/entrar.html');
+await staff.page.locator('#staffLoginSection').waitFor({state:'visible'});
+assert.equal(new URL(staff.page.url()).pathname,'/admin-mysql.html');
 console.log('PASS: moderator identity, restricted navigation and administrative logout');
 await staff.context.close();
  console.log('PASS: moderator MFA unlocks moderation queues but not administrator metrics or billing');
