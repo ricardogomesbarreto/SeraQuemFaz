@@ -16,7 +16,37 @@
    const security=(await api.accountSecurity()).data;$('mysqlSecurityEmail').textContent='E-mail: '+security.email+(security.email_confirmed_at?' · confirmado':'');$('mysqlNotificationPreference').elements.email_enabled.checked=Boolean(security.email_enabled);
    const cases=(await api.cases()).data,caseRoot=$('mysqlCases');caseRoot.replaceChildren();for(const item of [...cases.support,...cases.privacy]){const card=wrap(item.topic||item.request_type);card.append(el('p',item.message||item.details),el('p','Situação: '+item.status));caseRoot.append(card);}
    if(!caseRoot.childElementCount)caseRoot.append(el('p','Nenhuma solicitação registrada.'));
-   if(profile.account_type==='prestador'){const v=(await api.verification()).data;$('mysqlVerificationStatus').textContent='Situação cadastral: '+v.status;}
+   if(profile.account_type==='prestador'){
+     const v=(await api.verification()).data;
+     $('mysqlVerificationStatus').textContent='Situação cadastral: '+v.status;
+     const readiness=$('mysqlProviderReadiness');
+     if(readiness){
+       readiness.replaceChildren();
+       readiness.append(el('h3','Preparação para aparecer no catálogo'));
+       const steps=[
+         [v.email_confirmed,'E-mail confirmado','Confirme o código recebido por e-mail.'],
+         [v.city_selected,'Município definido','Selecione seu município no cadastro do perfil.'],
+         [v.identity_document_accepted,'Documento de identidade aceito','Envie o documento na seção abaixo e aguarde a análise.'],
+         [v.status==='approved','Cadastro aprovado','A aprovação é realizada exclusivamente pela administração.'],
+         [v.publication_enabled,'Publicação habilitada','A publicação ocorre após aprovação do cadastro.'],
+         [Number(v.services_active)>0,'Serviço ativo','Cadastre pelo menos um serviço na seção Meus serviços.'],
+         [v.catalog_visible,'Visível no catálogo','O catálogo exige todos os requisitos e, quando aplicável, assinatura vigente.']
+       ];
+       const list=el('ul');list.className='sqf-provider-readiness-list';
+       for(const [done,label,hint] of steps){
+         const row=el('li');row.className=done?'is-done':'is-pending';
+         row.append(el('strong',(done?'✓ ':'○ ')+label));
+         if(!done)row.append(el('span',hint));
+         list.append(row);
+       }
+       readiness.append(list);
+       if(v.catalog_visible&&profile.city_ibge){
+         const link=el('a','Ver profissionais da minha cidade');
+         link.className='button button-outline';link.href='categorias.html?cidade='+encodeURIComponent(profile.city_ibge);
+         readiness.append(link);
+       }
+     }
+   }
    $('mysqlTitle').textContent=(profile.account_type==='prestador'?'Painel do prestador — ':'Painel do cliente — ')+profile.full_name;
    const avatar=$('mysqlAvatar');avatar.hidden=Number(profile.has_avatar)!==1;if(!avatar.hidden)avatar.src=api.mediaUrl('avatar',user)+'&v='+Date.now();
    const form=$('mysqlProfile');form.elements.full_name.value=profile.full_name;form.elements.bio.value=profile.bio||'';form.elements.city_ibge.value=profile.city_ibge||'';
