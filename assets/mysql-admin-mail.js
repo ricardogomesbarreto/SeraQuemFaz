@@ -39,7 +39,7 @@
    const diag=node('div');diag.className='sqf-mail-diagnostics';card.append(diag);
    const events=node('div');events.className='sqf-mail-audit';card.append(events);
    function display(data){
-      enabled.checked=Boolean(data.enabled);host.value=data.host||'smtp.hostinger.com';
+      enabled.checked=data.transport==='smtp'&&Boolean(data.enabled);host.value=data.host||'smtp.hostinger.com';
       port.value=String(data.port||465);
       from.value=data.from||'';username.value=data.username||'';
       password.value='';password.placeholder=data.password_configured?'Senha protegida — deixe vazio para manter':'Informe a senha da caixa de e-mail';
