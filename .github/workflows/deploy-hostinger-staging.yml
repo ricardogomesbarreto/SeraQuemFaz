@@ -125,6 +125,16 @@ jobs:
             echo "PASS: $page HTTP 200, login e MFA presentes sem redirecionamento"
           done
           rm -f /tmp/sqf-admin-live.html
+      - name: Smoke test da imagem do advogado em alta resolucao
+        if: ${{ github.event_name == 'push' || inputs.publicar == true }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          url='https://deeppink-hawk-778631.hostingersite.com/assets/images/admin-advogado.webp?v=20261113-hq'
+          code="$(curl --silent --show-error --max-time 25 -o /tmp/sqf-admin-lawyer.webp -w '%{http_code}' "$url")"
+          test "$code" = '200'
+          node -e "const fs=require('fs');const b=fs.readFileSync('/tmp/sqf-admin-lawyer.webp');if(b.length<30000||b.toString('ascii',0,4)!=='RIFF'||b.toString('ascii',8,12)!=='WEBP')process.exit(1);console.log('PASS: imagem WebP nítida publicada ('+b.length+' bytes)')"
+          rm -f /tmp/sqf-admin-lawyer.webp
       - name: Smoke test nao destrutivo da API publica
         if: ${{ github.event_name == 'push' || inputs.publicar == true }}
         run: |
